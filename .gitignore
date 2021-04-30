@@ -280,3 +280,7 @@ TAGS
 
 # bazel symlinks
 bazel-*
+
+
+*.pdf
+
