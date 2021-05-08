@@ -150,7 +150,7 @@ def main():
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    print(list(model.parameters()))
+    #print(list(model.parameters()))
 
     #scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma, verbose=False)
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
@@ -170,9 +170,9 @@ def main():
     #print(output)
     #print(dict(model.named_parameters()))
 
-    for v in output:
-        #print(v)
-        print(v.grad_fn)
+    # for v in output:
+    #     #print(v)
+    #     print(v.grad_fn)
 
     #g= tv.make_dot( output, params=dict(model.named_parameters()), show_attrs=True, show_saved=True)
     #g.view()
@@ -187,7 +187,7 @@ def main():
         optimizer.zero_grad()
         output = model()
         loss = torch.norm(output - output_default, p='fro')
-        writer.add_scalar("Loss/train", loss, ep)
+        #writer.add_scalar("Loss/train", loss, ep)
         #if ep % 50 == 0:
         print('For Epoch: {}, Loss:{}'.format(ep, loss.item()))
 
