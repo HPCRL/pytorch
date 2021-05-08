@@ -50,6 +50,11 @@ class Optimizer(object):
             raise ValueError("optimizer got an empty parameter list")
         if not isinstance(param_groups[0], dict):
             param_groups = [{'params': param_groups}]
+            
+            #Added by Emin
+
+            print("Printing params in param_groups / optimizer.py")
+            print(param_groups)
 
         for param_group in param_groups:
             self.add_param_group(param_group)
