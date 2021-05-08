@@ -27,7 +27,7 @@ import argparse
 import torch
 import torch.nn as nn
 
-from torch.utils.tensorboard import SummaryWriter
+#from torch.utils.tensorboard import SummaryWriter
 import graphviz
 import torchviz as tv
 from graphviz import Digraph
@@ -149,6 +149,9 @@ def main():
     model.to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
+
+    print(list(model.parameters()))
+
     #scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma, verbose=False)
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
 
@@ -157,7 +160,7 @@ def main():
 
     output_default = linear(default_input)
 
-    writer = SummaryWriter()
+    #writer = SummaryWriter()
     
     #print(model.state_dict)
 
@@ -171,19 +174,30 @@ def main():
         #print(v)
         print(v.grad_fn)
 
-    g= tv.make_dot( output, params=dict(model.named_parameters()), show_attrs=True, show_saved=True)
+    #g= tv.make_dot( output, params=dict(model.named_parameters()), show_attrs=True, show_saved=True)
     #g.view()
 
     #Training Part
     for ep in range(1, args.epochs + 1):
         model.train()
+
+        # clears old gradients from the last step 
+        # (otherwise you’d just accumulate 
+        # the gradients from all loss.backward() calls).
         optimizer.zero_grad()
         output = model()
         loss = torch.norm(output - output_default, p='fro')
         writer.add_scalar("Loss/train", loss, ep)
         #if ep % 50 == 0:
         print('For Epoch: {}, Loss:{}'.format(ep, loss.item()))
+
+        #loss.backward() computes the derivative of the loss w.r.t. 
+        # the parameters (or anything requiring gradients) using backpropagation.
         loss.backward(retain_graph=True)
+
+        #opt.step() causes the optimizer to take a step based 
+        # on the gradients of the parameters.
+
         optimizer.step()
         if ep % args.lr_step == 0:
             scheduler.step()
