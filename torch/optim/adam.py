@@ -79,6 +79,9 @@ class Adam(Optimizer):
                     params_with_grad.append(p)
                     if p.grad.is_sparse:
                         raise RuntimeError('Adam does not support sparse gradients, please consider SparseAdam instead')
+                    #Added by Emin
+                    print("Appending gradient to list \Adam.py")
+                    params_with_grad.append(p)
                     grads.append(p.grad)
 
                     state = self.state[p]
@@ -95,6 +98,9 @@ class Adam(Optimizer):
 
                     exp_avgs.append(state['exp_avg'])
                     exp_avg_sqs.append(state['exp_avg_sq'])
+
+                    #Added by Emin
+                    print(state)
 
                     if group['amsgrad']:
                         max_exp_avg_sqs.append(state['max_exp_avg_sq'])
