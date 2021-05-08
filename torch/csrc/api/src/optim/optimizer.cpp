@@ -8,6 +8,10 @@
 #include <utility>
 #include <vector>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace torch {
 namespace optim {
 
@@ -105,6 +109,11 @@ void Optimizer::zero_grad() {
       if (p.grad().defined()) {
         p.grad().detach_();
         p.grad().zero_();
+
+        //Emin Code
+        cout<<"in Optimizer::zero_grad in optimizer.cpp"<<endl;
+
+
       }
     }
   }

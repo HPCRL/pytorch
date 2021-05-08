@@ -11,6 +11,10 @@
 
 #include <functional>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace torch {
 namespace optim {
 
@@ -93,6 +97,9 @@ Tensor SGD::step(LossClosure closure)  {
         }
       }
       p.data().add_(d_p, -1 * options.lr());
+      
+      //Emin
+      cout<<"in sgd.cpp print p in group.params "<<p.data()<<endl;
     }
   }
   return loss;
