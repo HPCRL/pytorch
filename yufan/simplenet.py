@@ -14,8 +14,8 @@ from graph import Graph, build_graph
 class Net(nn.Module):
     def __init__(self, b=5, m=32, n=64, k=32) :
         super(Net, self).__init__()
-        # self.linear_1 = nn.Linear(n,k)
-        # self.linear_2 = nn.Linear(k,16)
+        self.linear_1 = nn.Linear(n,k)
+        self.linear_2 = nn.Linear(k,16)
 
     def forward(self, x):
 
@@ -65,8 +65,8 @@ def main():
     input = torch.rand(args.b, args.m, args.n).cuda()
     output = model(input)
 
-    # print("input size", input.size())
-    # print("output size", output.size())
+    print("input size", input.size())
+    print("output size", output.size())
 
     # g = make_dot( output, params=dict(model.named_parameters()))
     # g.view()
