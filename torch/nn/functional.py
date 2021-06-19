@@ -1748,7 +1748,6 @@ def linear(input: Tensor, weight: Tensor, bias: Optional[Tensor] = None) -> Tens
         - Bias: :math:`(out\_features)`
         - Output: :math:`(N, *, out\_features)`
     """
-    print("hahahh")
     if has_torch_function_variadic(input, weight):
         return handle_torch_function(linear, (input, weight), input, weight, bias=bias)
     return torch._C._nn.linear(input, weight, bias)

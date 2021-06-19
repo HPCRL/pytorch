@@ -16,9 +16,9 @@ class BaseLayer(torch.nn.Module):
         BaseLayer.glb_id += 1
         self.unique_id = BaseLayer.glb_id 
         
-    def forward(self, input: Tensor) -> Tensor:
-        return input
+    def forward(self, x):
+        pass
 
-
-
+    def extra_repr(self) -> str:
+        return 'uu virtual baselayer'
 
