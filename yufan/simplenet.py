@@ -36,15 +36,16 @@ def dryrun_cpu(model: nn.Module, input_dim: List[int]) -> None:
     print("input tensor size", input.size())
     g = build_graph(model, input, True)
     #g.save("/uufs/chpc.utah.edu/common/home/u0940848/pytorch/yufan/test.pdf")
+    g.save("/home/yufan/labpytorch/yufan/test.pdf")
 
 
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--b", default=5, type=int, help="Batch")
-    parser.add_argument("--m", default=32, type=int, help="M Dimension")
-    parser.add_argument("--n", default=64, type=int, help="N Dimension")
+    parser.add_argument("--b", default=5000000000, type=int, help="Batch")
+    parser.add_argument("--m", default=32000000000, type=int, help="M Dimension")
+    parser.add_argument("--n", default=6400000000000, type=int, help="N Dimension")
     parser.add_argument("--k", default=32, type=int, help="K Dimension")
     parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
     parser.add_argument("--epochs", type=int, default=10, help="Number of epochs ")
@@ -57,7 +58,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
     model = Net(b=args.b, m=args.m, n=args.n, k=args.k)
     
-    #dryrun_cpu(model, [args.b, args.m, args.n])
+    dryrun_cpu(model, [args.b, args.m, args.n])
 
 
     

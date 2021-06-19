@@ -156,6 +156,8 @@ def main():
     print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&", erro)
     erro.backward(torch.ones_like(erro))
 
+    nn.Linear(10,100)
+
 
 
 
