@@ -8,6 +8,7 @@ if __name__ == '__main__':
     print(l1)
     
     #create a subclass (on GPU)
+    print("\n create a operator on GPU device")
     l2 = linear.Linear(10,1).cuda()
     print(l2)
     input = torch.rand(5,10).cuda()
@@ -15,6 +16,7 @@ if __name__ == '__main__':
     print(res)
 
     #create a subclass (on CPU)
+    print("\n create a operator on CPU default")
     l3 = linear.Linear(10,1)
     print(l3)
     input = torch.rand(6,10)
