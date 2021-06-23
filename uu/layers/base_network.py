@@ -26,6 +26,31 @@ class BaseNetwork():
             raise RuntimeError('Have to set first_layer before calculating mem usage')
         if input is None:
             raise RuntimeError('Have to have a input tensor before calculating mem usage')
+
+        total_mem = self.mem_collect(input, self.first_layer)
+        print("entwork total mem", total_mem)
+
+    
+    def mem_collect(self, input: ft, l: base_layer.BaseLayer):
+        if l is None:
+            return 0
+        l.fwdcounter_inc()
+        # join node, not fullly arrived.
+        if l.fwdcounter < l.get_prev_layer_size():
+            return 0
+    
+        mem_u, output = l.mem_usage(input) 
+        next_layers = l.get_next()
+        if len(next_layers) == 1:
+            mem_u += self.mem_collect(output, next_layers[0])
+        elif len(next_layers) > 1:
+            for i in range(0, len(next_layers)):
+                mem_u += self.mem_collect(output, next_layers[i])
+        
+        l.reset_fwdcounter()
+        return mem_u
+    
+
     
     #DFS
     def traverse(self, l: base_layer.BaseLayer):
@@ -45,6 +70,9 @@ class BaseNetwork():
                 self.traverse(next_layers[i])
         
         l.reset_fwdcounter()
+    
+
+
 
         
         

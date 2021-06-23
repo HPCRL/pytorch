@@ -10,3 +10,5 @@ if __name__ == '__main__':
     # 1d fake tensor
     t2 = ft.FakeTensor([7700, 8800000000000])
     print (t2.size())
+
+    print (t2)

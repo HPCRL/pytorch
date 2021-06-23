@@ -9,4 +9,14 @@ class FakeTensor():
     
     def size(self) -> int:
         return np.prod(self.dims)
+    
+    def get_dims(self) -> List[int]:
+        return self.dims
+    
+    def __repr__(self) -> str:
+        s = ""
+        for i in self.dims:
+            s = s + str(i) + " x "
+        s = s[:-3]
+        return 'fTensor [{}]'.format(s)
 
