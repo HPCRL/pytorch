@@ -12,24 +12,23 @@ class Network(base_network.BaseNetwork):
         linear1 = linear.Linear(100000000000000000,1)
         linear2 = linear.Linear(1, 770000000)
         linear3 = linear.Linear(770000000,100)
+        linear4 = linear.Linear(17,100)
+
+        #self.first_layer = linear1
+        self.set_first_layer(linear1)
 
         #constrcut network
+        linear1.hook(linear4)
         linear1.hook(linear2)
-        linear2.hook(linear3)
-
-
-
- 
-
+        linear1.hook(linear3)
 
 
 if __name__ == '__main__':
-    input = ft.FakeTensor([7700, 100000000000000000])
-    mynet = Network()
-    mynet.set_first_layer(mynet.linear1)
-    mem_cost = mynet.mem_usage(input)
+    mynet = Network()    
+    #mynet.check_compatibility()
 
-    print(mem_cost)
-
+    l = mynet.get_first_layer()
+    print("first layer : ", l)
+    print(l.get_next())
 
 

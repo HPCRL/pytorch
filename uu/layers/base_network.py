@@ -27,7 +27,26 @@ class BaseNetwork():
         if input is None:
             raise RuntimeError('Have to have a input tensor before calculating mem usage')
     
-    def travese(self):
-        print(self.first_layer)
+    #DFS
+    def traverse(self, l: base_layer.BaseLayer):
+        if l is None:
+            return
+        l.fwdcounter_inc()
+        # join node, not fullly arrived.
+        if l.fwdcounter < l.get_prev_layer_size():
+            return
+
+        print("trv ", l)
+        next_layers = l.get_next()
+        if len(next_layers) == 1:
+            self.traverse(next_layers[0])
+        elif len(next_layers) > 1:
+            for i in range(0, len(next_layers)):
+                self.traverse(next_layers[i])
+        
+        l.reset_fwdcounter()
+
+        
+        
 
  

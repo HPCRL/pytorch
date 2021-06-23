@@ -38,11 +38,12 @@ class BaseLayer(torch.nn.Module):
             self.prev_layers.sort(key=lambda x:x.unique_id)
         return self.prev_layers
     
-    def get_pre_layer_size(self) -> int:
-        return len(self.pre_layers)
+    def get_prev_layer_size(self) -> int:
+        return len(self.prev_layers)
 
     def hook(self, l: BaseLayer):
-        print("hook layer {}:{} <-> {}:{}\n".format(self.unique_id, self.extra_repr(), l.unique_id, l.extra_repr()) )
+        if __debug__:
+            print("hook layer {}:{} <-> {}:{}\n".format(self.unique_id, self.extra_repr(), l.unique_id, l.extra_repr()) )
         self.next_layers.append(l)
         l.prev_layers.append(self)
 
@@ -52,16 +53,16 @@ class BaseLayer(torch.nn.Module):
     def reset_glb_id():
         BaseLayer.glb_id = 0
 
-    def fwdcounter_inc():
+    def fwdcounter_inc(self):
         self.fwdcounter += 1
     
-    def bwdcounter_inc():
+    def bwdcounter_inc(self):
         self.bwdcounter += 1
     
-    def reset_fwdcounter():
+    def reset_fwdcounter(self):
         self.fwdcounter = 0
     
-    def reset_bwdcounter():
+    def reset_bwdcounter(self):
         self.bwdcounter = 0
     
 
