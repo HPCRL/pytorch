@@ -122,3 +122,6 @@ class MeasureMemory:
         maxUsage = self.maximumValue() - maxBefore
 
         return result, usage, maxUsage
+    
+    def snapshot(self):
+        return torch.cuda.memory_snapshot()
