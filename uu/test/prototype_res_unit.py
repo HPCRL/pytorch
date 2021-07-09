@@ -21,11 +21,11 @@ class Residual_ref(nn.Module):
         #self.sck = torch.nn.Sequential(*[self.conv1, self.bn1, self.relu, self.conv2, self.bn2])
 
     def forward(self, X):
-        s = torch.nn.Sequential(*[self.conv1, self.bn1, self.relu, self.conv2, self.bn2])
-        Y = checkpoint(s, X)
+        # s = torch.nn.Sequential(*[self.conv1, self.bn1, self.relu, self.conv2, self.bn2])
+        # Y = checkpoint(s, X)
         # Y = checkpoint(self.sck, X)
-        # Y = self.relu(self.bn1(self.conv1(X)))
-        # Y = self.bn2(self.conv2(Y))
+        Y = self.relu(self.bn1(self.conv1(X)))
+        Y = self.bn2(self.conv2(Y))
         Y += X
         return self.relu(Y)
 
