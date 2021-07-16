@@ -282,6 +282,7 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
 
   /// Returns true if any of the output edges in any of the ranges are active.
   bool should_compute_output(std::initializer_list<IndexRange> idxs) const {
+    //std::cout<<"[torch/csrc/autograd/function.h] should_compute_output\n";
     return std::any_of(idxs.begin(), idxs.end(), [this](IndexRange range) {
       for (auto i = range.first; i < range.second; i++) {
         if (should_compute_output(i))

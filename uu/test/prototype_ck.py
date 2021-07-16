@@ -142,7 +142,7 @@ def main():
     # q = 100
 
     model = Net(m, n, k, l, q).to(device)
-    input = torch.rand(m, k, requires_grad = True).cuda() # [400, 200] 320K
+    input = torch.rand(m, k) # [400, 200] 320K
 
     l1_w = model.linear_1.weight
     l2_w = model.linear_2.weight
@@ -154,18 +154,18 @@ def main():
 
     # use same random as Net()
     model_ref = Net_ref(m, n, k, l, q, l1_w, l2_w, l3_w).to(device)
-
+    input_ref = input.to(device)
 
     out = model(input, 100)      # m x q
-    out_ref = model_ref(input)
+    out_ref = model_ref(input_ref)
     print("out shape", out.size())
     print("out_ref shape", out_ref.size())
     # print("out ", out)
     # print("out_ref ", out_ref)
     
-    print("~~ check forward correctness ~~")
-    not_same_num = point_wise_compare(m, q, out, out_ref)
-    print (" precentile {} / {} = {}".format(not_same_num, m*q, (not_same_num/m/q)))
+    # print("~~ check forward correctness ~~")
+    # not_same_num = point_wise_compare(m, q, out, out_ref)
+    # print (" precentile {} / {} = {}".format(not_same_num, m*q, (not_same_num/m/q)))
     #assert(torch.all(torch.eq(out, out_ref)))
     #assert(torch.allclose(out, out_ref))
 
@@ -180,23 +180,23 @@ def main():
 
     out_w_list = []
     i = 0
-    for name, param in model.named_parameters():
-        #print("i", i, name, param.size())
-        i += 1
-        out_w_list.append(param.grad)
+    # for name, param in model.named_parameters():
+    #     #print("i", i, name, param.size())
+    #     i += 1
+    #     out_w_list.append(param.grad)
 
-    out_ref_w_list = []
-    i = 0
-    for name, param in model_ref.named_parameters():
-        #print("i", i, name, param.size(), param.grad.size())
-        i += 1
-        out_ref_w_list.append(param.grad)
+    # out_ref_w_list = []
+    # i = 0
+    # for name, param in model_ref.named_parameters():
+    #     #print("i", i, name, param.size(), param.grad.size())
+    #     i += 1
+    #     out_ref_w_list.append(param.grad)
        
 
-    print("~~ compare all weights ~~")
-    for ww in range(0, i):
-        #print("out_w {} \n out_ref_w {}".format(out_w_list[ww], out_ref_w_list[ww]))
-        assert(torch.all(torch.eq(out_w_list[ww], out_ref_w_list[ww])))
+    # print("~~ compare all weights ~~")
+    # for ww in range(0, i):
+    #     #print("out_w {} \n out_ref_w {}".format(out_w_list[ww], out_ref_w_list[ww]))
+    #     assert(torch.all(torch.eq(out_w_list[ww], out_ref_w_list[ww])))
 
 
 

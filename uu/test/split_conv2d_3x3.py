@@ -34,10 +34,10 @@ class Net(nn.Module):
                                   )
 
     def forward(self, x):
-        Th = 3
-        Tw = 3
-        H = 9
-        W = 9
+        Th = 27
+        Tw = 27
+        H = 81
+        W = 81
         #TODO: need to detect original padding from unmodified graph
         input_tile = padding_calc.get_input_tile([0,0], H, W, Th, Tw, 1, 1, x)
         out_1 = self.conv2d_1(input_tile)
@@ -82,7 +82,7 @@ def main():
     w = model.conv2d_1.weight
     model_ref =  Net_ref(w).to(device)
 
-    input = torch.rand(1,3,9,9, requires_grad = True).cuda() 
+    input = torch.rand(1,3,81,81, requires_grad = True).cuda() 
     print("input shape", input.size())
 
     out = model(input)
@@ -94,13 +94,13 @@ def main():
 
     # print("out", out)
     # print("out_ref", out_ref)
-    not_same_num = correctness_check.point_wise_compare_4d(1,64,9,9, out, out_ref)
+    not_same_num = correctness_check.point_wise_compare_4d(1,64,81,81, out, out_ref)
     
     out.sum().backward()
     out_ref.sum().backward()
 
-    print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
-    print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
+    #print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
+    #print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
     assert(torch.all(torch.eq(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad)))
 
 

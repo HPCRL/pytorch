@@ -115,10 +115,13 @@ class Sequential(Module):
     # TestScript.test_sequential_intermediary_types).  Cannot annotate
     # with Any as TorchScript expects a more precise type
     def forward(self, input):
+        print("SEQ **********************")
         for module in self:
+            print("module ", module)
             input = module(input)
+        print("SEQ **********************")
         return input
-
+        
 
 class ModuleList(Module):
     r"""Holds submodules in a list.
