@@ -17,11 +17,9 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
 
     pad_top = max(0-(tile_top-pads[0]), 0)
     pad_bottom = max((tile_bottom+pads[0])-(H-1), 0)
-
     pad_left = max(0-(tile_left-pads[1]), 0)
     pad_right = max((tile_right+pads[1])-(W-1), 0)
-
-    #(\text{padding\_left}padding_left, \text{padding\_right}padding_right, \text{padding\_top}padding_top, \text{padding\_bottom}padding_bottom)
+    # padding 
     padding_info = [pad_left, pad_right, pad_top, pad_bottom]
 
     input_left = max(0, (tile_left-pads[1]))
@@ -49,49 +47,66 @@ class Pad_info:
         self.internal_expand = internal_expand
         self.real_index = real_index
 
-def get_input_tile(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: int, pw: int, input, depth_convs: int) -> Dict:
+    def __repr__(self) -> str:
+        rep = 'PI( <' + "".join([str(x)+"," for x in self.padding_info]) + '>,\n <' + \
+                        "".join([str(x)+"," for x in self.slice_info]) + '>, \n <' + \
+                        "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <' + \
+                        "".join([str(x)+"," for x in self.real_index]) + '>, \n)' + '\n'
+        return rep
+
+def compute_info(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: int, pw: int, input, num_convs: int) -> Dict:
     info_dict = {}
     tile_top = output_tile_coord[0]*Th
     tile_bottom = tile_top+Th-1
     tile_left = output_tile_coord[1]*Tw
     tile_right = tile_left+Tw-1
 
+    depth_convs = 0
     slice_info = [tile_left, tile_right, tile_top, tile_bottom ]
     real_index = slice_info
-    while depth_convs > 0:
+    while depth_convs < num_convs:
         padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
         pi = Pad_info(padding_info, slice_info, internal_expand, real_index)
         info_dict[depth_convs] = pi
-        depth_convs -= 1
-        print("pd info ", padding_info)
-        print("slice info ", slice_info)
-        print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
+        depth_convs += 1
+        # print("pd info ", padding_info)
+        # print("slice info ", slice_info)
+        # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
     return info_dict
 
 
+def get_input_tile(info:Dict, input, depth: int):
+    pi = info[depth]
+    padding_info = pi.padding_info
+    slice_info = pi.slice_info
+    input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
+    #print(" pi", pi)
+    pd = torch.nn.ConstantPad2d(padding_info, 0)
+    input_tile = pd(input_tile)
+
+    return input_tile
 
 
+def recreate_input_tile(info:Dict, input, depth: int):
+    pi = info[depth]
+    padding_info = pi.padding_info
+    #shifting tile to extract
+    input_shape = input.size()
+    top = padding_info[2]
+    bottom = input_shape[2]-padding_info[3]
+    left = padding_info[0]
+    right = input_shape[3]-padding_info[1]
+    # print("\n===\n")
+    # print(input_shape)
+    # print(padding_info)
+    # print(slice_info)
+    # print("top, bottom, left, right " , top, bottom, left, right)
+    # print("\n===\n")
+    input_tile = input[:, :, top:bottom, left:right]       #NCHW
+    pd = torch.nn.ConstantPad2d(padding_info, 0)
+    input_tile = pd(input_tile)
 
-
-
-
-
-    #for single conv2d
-# def get_input_tile(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: int, pw: int, input):
-#     tile_top = output_tile_coord[0]*Th
-#     tile_bottom = tile_top+Th-1
-#     tile_left = output_tile_coord[1]*Tw
-#     tile_right = tile_left+Tw-1
-
-#     padding_info, slice_info = conv2d_padding_info([tile_top, tile_bottom, tile_left, tile_right], [Th, Tw], [H, W], [ph, pw])
-#     input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
-    
-#     # print(padding_info)
-#     # print(slice_info)
-#     pd = torch.nn.ConstantPad2d(padding_info, 0)
-#     input_tile = pd(input_tile)
-
-#     return input_tile
+    return input_tile
 
 
 
