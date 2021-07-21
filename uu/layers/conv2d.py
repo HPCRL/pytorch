@@ -15,13 +15,15 @@ class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, depth):
+        ctx.depth = depth                
         if depth == 0:
             out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+            ctx.save_for_backward(input, out, weight)
         else:
             out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
-            
+            ctx.save_for_backward(input, out, weight)
             #print("net_ out\n", out)
             input_tile_for_next = padding_calc.recreate_input_tile(info, out, depth-1)
             #print("shape input_tile_for_next\n", input_tile_for_next.size())
@@ -32,8 +34,24 @@ class TiledConv2dFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        grad_input = torch.zeros([2, 4])
-        return grad_input
+        print("ctx.depth", ctx.depth)
+        input, out, weight = ctx.saved_tensors
+
+        print("input shape", input.size())
+        print("out shape", out.size())
+        print("weight shape", weight.size())
+        if ctx.needs_input_grad[0]:
+            print("compute grad_input\n")
+            grad_input = torch.nn.grad.conv2d_input(input.shape, weight, grad_output) 
+              
+        if ctx.needs_input_grad[1]:
+            print("compute grad_weight\n")
+            grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, grad_output)  
+                
+        #grad_bias = torch.zeros([1, 1, 1, 1]).cuda() #TODO: bias shape??
+        print ("++++++++++++++++shape grad_input", grad_input.size())
+        print ("++++++++++++++++shape grad_weight", grad_weight.size())
+        return grad_input, grad_weight, None, None, None, None, None, None, None
 
 class TiledConv2d(_ConvNd):
     def __init__(

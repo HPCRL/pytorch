@@ -188,8 +188,8 @@ def main():
     model_ref =  Net_ref(w1, w2, w3).to(device)
     #print(model_ref.conv2d_1.weight, model_ref.conv2d_2.weight)
     
-    H = 243
-    W = 243
+    H = 3
+    W = 3
     Th = int(H/3)
     Tw = int(W/3)
     input = torch.rand(1,1,H,W, requires_grad = True).cuda()
@@ -210,8 +210,8 @@ def main():
     print("out_ref", out_ref)
     not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
     
-    # # out.sum().backward()
-    # out_ref.sum().backward()
+    out.sum().backward()
+    #out_ref.sum().backward()
 
     # #print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
     # #print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
