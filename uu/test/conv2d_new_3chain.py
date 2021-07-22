@@ -1,9 +1,22 @@
+from torch.autograd.grad_mode import no_grad
 import torch
 import torch.nn as nn
 from uu.utils import memory 
 from uu.utils import correctness_check 
 from uu.utils import padding_calc
-from uu.layers import conv2d 
+from uu.layers import conv2d, tilecat
+
+
+
+def print_grad(self, grad_input, grad_output):
+    print('Inside '+ self.__class__.__name__+ ' backward')
+    # print('grad_input : ', len(grad_input))
+    # print('grad_output : ', len(grad_output))
+    print('grad_output size : ', grad_output[0].size())
+    print('ref grad_output  :\n ', grad_output[0])
+
+    print('grad_input size : ', grad_input[0].size())
+    print('ref grad_input  : \n', grad_input[0])
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3):
@@ -30,6 +43,10 @@ class Net_ref(nn.Module):
         self.conv2d_2.weight = w2
         self.conv2d_3.weight = w3
 
+        self.conv2d_1.register_full_backward_hook(print_grad)
+        self.conv2d_2.register_full_backward_hook(print_grad)
+        self.conv2d_3.register_full_backward_hook(print_grad)
+
     def forward(self, x):
         out = self.conv2d_1(x)
         #print("ref 1st out\n", out)
@@ -48,38 +65,33 @@ class Net(nn.Module):
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
-                                  depth=2
+                                  depth=2,
+                                  num_conv=3
                                   )
         self.conv2d_2 = conv2d.TiledConv2d(in_channels=1, 
                                   out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
-                                  depth=1
+                                  depth=1,
+                                  num_conv=3
                                   )
         self.conv2d_3 = conv2d.TiledConv2d(in_channels=1, 
                                   out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
-                                  depth=0
+                                  depth=0,
+                                  num_conv=3
                                   )   
-        
+        self.tcat = tilecat.TiledConcatenateFunction.apply
         # TODO: How to make sequential work??                                                 
         # self.block = nn.Sequential(*[self.conv2d_1, self.conv2d_2])
 
     def forward(self, x, H, W, Th, Tw):
         num_conv = 3
         # preprocess network, not sure if need to put it here 
-        info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
-        # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
-       # print(input_tile.size())
-       # print(input_tile)
-        out_1 = self.conv2d_1(input_tile, info)
-        out_1 = self.conv2d_2(out_1, info)
-        out_1 = self.conv2d_3(out_1, info)
-        #print("*******", out_1)
+        
 
 
         info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -163,15 +175,21 @@ class Net(nn.Module):
         out_9 = self.conv2d_3(out_9, info)
         #print("*******", out_9)
 
-        out_row_1 = torch.cat([out_1, out_2, out_3], dim=3)
-        out_row_2 = torch.cat([out_4, out_5, out_6], dim=3)
-        out_row_3 = torch.cat([out_7, out_8, out_9], dim=3)
 
-        # print("---", out_row_1.size())
-        # print("---", out_row_2.size())
-        # print("---", out_row_3.size())
-        out = torch.cat([out_row_1, out_row_2, out_row_3], dim=2)
+        info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
+        # assume we prepare the very first input
+        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+       # print(input_tile.size())
+       # print(input_tile)
+        out_1 = self.conv2d_1(input_tile, info)
+        out_1 = self.conv2d_2(out_1, info)
+        out_1 = self.conv2d_3(out_1, info)
+        #print("*******", out_1)
 
+        out_row_1 = self.tcat(out_1, out_2, out_3, 3)
+        out_row_2 = self.tcat(out_4, out_5, out_6, 3)
+        out_row_3 = self.tcat(out_7, out_8, out_9, 3)
+        out = self.tcat(out_row_1, out_row_2, out_row_3, 2)
         return out
 
 
@@ -202,16 +220,19 @@ def main():
     out = model(input, H, W, Th, Tw )
     
 
-    print("out shape", out.size())
-    print("out_ref shape", out_ref.size())
-    print("~~ check forward correctness ~~")
+    # print("out shape", out.size())
+    # print("out_ref shape", out_ref.size())
+    # print("~~ check forward correctness ~~")
 
-    print("out", out)
-    print("out_ref", out_ref)
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
+    # print("out", out)
+    # print("out_ref", out_ref)
+    # not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
     
+    # # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    # # out_ref.sum().backward()
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
-    #out_ref.sum().backward()
+    
 
     # #print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
     # #print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)

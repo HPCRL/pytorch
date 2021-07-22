@@ -402,7 +402,7 @@ static void _save_variables(const std::shared_ptr<PyNode>& cdata_ptr, THPFunctio
   Py_ssize_t num_saved = PyTuple_GET_SIZE(self->to_save);
   self->saved_variables.clear();
   self->saved_variables.reserve(num_saved);
-  std::cout<<"[python_function.cpp] save cdata " << num_saved << "\n";
+  //std::cout<<"[python_function.cpp] save cdata " << num_saved << "\n";
 
   for (int i = 0; i < num_saved; i++) {
     PyObject *obj = PyTuple_GET_ITEM(self->to_save, i);
@@ -413,8 +413,8 @@ static void _save_variables(const std::shared_ptr<PyNode>& cdata_ptr, THPFunctio
       auto variable = (THPVariable*)obj;
       bool is_output = variable->cdata.grad_fn().get() == cdata_ptr.get();
       self->saved_variables.emplace_back(variable->cdata, is_output);
-      std::cout<<"cdata \n";
-      variable->cdata.print();
+      //std::cout<<"cdata \n";
+      //variable->cdata.print();
 
     } else {
       throw TypeError(
@@ -675,7 +675,7 @@ PyObject *THPFunction_apply(PyObject *cls, PyObject *inputs)
     THPObjectPtr forward_fn(PyObject_GetAttrString(cls, "forward"));
     if (!forward_fn) return nullptr;
     tensor_outputs = PyObject_CallObject(forward_fn, ctx_input_tuple);
-    std::cout<< "[/torch/csrc/autograd/python_function.cpp] forward_fn \n";
+    //std::cout<< "[/torch/csrc/autograd/python_function.cpp] forward_fn " << std::string(Py_TYPE(forward_fn)->tp_name) << "\n";
     if (!tensor_outputs) return nullptr;
   }
 

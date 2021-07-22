@@ -11,6 +11,9 @@ def _grad_input_padding(grad_output, input_size, stride, padding, kernel_size, d
         warnings.warn("_grad_input_padding 'dilation' argument not provided. Default of 1 is used.")
         dilation = [1] * len(stride)
 
+
+    print("_grad_input_padding", grad_output, input_size, stride, padding, kernel_size)
+
     input_size = list(input_size)
     k = grad_output.dim() - 2
 
@@ -27,6 +30,7 @@ def _grad_input_padding(grad_output, input_size, stride, padding, kernel_size, d
     min_sizes = [dim_size(d) for d in range(k)]
     max_sizes = [min_sizes[d] + stride[d] - 1 for d in range(k)]
     for size, min_size, max_size in zip(input_size, min_sizes, max_sizes):
+        print("size, min_size, max_size", size, min_size, max_size)
         if size < min_size or size > max_size:
             raise ValueError(
                 ("requested an input grad size of {}, but valid sizes range "

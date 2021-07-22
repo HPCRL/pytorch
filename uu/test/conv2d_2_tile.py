@@ -134,8 +134,8 @@ def main():
     print("out_ref", out_ref)
     not_same_num = correctness_check.point_wise_compare_4d(1,1,3,3, out, out_ref)
     
-    # out.sum().backward()
-    out_ref.sum().backward()
+    out.sum().backward()
+    # out_ref.sum().backward()
 
     # #print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
     # #print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
