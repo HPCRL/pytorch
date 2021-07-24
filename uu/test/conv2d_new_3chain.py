@@ -5,8 +5,7 @@ from uu.utils import memory
 from uu.utils import correctness_check 
 from uu.utils import padding_calc
 from uu.layers import conv2d, tilecat
-
-
+from torch.nn.parameter import Parameter
 
 def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
@@ -39,9 +38,9 @@ class Net_ref(nn.Module):
                                   bias = False,
                                   padding=(1,1)
                                   )                                                    
-        self.conv2d_1.weight = w1
-        self.conv2d_2.weight = w2
-        self.conv2d_3.weight = w3
+        self.conv2d_1.weight = Parameter(w1)
+        self.conv2d_2.weight = Parameter(w2)
+        self.conv2d_3.weight = Parameter(w3)
 
         self.conv2d_1.register_full_backward_hook(print_grad)
         self.conv2d_2.register_full_backward_hook(print_grad)
@@ -198,21 +197,21 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
-    w1 = model.conv2d_1.weight
-    w2 = model.conv2d_2.weight
-    w3 = model.conv2d_3.weight
+    w1 = model.conv2d_1.weight.data
+    w2 = model.conv2d_2.weight.data
+    w3 = model.conv2d_3.weight.data
 
     #print(w1, w2)
     model_ref =  Net_ref(w1, w2, w3).to(device)
     #print(model_ref.conv2d_1.weight, model_ref.conv2d_2.weight)
     
-    H = 3
-    W = 3
+    H = 9
+    W = 9
     Th = int(H/3)
     Tw = int(W/3)
     input = torch.rand(1,1,H,W, requires_grad = True).cuda()
-    print("input shape", input.size())
-    print(input)
+    # print("input shape", input.size())
+    # print(input)
 
 
 
@@ -226,16 +225,20 @@ def main():
 
     # print("out", out)
     # print("out_ref", out_ref)
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
     
-    # # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    # # out_ref.sum().backward()
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    out_ref.sum().backward()
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
     
 
-    # #print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
-    # #print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
+    print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
+    print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
+    print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
+    print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
+    print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
+    print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
     # assert(torch.all(torch.eq(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad)))
 
 

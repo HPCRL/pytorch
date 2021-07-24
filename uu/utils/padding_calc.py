@@ -41,8 +41,9 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
 
 # might need to create a memo structure. 
 class Pad_info:
-    def __init__(self, coord, padding_info, slice_info, internal_expand, real_index):
+    def __init__(self, coord, orig_size, padding_info, slice_info, internal_expand, real_index):
         self.coord = coord
+        self.orig_size = orig_size
         self.padding_info = padding_info
         self.slice_info = slice_info
         self.internal_expand = internal_expand
@@ -50,6 +51,7 @@ class Pad_info:
 
     def __repr__(self) -> str:
         rep = 'PI( <' + "".join([str(x)+"," for x in self.coord]) + '>,\n <' + \
+                    "".join([str(x)+"," for x in self.orig_size]) + '>,\n <' + \
                     "".join([str(x)+"," for x in self.padding_info]) + '>,\n <' + \
                     "".join([str(x)+"," for x in self.slice_info]) + '>, \n <' + \
                     "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <' + \
@@ -57,36 +59,42 @@ class Pad_info:
         return rep
 
 def compute_info(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: int, pw: int, input, num_convs: int) -> Dict:
-    info_dict = {}
-    tile_top = output_tile_coord[0]*Th
-    tile_bottom = tile_top+Th-1
-    tile_left = output_tile_coord[1]*Tw
-    tile_right = tile_left+Tw-1
+    with torch.no_grad():
+        info_dict = {}
+        tile_top = output_tile_coord[0]*Th
+        tile_bottom = tile_top+Th-1
+        tile_left = output_tile_coord[1]*Tw
+        tile_right = tile_left+Tw-1
 
-    depth_convs = 0
-    slice_info = [tile_left, tile_right, tile_top, tile_bottom ]
-    real_index = slice_info
-    while depth_convs < num_convs:
-        padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
-        pi = Pad_info(output_tile_coord, padding_info, slice_info, internal_expand, real_index)
-        info_dict[depth_convs] = pi
-        depth_convs += 1
-        # print("pd info ", padding_info)
-        # print("slice info ", slice_info)
-        # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
+        depth_convs = 0
+        slice_info = [tile_left, tile_right, tile_top, tile_bottom ]
+        real_index = slice_info
+        org_size = [H, W, Th, Tw]
+
+        while depth_convs < num_convs:
+            padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
+            pi = Pad_info(output_tile_coord, org_size, padding_info, slice_info, internal_expand, real_index)
+            info_dict[depth_convs] = pi
+            depth_convs += 1
+            # print("pd info ", padding_info)
+            # print("slice info ", slice_info)
+            # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
     return info_dict
 
 
 def get_input_tile(info:Dict, input, depth: int):
-    pi = info[depth]
-    padding_info = pi.padding_info
-    slice_info = pi.slice_info
-    input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
-    # print(" pi", pi)
+    input_tile = None
     with torch.no_grad():
+        pi = info[depth]
+        padding_info = pi.padding_info
+        slice_info = pi.slice_info
+        input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
+        # print(" pi", pi)
         pd = torch.nn.ConstantPad2d(padding_info, 0)
         input_tile = pd(input_tile)
-    input_tile.requires_grad = True
+    
+    input_tile.requires_grad = input.requires_grad
+    assert input_tile is not None
     return input_tile
 
 

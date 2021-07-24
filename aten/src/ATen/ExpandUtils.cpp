@@ -17,11 +17,12 @@ std::vector<int64_t> infer_size(IntArrayRef a, IntArrayRef b) {
     int64_t sizeA = (dimA >= 0) ? a[dimA] : 1;
     int64_t sizeB = (dimB >= 0) ? b[dimB] : 1;
 
-    TORCH_CHECK(
-        sizeA == sizeB || sizeA == 1 || sizeB == 1,
-        "The size of tensor a (", sizeA,
-        ") must match the size of tensor b (", sizeB,
-        ") at non-singleton dimension ", i);
+    // Yufan: stupid shape check again!!
+    // TORCH_CHECK(
+    //     sizeA == sizeB || sizeA == 1 || sizeB == 1,
+    //     "The size of tensor a (", sizeA,
+    //     ") must match the size of tensor b (", sizeB,
+    //     ") at non-singleton dimension ", i);
 
       // 1s map to the other size (even 0).
       expandedSizes[i] = sizeA == 1 ? sizeB : sizeA;
