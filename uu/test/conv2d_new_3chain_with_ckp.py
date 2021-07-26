@@ -4,7 +4,7 @@ import torch.nn as nn
 from uu.utils import memory 
 from uu.utils import correctness_check 
 from uu.utils import padding_calc
-from uu.layers import conv2d, tilecat
+from uu.layers import conv2d, tilecat, sequential
 from torch.nn.parameter import Parameter
 
 def print_grad(self, grad_input, grad_output):
@@ -85,32 +85,35 @@ class Net(nn.Module):
                                   )   
         self.tcat = tilecat.TiledConcatenateFunction.apply
         # TODO: How to make sequential work??                                                 
-        # self.block = nn.Sequential(*[self.conv2d_1, self.conv2d_2])
+        #self.block = nn.Sequential(*[self.conv2d_1, self.conv2d_2])
+        self.block = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.conv2d_3])
 
     def forward(self, x, H, W, Th, Tw):
         num_conv = 3
-        # preprocess network, not sure if need to put it here 
-        
 
 
-        info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
+        info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_2 = self.conv2d_1(input_tile, info)
-        out_2 = self.conv2d_2(out_2, info)
-        out_2 = self.conv2d_3(out_2, info)
-        #print("*******", out_2)
+        out_1 = self.block(input_tile, info)[0]
+        #print("*******", out_1)
+
+        # preprocess network, not sure if need to put it here 
+        info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
+        # assume we prepare the very first input
+        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        out_2 = self.block(input_tile, info)[0]
+        #print("*******", out_2.size())
+
 
         info = padding_calc.compute_info([0,2], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_3 = self.conv2d_1(input_tile, info)
-        out_3 = self.conv2d_2(out_3, info)
-        out_3 = self.conv2d_3(out_3, info)
+        out_3 = self.block(input_tile, info)[0]
         #print("*******", out_3)
 
 
@@ -119,19 +122,15 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_4 = self.conv2d_1(input_tile, info)
-        out_4 = self.conv2d_2(out_4, info)
-        out_4 = self.conv2d_3(out_4, info)
-        #print("*******", out_4)
+        out_4 = self.block(input_tile, info)[0]
+        #print("*******", out_4.size())
 
         info = padding_calc.compute_info([1,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_5 = self.conv2d_1(input_tile, info)
-        out_5 = self.conv2d_2(out_5, info)
-        out_5 = self.conv2d_3(out_5, info)
+        out_5 = self.block(input_tile, info)[0]
         #print("*******", out_5)
         
         info = padding_calc.compute_info([1,2], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -139,9 +138,8 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_6 = self.conv2d_1(input_tile, info)
-        out_6 = self.conv2d_2(out_6, info)
-        out_6 = self.conv2d_3(out_6, info)
+        out_6 = self.block(input_tile, info)[0]
+
         #print("*******", out_6)
 
         info = padding_calc.compute_info([2,0], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -149,9 +147,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_7 = self.conv2d_1(input_tile, info)
-        out_7 = self.conv2d_2(out_7, info)
-        out_7 = self.conv2d_3(out_7, info)
+        out_7 = self.block(input_tile, info)[0]
         #print("*******", out_7)
 
         info = padding_calc.compute_info([2,1], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -159,9 +155,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_8 = self.conv2d_1(input_tile, info)
-        out_8 = self.conv2d_2(out_8, info)
-        out_8 = self.conv2d_3(out_8, info)
+        out_8 = self.block(input_tile, info)[0]
         #print("*******", out_8)
 
         info = padding_calc.compute_info([2,2], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -169,26 +163,16 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_9 = self.conv2d_1(input_tile, info)
-        out_9 = self.conv2d_2(out_9, info)
-        out_9 = self.conv2d_3(out_9, info)
+        out_9 = self.block(input_tile, info)[0]
         #print("*******", out_9)
 
 
-        info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
-        # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
-       # print(input_tile.size())
-       # print(input_tile)
-        out_1 = self.conv2d_1(input_tile, info)
-        out_1 = self.conv2d_2(out_1, info)
-        out_1 = self.conv2d_3(out_1, info)
-        #print("*******", out_1)
 
         out_row_1 = self.tcat(out_1, out_2, out_3, 3)
         out_row_2 = self.tcat(out_4, out_5, out_6, 3)
         out_row_3 = self.tcat(out_7, out_8, out_9, 3)
         out = self.tcat(out_row_1, out_row_2, out_row_3, 2)
+
         return out
 
 
@@ -219,8 +203,8 @@ def main():
     out = model(input, H, W, Th, Tw )
     
 
-    # print("out shape", out.size())
-    # print("out_ref shape", out_ref.size())
+    print("out shape", out.size())
+    print("out_ref shape", out_ref.size())
     # print("~~ check forward correctness ~~")
 
     # print("out", out)
@@ -233,13 +217,19 @@ def main():
     out.sum().backward()
     
 
-    print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
-    print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
-    print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
-    print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
-    print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
-    print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
-    # assert(torch.all(torch.eq(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad)))
+    # print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
+    # print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
+    # print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
+    # print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
+    # print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
+    # print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
+    assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
+    assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
+    assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
+
+    print("~~~~DONE TEST~~~~")
+
+
 
 
 

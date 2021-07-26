@@ -132,8 +132,9 @@ class TiledConv2d(_ConvNd):
             in_channels, out_channels, kernel_size_, stride_, padding_, dilation_,
             False, _pair(0), groups, bias, padding_mode)
 
-    def forward(self, input: Tensor, info: Dict) -> Tensor:
+    def forward(self, *inputs) -> Tensor:
+        input, info = inputs
         tconv2d = TiledConv2dFunction.apply
         return tconv2d(input, self.weight, self.bias, self.stride,
-                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv)
+                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
  
