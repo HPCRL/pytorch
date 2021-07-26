@@ -54,20 +54,26 @@ class TiledConv2dFunction(torch.autograd.Function):
         if ctx.needs_input_grad[0]:
             if depth == 0:
                 # for user input
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3]))
+                #print("AA")
+                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+                # print("input shape", input.size())
+                # print("out shape", out.size())
+                # print("weight shape", weight.size())
+                # print("grad_output shape", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
-                print("final", grad_input)
+                #print("final", grad_input)
             elif depth == ctx.num_conv-1:
+                #print("AAA")
                 # a whole grad_output as input of backward
                 new_grad_out = padding_calc.get_input_tile(info, grad_output, depth)
-                print(new_grad_out)
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3]))
+                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
                 grad_input = F.conv2d(new_grad_out, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
-                print(grad_input)
+                #print(grad_input)
             else:
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3]))
+                #print("AAAA")
+                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
                 grad_input = F.conv2d(grad_output, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
@@ -75,6 +81,7 @@ class TiledConv2dFunction(torch.autograd.Function):
         if ctx.needs_input_grad[1]:
             if depth == ctx.num_conv-1:
                 #print("info", info)
+                #print("BB")
                 Th = info[depth].orig_size[2]
                 Tw = info[depth].orig_size[3]
                 H_index = info[depth].coord[0]* Th
@@ -85,22 +92,25 @@ class TiledConv2dFunction(torch.autograd.Function):
                 #need to get the correct tile 
                 H_len = grad_output.size()[2]
                 W_len = grad_output.size()[3]
-                print("depth", depth)
+                # print("BBB")
+                # print("depth", depth)
+                # print("compute grad_weight\n")
+                # print("input shape", input.size())
                 depth += 1  # TODO: rethink about it
                 new_grad_out = grad_output[:,:, depth:H_len-depth, depth:W_len-depth]
                 input_H = input.size()[2]
                 input_W = input.size()[3]
                 new_input = input[:,:, ctx.depth:input_H-ctx.depth , ctx.depth:input_W-ctx.depth]
-                print("$$$$$$$$$$$$$$$$$$$$$grad_out {} \n new_grad_out {}".format(grad_output, new_grad_out))
-                print("compute grad_weight\n")
-                print("input shape", input.size())
-                print("new_input shape", new_input.size())
-                print("grad_out shape", grad_output.size())
-                print("new_grad_out shape", new_grad_out.size())
+                #print("$$$$$$$$$$$$$$$$$$$$$grad_out {} \n new_grad_out {}".format(grad_output, new_grad_out))
+                # print("compute grad_weight\n")
+                # print("input shape", input.size())
+                # print("new_input shape", new_input.size())
+                # print("grad_out shape", grad_output.size())
+                # print("new_grad_out shape", new_grad_out.size())
                 
                 grad_weight = torch.nn.grad.conv2d_weight(new_input, weight.shape, new_grad_out)
                
-                print("grad_weight", grad_weight)
+                #print("grad_weight", grad_weight)
 
                 
         grad_bias = None #TODO: bias shape??
@@ -135,6 +145,14 @@ class TiledConv2d(_ConvNd):
     def forward(self, *inputs) -> Tensor:
         input, info = inputs
         tconv2d = TiledConv2dFunction.apply
-        return tconv2d(input, self.weight, self.bias, self.stride,
-                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
+        # return tconv2d(input, self.weight, self.bias, self.stride,
+        #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
+
+
+        if self.depth == 0:
+           return tconv2d(input, self.weight, self.bias, self.stride,
+                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv)
+        else:
+           return tconv2d(input, self.weight, self.bias, self.stride,
+                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
  
