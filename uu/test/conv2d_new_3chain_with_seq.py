@@ -97,6 +97,7 @@ class Net(nn.Module):
 
     def forward(self, x, H, W, Th, Tw):
         num_conv = 3
+       
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         memUsage = memory.MeasureMemory(device)
         print("==== before  ...")
@@ -104,13 +105,12 @@ class Net(nn.Module):
         print(memUsage.currentValue())     
         print(memUsage.availableValue())
 
-
         info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_1 = checkpoint.checkpoint(self.block, input_tile, info)
+        out_1 = self.block(input_tile, info)
 
         print("==== first tile done compute...")
         print(memUsage.snapshot())
@@ -124,6 +124,8 @@ class Net(nn.Module):
         print(memUsage.currentValue())     
         print(memUsage.availableValue())
 
+
+
         #out_1 = self.block(input_tile, info)
         #print("*******", out_1)
 
@@ -131,8 +133,8 @@ class Net(nn.Module):
         info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
-        out_2 = checkpoint.checkpoint(self.block, input_tile, info)
-        #print("*******", out_2.size())
+        out_2 = self.block(input_tile, info)
+
         print("==== 2nd tile done compute...")
         print(memUsage.snapshot())
         print(memUsage.currentValue())     
@@ -145,6 +147,7 @@ class Net(nn.Module):
         print(memUsage.currentValue())     
         print(memUsage.availableValue())
 
+        #print("*******", out_2.size())
 
 
         info = padding_calc.compute_info([0,2], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -205,6 +208,8 @@ class Net(nn.Module):
         out_9 = self.block(input_tile, info)
         #print("*******", out_9)
 
+
+
         out_row_1 = self.tcat(out_1, out_2, out_3, 3)
         out_row_2 = self.tcat(out_4, out_5, out_6, 3)
         out_row_3 = self.tcat(out_7, out_8, out_9, 3)
@@ -248,7 +253,7 @@ def main():
 
     # print("out", out)
     # print("out_ref", out_ref)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
     
     # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     # out_ref.sum().backward()

@@ -15,18 +15,32 @@ from torch.nn.parameter import Parameter
 class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
-                        padding, dilation, groups, info, depth, num_conv):
+                        padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
+        print("** tiled conv2d forward")
+        print("depth", depth)
+
         ctx.depth = depth
         ctx.info = info   
         ctx.num_conv = num_conv             
         if depth == 0:
-            out = F.conv2d(input, weight, bias, stride,
+            if not is_ccheckpoint:            
+                ctx.save_for_backward(input)
+                ctx.weight = weight
+                out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
-            ctx.save_for_backward(input, out, weight)
+            else:
+                out = F.conv2d(input, weight, bias, stride,
+                        padding, dilation, groups)
         else:
-            out = F.conv2d(input, weight, bias, stride,
+            if not is_ccheckpoint:            
+                ctx.save_for_backward(input)
+                ctx.weight = weight
+                out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
-            ctx.save_for_backward(input, out, weight)
+            else:
+                out = F.conv2d(input, weight, bias, stride,
+                        padding, dilation, groups)
+                    
             # how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
             input_tile_for_next = padding_calc.recreate_input_tile(info, out, depth-1)
@@ -42,13 +56,13 @@ class TiledConv2dFunction(torch.autograd.Function):
         # print("** grad_output", grad_output)
         # print("** grad_output shape", grad_output.size())
         print("ctx.depth", ctx.depth)
-        input, out, weight, = ctx.saved_tensors
+        input = ctx.saved_tensors[0]
+        weight = ctx.weight
         depth = ctx.num_conv-ctx.depth-1
         info = ctx.info
         #print("info", info)
-        # print("input shape", input.size())
-        # print("out shape", out.size())
-        # print("weight shape", weight.size())
+        print("input shape", input.size())
+        print("weight shape", weight.size())
         grad_input = None
         grad_weight = None
         if ctx.needs_input_grad[0]:
@@ -114,7 +128,7 @@ class TiledConv2dFunction(torch.autograd.Function):
 
                 
         grad_bias = None #TODO: bias shape??
-        return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None
+        return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
 class TiledConv2d(_ConvNd):
     def __init__(
@@ -130,7 +144,8 @@ class TiledConv2d(_ConvNd):
         padding_mode: str = 'zeros',  
         # additional info
         depth: int =  0,
-        num_conv: int = 0  # num of conv in segment
+        num_conv: int = 0,  # num of conv in segment
+        is_ccheckpoint = False
     ):
         kernel_size_ = _pair(kernel_size)
         stride_ = _pair(stride)
@@ -138,12 +153,17 @@ class TiledConv2d(_ConvNd):
         dilation_ = _pair(dilation)
         self.depth = depth
         self.num_conv = num_conv
+        self.is_ccheckpoint = is_ccheckpoint
         super(TiledConv2d, self).__init__(
             in_channels, out_channels, kernel_size_, stride_, padding_, dilation_,
             False, _pair(0), groups, bias, padding_mode)
 
     def forward(self, *inputs) -> Tensor:
-        input, info = inputs
+        if len(inputs) == 2:
+            input, info = inputs
+        else:
+            input, info, is_ccheckpoint = inputs
+            self.is_ccheckpoint = is_ccheckpoint
         tconv2d = TiledConv2dFunction.apply
         # return tconv2d(input, self.weight, self.bias, self.stride,
         #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
@@ -151,8 +171,9 @@ class TiledConv2d(_ConvNd):
 
         if self.depth == 0:
            return tconv2d(input, self.weight, self.bias, self.stride,
-                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv)
+                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint)
         else:
            return tconv2d(input, self.weight, self.bias, self.stride,
-                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
+                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint), info, self.is_ccheckpoint
+                
  
