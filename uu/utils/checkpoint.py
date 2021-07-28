@@ -1,6 +1,8 @@
 import torch
 import warnings
 from typing import Any, Iterable, List, Tuple
+from torch.autograd.variable import Variable
+
 
 def check_backward_validity(inputs: Iterable[Any]) -> None:
     if not any(inp.requires_grad for inp in inputs if isinstance(inp, torch.Tensor)):
@@ -25,6 +27,23 @@ def set_device_states(devices, states) -> None:
         with torch.cuda.device(device):
             torch.cuda.set_rng_state(state)
 
+def detach_variable(inputs: Tuple[Any, ...]) -> Tuple[torch.Tensor, ...]:
+    if isinstance(inputs, tuple):
+        out = []
+        for inp in inputs:
+            if not isinstance(inp, torch.Tensor):
+                out.append(inp)
+                continue
+
+            x = inp.detach()
+            x.requires_grad = inp.requires_grad
+            out.append(x)
+        return tuple(out)
+    else:
+        raise RuntimeError(
+            "Only tuple of tensors is supported. Got Unsupported input type: ", type(inputs).__name__)
+
+
 
 class cCheckpoint(torch.autograd.Function):
     @staticmethod
@@ -42,7 +61,13 @@ class cCheckpoint(torch.autograd.Function):
                 ctx.fwd_gpu_devices, ctx.fwd_gpu_states = get_device_states(*args)
         # TODO: assume first arg always be input tensor
         # the very begining tile will be accumulatted !! have to create a fork node
+        # fork node ???
+        
+        # how about multiple inputs 
+        # lets restrict last one is info
+        args[0].requires_grad=True      #??
         ctx.save_for_backward(args[0])
+        ctx.info = args[-1]
         is_ccheckpoint = True
         args = list(args)
         args.append(is_ccheckpoint)
@@ -53,7 +78,59 @@ class cCheckpoint(torch.autograd.Function):
     
     @staticmethod
     def backward(ctx, *args):
-        return None
+        # 1) get the tile from cpu
+        # 2) fwd per tile
+        # 3) bwd 
+        if not torch.autograd._is_checkpoint_valid():
+            raise RuntimeError("Checkpointing is not compatible with .grad(), please use .backward() if possible")
+        inputs = ctx.saved_tensors
+        info = ctx.info
+        inputs = list(inputs)
+        inputs.append(info)
+        inputs = tuple(inputs)
+        # Stash the surrounding rng state, and mimic the state that was
+        # present at this time during forward.  Restore the surrounding state
+        # when we're done.
+        rng_devices = []
+        if ctx.preserve_rng_state and ctx.had_cuda_in_fwd:
+            rng_devices = ctx.fwd_gpu_devices
+        with torch.random.fork_rng(devices=rng_devices, enabled=ctx.preserve_rng_state):
+            if ctx.preserve_rng_state:
+                torch.set_rng_state(ctx.fwd_cpu_state)
+                if ctx.had_cuda_in_fwd:
+                    set_device_states(ctx.fwd_gpu_devices, ctx.fwd_gpu_states)
+            detached_inputs = detach_variable(inputs)
+            
+            with torch.enable_grad():
+                print("ctx.run_function bkw", ctx.run_function)
+                outputs = ctx.run_function(*detached_inputs)
+
+        if isinstance(outputs, torch.Tensor):
+            outputs = (outputs,)
+
+        print("#############", len(outputs))
+        print(args)
+        print (outputs[0].size())
+        print (args[0].size())
+        # run backward() with only tensor that requires grad
+        outputs_with_grad = []
+        args_with_grad = []
+        for i in range(len(outputs)):
+            if outputs[i].requires_grad:
+                outputs_with_grad.append(outputs[i])
+                args_with_grad.append(args[i])
+        if len(outputs_with_grad) == 0:
+            raise RuntimeError(
+                "none of output has requires_grad=True,"
+                " this checkpoint() is not necessary")
+
+        # issue?? how to call backward ??     
+        torch.autograd.backward(outputs_with_grad, args_with_grad)
+        #ctx.run_function.backward(outputs_with_grad, args_with_grad)
+        grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else inp
+                      for inp in detached_inputs)
+        print("HREREERE")
+        return (None, None) + grads
 
 
 def checkpoint(function, *args, **kwargs):

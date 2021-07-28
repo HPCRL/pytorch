@@ -118,6 +118,7 @@ class Net(nn.Module):
         print(memUsage.availableValue())
         
         del input_tile
+        #TODO: we want load back CPU
 
         print("==== first tile recycle buffer...")
         print(memUsage.snapshot())

@@ -11,19 +11,22 @@ from  torch.nn.modules.conv import _ConvNd
 from torch.nn import functional as F
 from uu.utils import padding_calc
 from torch.nn.parameter import Parameter
+from torch.autograd.variable import Variable
+
 
 class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
-        print("** tiled conv2d forward")
-        print("depth", depth)
+        # print("** tiled conv2d forward")
+        # print("depth", depth)
+        # print("is_ccheckpoint", is_ccheckpoint)
 
         ctx.depth = depth
         ctx.info = info   
         ctx.num_conv = num_conv             
         if depth == 0:
-            if not is_ccheckpoint:            
+            if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
                 ctx.weight = weight
                 out = F.conv2d(input, weight, bias, stride,
@@ -56,12 +59,14 @@ class TiledConv2dFunction(torch.autograd.Function):
         # print("** grad_output", grad_output)
         # print("** grad_output shape", grad_output.size())
         print("ctx.depth", ctx.depth)
-        input = ctx.saved_tensors[0]
-        weight = ctx.weight
         depth = ctx.num_conv-ctx.depth-1
         info = ctx.info
-        #print("info", info)
-        print("input shape", input.size())
+        print("info coord", info[depth].coord)
+        input = ctx.saved_tensors[0]
+        weight = ctx.weight
+        print("in_ grad_out shape", grad_output)
+
+        print("input shape", input)
         print("weight shape", weight.size())
         grad_input = None
         grad_weight = None
@@ -75,7 +80,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("weight shape", weight.size())
                 # print("grad_output shape", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
-                #print("final", grad_input)
+                print("final", grad_input.size())
             elif depth == ctx.num_conv-1:
                 #print("AAA")
                 # a whole grad_output as input of backward
@@ -119,7 +124,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("compute grad_weight\n")
                 # print("input shape", input.size())
                 # print("new_input shape", new_input.size())
-                # print("grad_out shape", grad_output.size())
+                print("grad_out shape", grad_output.size())
                 # print("new_grad_out shape", new_grad_out.size())
                 
                 grad_weight = torch.nn.grad.conv2d_weight(new_input, weight.shape, new_grad_out)
@@ -161,6 +166,7 @@ class TiledConv2d(_ConvNd):
     def forward(self, *inputs) -> Tensor:
         if len(inputs) == 2:
             input, info = inputs
+            self.is_ccheckpoint = False
         else:
             input, info, is_ccheckpoint = inputs
             self.is_ccheckpoint = is_ccheckpoint
@@ -175,5 +181,11 @@ class TiledConv2d(_ConvNd):
         else:
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint), info, self.is_ccheckpoint
+
+    # def backward(self, *args):
+    #     print("!!! !!!! conv2d backw")
+    #     tconv2d = TiledConv2dFunction.apply
+
+
                 
  

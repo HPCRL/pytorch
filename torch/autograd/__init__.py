@@ -29,12 +29,13 @@ def _make_grads(outputs: Sequence[torch.Tensor], grads: Sequence[_OptionalTensor
     new_grads: List[_OptionalTensor] = []
     for out, grad in zip(outputs, grads):
         if isinstance(grad, torch.Tensor):
-            if not out.shape == grad.shape:
-                raise RuntimeError("Mismatch in shape: grad_output["
-                                   + str(grads.index(grad)) + "] has a shape of "
-                                   + str(grad.shape) + " and output["
-                                   + str(outputs.index(out)) + "] has a shape of "
-                                   + str(out.shape) + ".")
+            # YUFAN: have to disable here for shape check
+            # if not out.shape == grad.shape:
+            #     raise RuntimeError("Mismatch in shape: grad_output["
+            #                        + str(grads.index(grad)) + "] has a shape of "
+            #                        + str(grad.shape) + " and output["
+            #                        + str(outputs.index(out)) + "] has a shape of "
+            #                        + str(out.shape) + ".")
             if out.dtype.is_complex != grad.dtype.is_complex:
                 raise RuntimeError("For complex Tensors, both grad_output and output"
                                    " are required to have the same dtype."

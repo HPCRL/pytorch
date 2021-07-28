@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import Dict, List
+from torch.autograd.variable import Variable
 
 import pdb
 
@@ -95,7 +96,7 @@ def get_input_tile(info:Dict, input, depth: int):
     
     input_tile.requires_grad = input.requires_grad
     assert input_tile is not None
-    return input_tile
+    return Variable(input_tile, requires_grad = True)
 
 
 def recreate_input_tile(info:Dict, input, depth: int):
