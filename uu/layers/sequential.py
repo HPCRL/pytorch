@@ -10,9 +10,3 @@ class mSequential(nn.Sequential):
             else:
                 inputs = module(inputs)
         return inputs
-
-    # def backward(self, *args):
-    #     print("!!! !!!! seq backw")
-    #     for module in self._modules.values():
-    #         print(module)
-    #         args = module.backward(args)

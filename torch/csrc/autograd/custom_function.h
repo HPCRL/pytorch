@@ -298,7 +298,6 @@ variable_list CppNode<T>::apply(variable_list&& inputs) {
   variable_list results;
   results.reserve(num_outputs);
   for (int i = 0; i < num_outputs; ++i) {
-    // Yufan test to shortcut
     if (!is_variable_input_[i]) {
       if (outputs[i].defined()) {
         std::string msg("function ");

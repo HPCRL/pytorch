@@ -182,10 +182,6 @@ class TiledConv2d(_ConvNd):
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint), info, self.is_ccheckpoint
 
-    # def backward(self, *args):
-    #     print("!!! !!!! conv2d backw")
-    #     tconv2d = TiledConv2dFunction.apply
-
 
                 
  

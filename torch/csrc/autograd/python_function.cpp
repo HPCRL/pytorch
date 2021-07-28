@@ -170,7 +170,7 @@ auto PyNode::apply(variable_list&& inputs) -> variable_list {
         std::string msg("function ");
         msg += name() + " returned a gradient different than None at position ";
         msg += std::to_string(i + 1) + ", but the corresponding forward input was not a Variable";
-        //throw std::runtime_error(msg);
+        throw std::runtime_error(msg);
       }
       continue;
     }

@@ -48,7 +48,7 @@ def detach_variable(inputs: Tuple[Any, ...]) -> Tuple[torch.Tensor, ...]:
 class cCheckpoint(torch.autograd.Function):
     @staticmethod
     def forward(ctx, run_function, preserve_rng_state, *args):
-        print("in customized checkpoint forward")
+        print("in customized checkpoint forward", len(args))
         #print("args", args)
         check_backward_validity(args)
         ctx.run_function = run_function
@@ -127,10 +127,15 @@ class cCheckpoint(torch.autograd.Function):
         # issue?? how to call backward ??     
         torch.autograd.backward(outputs_with_grad, args_with_grad)
         #ctx.run_function.backward(outputs_with_grad, args_with_grad)
-        grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else inp
+        grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else None
                       for inp in detached_inputs)
-        print("HREREERE")
-        return (None, None) + grads
+        # print("HREREERE", detached_inputs)              
+        # print("HREREERE", grads)
+        res = (None, None) + grads
+        # res = list(res)
+        # res.append(None)
+        # res = tuple(res)
+        return  res
 
 
 def checkpoint(function, *args, **kwargs):
