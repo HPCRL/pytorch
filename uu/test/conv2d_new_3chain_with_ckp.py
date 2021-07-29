@@ -88,7 +88,7 @@ class Net(nn.Module):
                                   depth=0,
                                   num_conv=3
                                   )   
-        self.tcat = tilecat.TiledConcatenateFunction.apply
+        self.tcat = tilecat.TiledCat()
         self.relu = torch.nn.ReLU()
         self.block = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.conv2d_3])
 

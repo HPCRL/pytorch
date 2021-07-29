@@ -1,13 +1,11 @@
-from typing import Dict, List, Union, Tuple, Optional
-from torch import Tensor
 import torch
-from torch.nn import functional as F
 
 class TiledConcatenateFunction(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, *input):
-        dim = input[-1]
-        input = input[:-1]
+    def forward(ctx, *inputs):
+        dim = inputs[-1]
+        input = inputs[:-1]
+        ctx.input_num = len(input)
         # print ("**input[0]", input[0])
         # print ("dim", dim)
         output = torch.cat(tensors=input, dim=dim, out=None)
@@ -16,18 +14,22 @@ class TiledConcatenateFunction(torch.autograd.Function):
     
     @staticmethod
     def backward(ctx, grad_output):
-        #print("\n^^^^^grad_output", grad_output, grad_output.size())
-        return grad_output, grad_output, grad_output, None
+        # print("\n^^^^^grad_output", grad_output, grad_output.size())
+        # based on num of input to generate return tuple
+        res = list()
+        for i in range(0,ctx.input_num):
+            res.append(grad_output)
+        res.append(None)
+        res = tuple(res)
 
+        return res
 
-# class TiledCat(torch.nn.Module):
-#     def __init__(self):
-#         super(TiledCat, self).__init__()
-#         self.activation_post_process = torch.nn.Identity()
+class TiledCat(torch.nn.Module):
+    def __init__(self):
+        super(TiledCat, self).__init__()
 
-#     def forward(self, tensors: Union[Tuple[Tensor, ...], List[Tensor]], dim: int=0, out: Optional[Tensor]=None):
-#         print("here")
-#         tcat = TiledConcatenateFunction.apply
-#         r = tcat(tensors, dim, out)
-#         return r
+    def forward(self, *inputs):
+        tcat = TiledConcatenateFunction.apply
+        r = tcat(*inputs)
+        return r
  
