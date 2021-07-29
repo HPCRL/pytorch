@@ -18,8 +18,8 @@ class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
-        # print("** tiled conv2d forward")
-        # print("depth", depth)
+        print("== tiled conv2d forward")
+        print("depth", depth)
         # print("is_ccheckpoint", is_ccheckpoint)
 
         ctx.depth = depth
@@ -64,9 +64,9 @@ class TiledConv2dFunction(torch.autograd.Function):
         print("info coord", info[depth].coord)
         input = ctx.saved_tensors[0]
         weight = ctx.weight
-        print("in_ grad_out shape", grad_output)
+        # print("in_ grad_out shape", grad_output)
 
-        print("input shape", input)
+        # print("input shape", input)
         print("weight shape", weight.size())
         grad_input = None
         grad_weight = None
@@ -80,7 +80,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("weight shape", weight.size())
                 # print("grad_output shape", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
-                print("final", grad_input.size())
+                #print("final", grad_input.size())
             elif depth == ctx.num_conv-1:
                 #print("AAA")
                 # a whole grad_output as input of backward
@@ -107,6 +107,8 @@ class TiledConv2dFunction(torch.autograd.Function):
                 W_index = info[depth].coord[1]* Tw
                 new_grad_out = grad_output[:,:, H_index:H_index+Th, W_index:W_index+Tw]
                 grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, new_grad_out)
+                #grad_weight = torch.zeros(grad_weight.shape).cuda()
+                #print("grad_weight", grad_weight.size())
             else:
                 #need to get the correct tile 
                 H_len = grad_output.size()[2]
@@ -124,12 +126,12 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("compute grad_weight\n")
                 # print("input shape", input.size())
                 # print("new_input shape", new_input.size())
-                print("grad_out shape", grad_output.size())
+                # print("grad_out shape", grad_output.size())
                 # print("new_grad_out shape", new_grad_out.size())
-                
+                #grad_weight = torch.zeros(weight.shape).cuda()
                 grad_weight = torch.nn.grad.conv2d_weight(new_input, weight.shape, new_grad_out)
-               
-                #print("grad_weight", grad_weight)
+                #grad_weight = torch.zeros(grad_weight.shape).cuda()
+                #print("grad_weight", grad_weight.size())
 
                 
         grad_bias = None #TODO: bias shape??

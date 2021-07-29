@@ -81,6 +81,7 @@ class cCheckpoint(torch.autograd.Function):
         # 1) get the tile from cpu
         # 2) fwd per tile
         # 3) bwd 
+        print("\n############# Enter checkpointing bkward ####")
         if not torch.autograd._is_checkpoint_valid():
             raise RuntimeError("Checkpointing is not compatible with .grad(), please use .backward() if possible")
         inputs = ctx.saved_tensors
@@ -108,10 +109,10 @@ class cCheckpoint(torch.autograd.Function):
         if isinstance(outputs, torch.Tensor):
             outputs = (outputs,)
 
-        print("#############", len(outputs))
-        print(args)
-        print (outputs[0].size())
-        print (args[0].size())
+        # print("#############", len(outputs))
+        # print(args)
+        # print (outputs[0].size())
+        # print (args[0].size())
         # run backward() with only tensor that requires grad
         outputs_with_grad = []
         args_with_grad = []
@@ -124,17 +125,12 @@ class cCheckpoint(torch.autograd.Function):
                 "none of output has requires_grad=True,"
                 " this checkpoint() is not necessary")
 
-        # issue?? how to call backward ??     
         torch.autograd.backward(outputs_with_grad, args_with_grad)
-        #ctx.run_function.backward(outputs_with_grad, args_with_grad)
         grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else None
                       for inp in detached_inputs)
         # print("HREREERE", detached_inputs)              
         # print("HREREERE", grads)
         res = (None, None) + grads
-        # res = list(res)
-        # res.append(None)
-        # res = tuple(res)
         return  res
 
 

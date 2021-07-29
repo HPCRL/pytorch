@@ -15,29 +15,28 @@ def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
     # print('grad_input : ', len(grad_input))
     # print('grad_output : ', len(grad_output))
-    print('grad_output size : ', grad_output[0].size())
-    print('ref grad_output  :\n ', grad_output[0])
-
-    print('grad_input size : ', grad_input[0].size())
-    print('ref grad_input  : \n', grad_input[0])
+    # print('grad_output size : ', grad_output[0].size())
+    # print('ref grad_output  :\n ', grad_output[0])
+    # print('grad_input size : ', grad_input[0].size())
+    # print('ref grad_input  : \n', grad_input[0])
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3):
         super().__init__()
-        self.conv2d_1 = nn.Conv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_1 = nn.Conv2d(in_channels=3, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
                                   )
-        self.conv2d_2 = nn.Conv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_2 = nn.Conv2d(in_channels=16, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
                                   )
-        self.conv2d_3 = nn.Conv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_3 = nn.Conv2d(in_channels=16, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
@@ -65,24 +64,24 @@ class Net(nn.Module):
         super().__init__()
         # TODO: when we rewirte the network, we should know the depth info.
         # depth is 0 if it is the last conv2d, reversely increased
-        self.conv2d_1 = conv2d.TiledConv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_1 = conv2d.TiledConv2d(in_channels=3, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
                                   depth=2,
                                   num_conv=3
                                   )
-        self.conv2d_2 = conv2d.TiledConv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_2 = conv2d.TiledConv2d(in_channels=16, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
                                   depth=1,
                                   num_conv=3
                                   )
-        self.conv2d_3 = conv2d.TiledConv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_3 = conv2d.TiledConv2d(in_channels=16, 
+                                  out_channels=16, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
@@ -91,9 +90,6 @@ class Net(nn.Module):
                                   )   
         self.tcat = tilecat.TiledConcatenateFunction.apply
         self.relu = torch.nn.ReLU()
-
-        # TODO: How to make sequential work??                                                 
-        #self.block = nn.Sequential(*[self.conv2d_1, self.conv2d_2])
         self.block = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.conv2d_3])
 
     def forward(self, x, H, W, Th, Tw):
@@ -133,8 +129,8 @@ class Net(nn.Module):
         # preprocess network, not sure if need to put it here 
         info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile2 = padding_calc.get_input_tile(info, x, num_conv-1)
-        out_2 = checkpoint.checkpoint(self.block, input_tile2, info)
+        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        out_2 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_2.size())
         # print("==== 2nd tile done compute...")
         # print(memUsage.snapshot())
@@ -148,14 +144,12 @@ class Net(nn.Module):
         # print(memUsage.currentValue())     
         # print(memUsage.availableValue())
 
-
-
         info = padding_calc.compute_info([0,2], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_3 = self.block(input_tile, info)
+        out_3 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_3)
 
 
@@ -164,7 +158,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_4 = self.block(input_tile, info)
+        out_4 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_4.size())
 
         info = padding_calc.compute_info([1,1], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -172,7 +166,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_5 = self.block(input_tile, info)
+        out_5 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_5)
         
         info = padding_calc.compute_info([1,2], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -180,7 +174,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_6 = self.block(input_tile, info)
+        out_6 = checkpoint.checkpoint(self.block, input_tile, info)
 
         #print("*******", out_6)
 
@@ -189,7 +183,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_7 = self.block(input_tile, info)
+        out_7 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_7)
 
         info = padding_calc.compute_info([2,1], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -197,7 +191,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_8 = self.block(input_tile, info)
+        out_8 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_8)
 
         info = padding_calc.compute_info([2,2], H, W, Th, Tw, 1, 1, x, num_conv)
@@ -205,7 +199,7 @@ class Net(nn.Module):
         input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
        # print(input_tile.size())
        # print(input_tile)
-        out_9 = self.block(input_tile, info)
+        out_9 = checkpoint.checkpoint(self.block, input_tile, info)
         #print("*******", out_9)
 
         out_row_1 = self.tcat(out_1, out_2, out_3, 3)
@@ -235,7 +229,7 @@ def main():
     W = 9
     Th = int(H/3)
     Tw = int(W/3)
-    input = torch.rand(1,1,H,W, requires_grad = True).cuda()
+    input = torch.rand(1,3,H,W, requires_grad = True).cuda()
     # print("input shape", input.size())
     # print(input)
 
@@ -253,18 +247,18 @@ def main():
     # print("out_ref", out_ref)
     #not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
     
-    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out_ref.sum().backward()
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
     
 
-    print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
-    print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
-    print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
-    print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
-    print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
-    print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
+    # print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
+    # print("model_ref.conv2d_1.weight.grad", model_ref.conv2d_1.weight.grad)
+    # print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
+    # print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
+    # print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
+    # print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
     assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
     assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
     assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
