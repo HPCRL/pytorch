@@ -4,7 +4,7 @@ import torch.nn as nn
 from uu.utils import memory 
 from uu.utils import correctness_check 
 from uu.utils import padding_calc
-from uu.layers import conv2d, tilecat, sequential
+from uu.layers import conv2d, tilecat, sequential, tilesplit
 from torch.nn.parameter import Parameter
 #from torch.utils.checkpoint import checkpoint
 from uu.utils import checkpoint
@@ -91,6 +91,8 @@ class Net(nn.Module):
         self.tcat = tilecat.TiledConcatenateFunction.apply
         self.relu = torch.nn.ReLU()
 
+        self.tsplit = tilesplit.TiledSplit()
+
         # TODO: How to make sequential work??                                                 
         #self.block = nn.Sequential(*[self.conv2d_1, self.conv2d_2])
         self.block = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.conv2d_3])
@@ -100,30 +102,32 @@ class Net(nn.Module):
        
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         memUsage = memory.MeasureMemory(device)
-        print("==== before  ...")
-        print(memUsage.snapshot())
-        print(memUsage.currentValue())     
-        print(memUsage.availableValue())
-
+        # print("==== before  ...")
+        # print(memUsage.snapshot())
+        # print(memUsage.currentValue())     
+        # print(memUsage.availableValue())
+        
+        model_device = next(self.parameters()).is_cuda
         info = padding_calc.compute_info([0,0], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_1 = self.block(input_tile, info)
+       
 
-        print("==== first tile done compute...")
-        print(memUsage.snapshot())
-        print(memUsage.currentValue())     
-        print(memUsage.availableValue())
+        # print("==== first tile done compute...")
+        # print(memUsage.snapshot())
+        # print(memUsage.currentValue())     
+        # print(memUsage.availableValue())
         
-        del input_tile
-        #TODO: we want load back CPU
+        # del input_tile
+        # #TODO: we want load back CPU
 
-        print("==== first tile recycle buffer...")
-        print(memUsage.snapshot())
-        print(memUsage.currentValue())     
-        print(memUsage.availableValue())
+        # print("==== first tile recycle buffer...")
+        # print(memUsage.snapshot())
+        # print(memUsage.currentValue())     
+        # print(memUsage.availableValue())
 
 
 
@@ -133,27 +137,28 @@ class Net(nn.Module):
         # preprocess network, not sure if need to put it here 
         info = padding_calc.compute_info([0,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
+
         out_2 = self.block(input_tile, info)
 
-        print("==== 2nd tile done compute...")
-        print(memUsage.snapshot())
-        print(memUsage.currentValue())     
-        print(memUsage.availableValue())
+        # print("==== 2nd tile done compute...")
+        # print(memUsage.snapshot())
+        # print(memUsage.currentValue())     
+        # print(memUsage.availableValue())
         
-        del input_tile
+        # del input_tile
 
-        print("==== 2nd tile recycle buffer...")
-        print(memUsage.snapshot())
-        print(memUsage.currentValue())     
-        print(memUsage.availableValue())
+        # print("==== 2nd tile recycle buffer...")
+        # print(memUsage.snapshot())
+        # print(memUsage.currentValue())     
+        # print(memUsage.availableValue())
 
         #print("*******", out_2.size())
 
 
         info = padding_calc.compute_info([0,2], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_3 = self.block(input_tile, info)
@@ -162,7 +167,7 @@ class Net(nn.Module):
 
         info = padding_calc.compute_info([1,0], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_4 = self.block(input_tile, info)
@@ -170,7 +175,7 @@ class Net(nn.Module):
 
         info = padding_calc.compute_info([1,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_5 = self.block(input_tile, info)
@@ -178,7 +183,7 @@ class Net(nn.Module):
         
         info = padding_calc.compute_info([1,2], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_6 = self.block(input_tile, info)
@@ -187,7 +192,7 @@ class Net(nn.Module):
 
         info = padding_calc.compute_info([2,0], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_7 = self.block(input_tile, info)
@@ -195,7 +200,7 @@ class Net(nn.Module):
 
         info = padding_calc.compute_info([2,1], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_8 = self.block(input_tile, info)
@@ -203,7 +208,7 @@ class Net(nn.Module):
 
         info = padding_calc.compute_info([2,2], H, W, Th, Tw, 1, 1, x, num_conv)
         # assume we prepare the very first input
-        input_tile = padding_calc.get_input_tile(info, x, num_conv-1)
+        input_tile = self.tsplit(info, x, num_conv-1, model_device)
        # print(input_tile.size())
        # print(input_tile)
         out_9 = self.block(input_tile, info)
@@ -238,13 +243,15 @@ def main():
     W = 270
     Th = int(H/3)
     Tw = int(W/3)
-    input = torch.rand(1,3,H,W, requires_grad = True).cuda()
+    input = torch.rand(1,3,H,W, requires_grad = True)
     # print("input shape", input.size())
     # print(input)
+    input_ref = input.data
+    input_ref = input_ref.cuda()
 
 
-
-    out_ref = model_ref(input)
+    out_ref = model_ref(input_ref)
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, Th, Tw )
     
 
@@ -254,12 +261,12 @@ def main():
 
     # print("out", out)
     # print("out_ref", out_ref)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
+    # not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
     
     # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     # out_ref.sum().backward()
     # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    # out.sum().backward()
+    out.sum().backward()
     
 
     # # print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)

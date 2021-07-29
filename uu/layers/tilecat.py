@@ -19,7 +19,7 @@ class TiledConcatenateFunction(torch.autograd.Function):
         res = list()
         for i in range(0,ctx.input_num):
             res.append(grad_output)
-        res.append(None)
+        res.append(None)    # last arg is dim, no need for grad
         res = tuple(res)
 
         return res
