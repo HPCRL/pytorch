@@ -55,7 +55,7 @@ class TiledConv2dFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        print("** tiled conv2d backward")
+        print("\n** tiled conv2d backward")
         # print("** grad_output", grad_output)
         # print("** grad_output shape", grad_output.size())
         print("ctx.depth", ctx.depth)
@@ -64,10 +64,9 @@ class TiledConv2dFunction(torch.autograd.Function):
         print("info coord", info[depth].coord)
         input = ctx.saved_tensors[0]
         weight = ctx.weight
-        # print("in_ grad_out shape", grad_output)
-
-        # print("input shape", input)
-        print("weight shape", weight.size())
+        #print("in_ grad_out shape", grad_output)
+        #print("input shape", input.size())
+        #print("weight shape", weight.size())
         grad_input = None
         grad_weight = None
         if ctx.needs_input_grad[0]:
