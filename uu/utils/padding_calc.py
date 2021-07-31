@@ -1,8 +1,8 @@
+from torch.nn.modules import conv
 import torch
-import torch.nn as nn
 from typing import Dict, List
 from torch.autograd.variable import Variable
-
+from torch.nn.modules.utils import _pair
 import pdb
 
 def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
@@ -42,9 +42,10 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
 
 # might need to create a memo structure. 
 class Pad_info:
-    def __init__(self, coord, orig_size, padding_info, slice_info, internal_expand, real_index):
+    def __init__(self, coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index):
         self.coord = coord
-        self.orig_size = orig_size
+        self.ordering_info = ordering_info
+        self.pt_size = pt_size # [problem, tile] size
         self.padding_info = padding_info
         self.slice_info = slice_info
         self.internal_expand = internal_expand
@@ -52,7 +53,8 @@ class Pad_info:
 
     def __repr__(self) -> str:
         rep = 'PI( <' + "".join([str(x)+"," for x in self.coord]) + '>,\n <' + \
-                    "".join([str(x)+"," for x in self.orig_size]) + '>,\n <' + \
+                    "".join([str(x)+"," for x in self.ordering_info]) + '>,\n <' + \
+                    "".join([str(x)+"," for x in self.pt_size]) + '>,\n <' + \
                     "".join([str(x)+"," for x in self.padding_info]) + '>,\n <' + \
                     "".join([str(x)+"," for x in self.slice_info]) + '>, \n <' + \
                     "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <' + \
@@ -72,14 +74,57 @@ def compute_info(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: 
         real_index = slice_info
         org_size = [H, W, Th, Tw]
 
+        #TODO: logic need to change. how to feed conv2d + pooling number
         while depth_convs < num_convs:
             padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
-            pi = Pad_info(output_tile_coord, org_size, padding_info, slice_info, internal_expand, real_index)
+            ordering_info = [0, depth_convs]
+            pi = Pad_info(output_tile_coord, ordering_info, org_size, padding_info, slice_info, internal_expand, real_index)
             info_dict[depth_convs] = pi
             depth_convs += 1
             # print("pd info ", padding_info)
             # print("slice info ", slice_info)
             # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
+    return info_dict
+
+def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair]) -> Dict:
+    # stream_structure provide inforation in a tilable segment which presents num of continious conv2d and num of pooling. 
+    # Store pair in an ordered list
+    # exp, [(conv2d, 3), (pooling, 1), (conv2d, 2),....]
+    with torch.no_grad():
+        info_dict = {}
+        depth_convs = 0
+        c_seg = 0
+    
+        #TODO: logic need to change. how to feed conv2d + pooling number
+        while c_seg < len(stream_structure):
+            p = stream_structure[c_seg]
+            if p[0] == "conv2d":
+                num_convs = p[1]
+                while depth_convs < num_convs:
+                    Th = H // nTh
+                    Tw = W // nTw
+
+                    tile_top = output_tile_coord[0]*Th
+                    tile_bottom = tile_top+Th-1
+                    tile_left = output_tile_coord[1]*Tw
+                    tile_right = tile_left+Tw-1
+                    if depth_convs == 0:
+                        slice_info = [tile_left, tile_right, tile_top, tile_bottom]
+                    real_index = slice_info
+                    pt_size = [H, W, Th, Tw]
+                    padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
+                    ordering_info = [c_seg, depth_convs]
+                    pi = Pad_info(output_tile_coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index)
+                    info_dict[depth_convs] = pi
+                    depth_convs += 1
+            elif p[0] == "pooling":
+                # 1) reset depth_convs to 0; 
+                # 2) change H/W to half?? TODO: it is not general
+                depth_convs = 0
+                H = H // 2
+                W = W // 2
+
+            c_seg += 1
     return info_dict
 
 

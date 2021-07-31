@@ -1,6 +1,4 @@
 from typing import Dict
-from .base_layer import BaseLayer
-import torch.nn as nn
 from torch import Tensor
 from uu.utils import ftensor as ft
 import numpy as np
@@ -11,7 +9,6 @@ from  torch.nn.modules.conv import _ConvNd
 from torch.nn import functional as F
 from uu.utils import padding_calc
 from torch.nn.parameter import Parameter
-from torch.autograd.variable import Variable
 
 
 class TiledConv2dFunction(torch.autograd.Function):

@@ -1,7 +1,11 @@
 import torch
+from  torch.nn.modules.pooling import _MaxPoolNd
+from torch.nn import functional as F
+from torch.nn.common_types import _size_2_t
 
 
-class TiledCopyFunction(torch.autograd.Function):
+
+class cMaxPool2dFunction(torch.autograd.Function):
     # create a static variable
     GRAD_OUT = None
     @staticmethod
@@ -39,12 +43,30 @@ class TiledCopyFunction(torch.autograd.Function):
 
 
 
-class TiledCopy(torch.nn.Module):
+class cMaxPool2d(_MaxPoolNd):
     def __init__(self):
-        super(TiledCopy, self).__init__()
+        super(cMaxPool2d, self).__init__()
+
+    kernel_size: _size_2_t
+    stride: _size_2_t
+    padding: _size_2_t
+    dilation: _size_2_t
 
     def forward(self, *inputs):
-        tcopy = TiledCopyFunction.apply
-        r = tcopy(*inputs)
-        return r
+        if len(inputs) == 2:
+            input, info = inputs
+            self.is_ccheckpoint = False
+        else:
+            input, info, is_ccheckpoint = inputs
+            self.is_ccheckpoint = is_ccheckpoint
+        cmaxplool = cMaxPool2dFunction.apply
+
+        if self.depth == 0:
+            return cmaxplool(input, info, self.kernel_size, self.stride,
+                                self.padding, self.dilation, self.ceil_mode,
+                                self.return_indices, self.is_ccheckpoint)
+        else:
+            return cmaxplool(input, info, self.kernel_size, self.stride,
+                                self.padding, self.dilation, self.ceil_mode,
+                                self.return_indices, self.is_ccheckpoint), info, self.is_ccheckpoint
  

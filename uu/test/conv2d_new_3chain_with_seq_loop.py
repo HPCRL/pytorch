@@ -106,8 +106,8 @@ class Net(nn.Module):
         model_device = next(self.parameters()).is_cuda
         # TODO: here we have to somehow infer the shape of the output of the segment. 
         out = torch.zeros(1, 16, H, W, requires_grad=True).cuda()
-        for i in range(0,9): 
-            for j in range(0,9):
+        for i in range(0,4): 
+            for j in range(0,4):
                 coord = [i,j]
                 info = padding_calc.compute_info(coord, H, W, Th, Tw, 1, 1, x, num_conv)
                 input_tile = self.tsplit(info, x, num_conv-1, model_device)
@@ -136,10 +136,10 @@ def main():
     model_ref =  Net_ref(w1, w2, w3).to(device)
     #print(model_ref.conv2d_1.weight, model_ref.conv2d_2.weight)
     
-    H = 27
-    W = 27
-    Th = int(H/9)
-    Tw = int(W/9)
+    H = 16
+    W = 16
+    Th = int(H/4)
+    Tw = int(W/4)
     input = torch.rand(1,3,H,W, requires_grad = True)
     # print("input shape", input.size())
     # print(input)
@@ -160,7 +160,7 @@ def main():
     # print("out_ref", out_ref)
     not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
     
-    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out_ref.sum().backward()
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
