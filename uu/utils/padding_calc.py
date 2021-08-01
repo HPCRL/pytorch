@@ -53,11 +53,11 @@ class Pad_info:
 
     def __repr__(self) -> str:
         rep = 'PI( <' + "".join([str(x)+"," for x in self.coord]) + '>,\n <' + \
-                    "".join([str(x)+"," for x in self.ordering_info]) + '>,\n <' + \
-                    "".join([str(x)+"," for x in self.pt_size]) + '>,\n <' + \
-                    "".join([str(x)+"," for x in self.padding_info]) + '>,\n <' + \
-                    "".join([str(x)+"," for x in self.slice_info]) + '>, \n <' + \
-                    "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <' + \
+                    "".join([str(x)+"," for x in self.ordering_info]) + '>,\n <p-tsize ' + \
+                    "".join([str(x)+"," for x in self.pt_size]) + '>,\n <padding ' + \
+                    "".join([str(x)+"," for x in self.padding_info]) + '>,\n <sliidx ' + \
+                    "".join([str(x)+"," for x in self.slice_info]) + '>, \n <internal ' + \
+                    "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <ridx' + \
                     "".join([str(x)+"," for x in self.real_index]) + '>, \n)' + '\n'
         return rep
 
@@ -86,50 +86,78 @@ def compute_info(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: 
             # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
     return info_dict
 
-def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair]) -> Dict:
+def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair], num_conv: int) -> Dict:
     # stream_structure provide inforation in a tilable segment which presents num of continious conv2d and num of pooling. 
     # Store pair in an ordered list
     # exp, [(conv2d, 3), (pooling, 1), (conv2d, 2),....]
     with torch.no_grad():
         info_dict = {}
         depth_convs = 0
-        c_seg = 0
-    
+        c_seg = len(stream_structure)-1 # reversed order
+        conv_g_id = 0
+
+        stack = []
+        for s in stream_structure:
+            stack.append(s)
+            if s[0] == "pooling":
+                H = H // 2
+                W = W // 2
+
+        real_index = []     # it is a iteratable variable
         #TODO: logic need to change. how to feed conv2d + pooling number
-        while c_seg < len(stream_structure):
-            p = stream_structure[c_seg]
+        while c_seg >= 0:
+            p = stack.pop()
+            print(p)
             if p[0] == "conv2d":
-                num_convs = p[1]
-                while depth_convs < num_convs:
+                seg_num_convs = p[1]
+                while depth_convs < seg_num_convs:
                     Th = H // nTh
                     Tw = W // nTw
-
-                    tile_top = output_tile_coord[0]*Th
-                    tile_bottom = tile_top+Th-1
-                    tile_left = output_tile_coord[1]*Tw
-                    tile_right = tile_left+Tw-1
-                    if depth_convs == 0:
+                    if conv_g_id == 0:
+                        tile_top = output_tile_coord[0]*Th
+                        tile_bottom = tile_top+Th-1
+                        tile_left = output_tile_coord[1]*Tw
+                        tile_right = tile_left+Tw-1
                         slice_info = [tile_left, tile_right, tile_top, tile_bottom]
-                    real_index = slice_info
+                        real_index = slice_info
+
                     pt_size = [H, W, Th, Tw]
+                    print("W , H ", H, W)
+                    print("TW , TH ", Th, Tw)
+                    print("real_index ", real_index)
+
                     padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
-                    ordering_info = [c_seg, depth_convs]
+                    ordering_info = [c_seg, seg_num_convs-depth_convs-1]
                     pi = Pad_info(output_tile_coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index)
-                    info_dict[depth_convs] = pi
+                    info_dict[conv_g_id] = pi
+                    
+                    print("input real_index ", real_index)
+                    print("conv_g_id - pi", conv_g_id, pi)
                     depth_convs += 1
+                    conv_g_id += 1
             elif p[0] == "pooling":
                 # 1) reset depth_convs to 0; 
                 # 2) change H/W to half?? TODO: it is not general
                 depth_convs = 0
-                H = H // 2
-                W = W // 2
+                print("pp real_index ", real_index)
+                real_index = [x*2 for x in real_index]
+                rule = lambda x: 0 if x < 0 else x
+                real_index = list(map(rule, real_index))
+                # right and bottom need plus 1
+                real_index[1] += 1
+                real_index[3] += 1
+                print("pp real_index ", real_index)
+                H = H * 2
+                W = W * 2
 
-            c_seg += 1
+            c_seg -= 1
+
     return info_dict
 
 
 def get_input_tile(info:Dict, input, depth: int):
     input_tile = None
+    print("depth", depth)
     with torch.no_grad():
         pi = info[depth]
         padding_info = pi.padding_info

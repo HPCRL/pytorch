@@ -5,68 +5,83 @@ from torch.nn.common_types import _size_2_t
 
 
 
-class cMaxPool2dFunction(torch.autograd.Function):
-    # create a static variable
-    GRAD_OUT = None
-    @staticmethod
-    def forward(ctx, *inputs):
-        #print("\n^^^^^TiledCopyFunction fwd")
-        out_temp = inputs[0]
-        out = inputs[1]
-        coord = inputs[2]
-        tile_size = inputs[3]
+# class cMaxPool2dFunction(torch.autograd.Function):
+#     # create a static variable
+#     @staticmethod
+#     def forward(ctx, *inputs):
+#         #print("\n^^^^^TiledCopyFunction fwd")
+#         out_temp = inputs[0]
+#         out = inputs[1]
+#         coord = inputs[2]
+#         tile_size = inputs[3]
        
-        #ctx.input_num = len(inputs)
-        # print ("**input[0]", input[0])
-        # print ("dim", dim)
-        out[:,:, coord[0]*tile_size[0]:(coord[0]+1)*tile_size[0], coord[1]*tile_size[1]:(coord[1]+1)*tile_size[1]] = out_temp
-        #output.requires_grad = True #tensors[0].requires_grad
-        return out
+#         #ctx.input_num = len(inputs)
+#         # print ("**input[0]", input[0])
+#         # print ("dim", dim)
+#         F.max_pool2d(input, kernel_size, stride,
+#                             self.padding, dilation, ceil_mode,
+#                             self.return_indices)
+
+#         return out
     
-    @staticmethod
-    def backward(ctx, grad_output):
-        #print("\n^^^^^TiledCopyFunction")
-        if TiledCopyFunction.GRAD_OUT is None:
-            TiledCopyFunction.GRAD_OUT = grad_output
-
-        # based on num of input to generate return tuple
-        res = list()
-        res.append(TiledCopyFunction.GRAD_OUT)
-        res.append(None)    # last arg is dim, no need for grad
-        res.append(None)
-        res.append(None)
-        res = tuple(res)
+#     @staticmethod
+#     def backward(ctx, grad_output):
+#         #print("\n^^^^^TiledCopyFunction")
+        
+#         # based on num of input to generate return tuple
+#         res = list()
+#         res.append(None)    # last arg is dim, no need for grad
+#         res.append(None)
+#         res.append(None)
+#         res = tuple(res)
 
 
-        # print(TiledCopyFunction.GRAD_OUT)
-        return res
+#         # print(TiledCopyFunction.GRAD_OUT)
+#         return res
 
 
 
 class cMaxPool2d(_MaxPoolNd):
-    def __init__(self):
-        super(cMaxPool2d, self).__init__()
+    def __init__(self, kernel_size: _size_2_t, stride: _size_2_t = None,
+                 padding: _size_2_t = 0, dilation: _size_2_t = 1,
+                 return_indices: bool = False, ceil_mode: bool = False,
+                 is_ccheckpoint = False, is_last = False
+                 ):
+        super(cMaxPool2d, self).__init__(kernel_size, stride,
+                 padding, dilation, return_indices, ceil_mode)
+        self.is_ccheckpoint = is_ccheckpoint
+        self.is_last = is_last
 
-    kernel_size: _size_2_t
-    stride: _size_2_t
-    padding: _size_2_t
-    dilation: _size_2_t
+        print(is_ccheckpoint, is_last)
+
 
     def forward(self, *inputs):
+        if type (inputs[0]) == tuple:
+            # to remove additional packing in tuple
+            inputs = list(inputs[0])
+
         if len(inputs) == 2:
             input, info = inputs
             self.is_ccheckpoint = False
-        else:
+        elif len(inputs) == 3:
             input, info, is_ccheckpoint = inputs
             self.is_ccheckpoint = is_ccheckpoint
-        cmaxplool = cMaxPool2dFunction.apply
-
-        if self.depth == 0:
-            return cmaxplool(input, info, self.kernel_size, self.stride,
-                                self.padding, self.dilation, self.ceil_mode,
-                                self.return_indices, self.is_ccheckpoint)
         else:
-            return cmaxplool(input, info, self.kernel_size, self.stride,
+            print("missing info in cMaxPool2d")
+            assert False
+        #cmaxplool = cMaxPool2dFunction.apply
+        # TODO: checkpoint ???
+        if self.is_last:
+            return F.max_pool2d(input, self.kernel_size, self.stride,
                                 self.padding, self.dilation, self.ceil_mode,
-                                self.return_indices, self.is_ccheckpoint), info, self.is_ccheckpoint
+                                self.return_indices)
+        else:
+            next_input = F.max_pool2d(input, self.kernel_size, self.stride,
+                                self.padding, self.dilation, self.ceil_mode,
+                                self.return_indices)
+            # need to handle padded for next if needed. 
+            
+            return next_input, info, self.is_ccheckpoint
+        
+        
  

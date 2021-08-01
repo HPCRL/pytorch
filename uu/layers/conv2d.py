@@ -17,7 +17,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                         padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
         print("== tiled conv2d forward")
         print("depth", depth)
-        # print("is_ccheckpoint", is_ccheckpoint)
+        print("input shape", input.size())
 
         ctx.depth = depth
         ctx.info = info   
@@ -44,9 +44,10 @@ class TiledConv2dFunction(torch.autograd.Function):
             # how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
             input_tile_for_next = padding_calc.recreate_input_tile(info, out, depth-1)
-            #print("shape input_tile_for_next\n", input_tile_for_next.size())
+            # print("shape input_tile_for_next\n", input_tile_for_next.size())
             #print("input_tile_for_next\n", input_tile_for_next)
             out = input_tile_for_next
+            
          
         return out
 
@@ -162,12 +163,19 @@ class TiledConv2d(_ConvNd):
             False, _pair(0), groups, bias, padding_mode)
 
     def forward(self, *inputs) -> Tensor:
+
+        if type (inputs[0]) == tuple:
+            # to remove additional packing in tuple
+            inputs = list(inputs[0])
         if len(inputs) == 2:
             input, info = inputs
             self.is_ccheckpoint = False
-        else:
+        elif len(inputs) == 3:
             input, info, is_ccheckpoint = inputs
             self.is_ccheckpoint = is_ccheckpoint
+        else:
+            print("missing info in cConv2d")
+            assert False
         tconv2d = TiledConv2dFunction.apply
         # return tconv2d(input, self.weight, self.bias, self.stride,
         #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info

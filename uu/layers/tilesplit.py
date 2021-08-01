@@ -14,6 +14,7 @@ class TiledSplitFunction(torch.autograd.Function):
         model_device = inputs[3]
         
         ctx.input_is_cuda = x.is_cuda
+
         ctx.abs_id = numpy.prod(info[0].coord)  
         ctx.big_infput_shape = x.size()
         ctx.coord = info[0].coord
