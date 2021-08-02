@@ -17,12 +17,22 @@ class TiledConv2dFunction(torch.autograd.Function):
                         padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
         print("== tiled conv2d forward")
         print("depth", depth)
-        print("input shape", input.size())
+        #print("input shape", input.size())
+        c_info = info[depth]
+        
+        #print("current info", c_info)
+        ordering = c_info.ordering_info
+        s_depth = ordering[2]  # depth in current segment
+        if ordering[1] == 0: # if it is the first conv in a segment then padding
+            padding_info = c_info.padding_info
+            pd = torch.nn.ConstantPad2d(padding_info, 0)
+            input = pd(input)
 
-        ctx.depth = depth
+        #print("af input shape", input.size())
+        ctx.depth = depth 
         ctx.info = info   
         ctx.num_conv = num_conv             
-        if depth == 0:
+        if depth == 0 or s_depth == 0: # depth is 0 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
                 ctx.weight = weight
@@ -41,7 +51,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
                     
-            # how to save , stride, padding, dilation, groups ??
+            # TODO: how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
             input_tile_for_next = padding_calc.recreate_input_tile(info, out, depth-1)
             # print("shape input_tile_for_next\n", input_tile_for_next.size())

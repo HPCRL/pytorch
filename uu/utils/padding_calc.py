@@ -15,6 +15,8 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
     tile_left = tile_indx[0]
     tile_right = tile_indx[1]
 
+    #print("index", tile_left, tile_right, tile_top, tile_bottom, )
+
 
     pad_top = max(0-(tile_top-pads[0]), 0)
     pad_bottom = max((tile_bottom+pads[0])-(H-1), 0)
@@ -22,6 +24,8 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
     pad_right = max((tile_right+pads[1])-(W-1), 0)
     # padding 
     padding_info = [pad_left, pad_right, pad_top, pad_bottom]
+
+    #print(padding_info)
 
     input_left = max(0, (tile_left-pads[1]))
     input_right = min(W-1, (tile_right+pads[1]))
@@ -107,10 +111,9 @@ def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: in
         #TODO: logic need to change. how to feed conv2d + pooling number
         while c_seg >= 0:
             p = stack.pop()
-            print(p)
             if p[0] == "conv2d":
                 seg_num_convs = p[1]
-                while depth_convs < seg_num_convs:
+                while depth_convs < seg_num_convs: # depth in segment; if == 0 then last conv in the segment
                     Th = H // nTh
                     Tw = W // nTw
                     if conv_g_id == 0:
@@ -122,33 +125,36 @@ def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: in
                         real_index = slice_info
 
                     pt_size = [H, W, Th, Tw]
-                    print("W , H ", H, W)
-                    print("TW , TH ", Th, Tw)
-                    print("real_index ", real_index)
+                    # print("W , H ", H, W)
+                    # print("TW , TH ", Th, Tw)
+                    #print("real_index ", real_index)
 
                     padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
-                    ordering_info = [c_seg, seg_num_convs-depth_convs-1]
+                    ordering_info = [c_seg, seg_num_convs-depth_convs-1, depth_convs]
                     pi = Pad_info(output_tile_coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index)
                     info_dict[conv_g_id] = pi
                     
-                    print("input real_index ", real_index)
-                    print("conv_g_id - pi", conv_g_id, pi)
+                    #print("input real_index ", real_index)
+                    #print("conv_g_id - pi", conv_g_id, pi)
                     depth_convs += 1
                     conv_g_id += 1
             elif p[0] == "pooling":
                 # 1) reset depth_convs to 0; 
                 # 2) change H/W to half?? TODO: it is not general
                 depth_convs = 0
-                print("pp real_index ", real_index)
+                #print("pp real_index ", real_index)
                 real_index = [x*2 for x in real_index]
                 rule = lambda x: 0 if x < 0 else x
                 real_index = list(map(rule, real_index))
-                # right and bottom need plus 1
-                real_index[1] += 1
-                real_index[3] += 1
-                print("pp real_index ", real_index)
+                
                 H = H * 2
                 W = W * 2
+                
+                real_index[1] = min(H-1, real_index[1] +1)
+                real_index[3] = min(W-1, real_index[3] +1)
+                # right and bottom need plus 1
+                #print("pp real_index ", real_index)
+
 
             c_seg -= 1
 
@@ -157,15 +163,15 @@ def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: in
 
 def get_input_tile(info:Dict, input, depth: int):
     input_tile = None
-    print("depth", depth)
+    #print("depth", depth)
     with torch.no_grad():
         pi = info[depth]
         padding_info = pi.padding_info
         slice_info = pi.slice_info
         input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
         # print(" pi", pi)
-        pd = torch.nn.ConstantPad2d(padding_info, 0)
-        input_tile = pd(input_tile)
+        # pd = torch.nn.ConstantPad2d(padding_info, 0)
+        # input_tile = pd(input_tile)
     
     input_tile.requires_grad = input.requires_grad
     assert input_tile is not None
@@ -187,9 +193,14 @@ def recreate_input_tile(info:Dict, input, depth: int):
     # print(slice_info)
     # print("top, bottom, left, right " , top, bottom, left, right)
     # print("\n===\n")
+    
     input_tile = input[:, :, top:bottom, left:right]       #NCHW
+    #print("== inputtile for next", input_tile)
+    #print(padding_info)
     pd = torch.nn.ConstantPad2d(padding_info, 0)
     input_tile = pd(input_tile)
+
+    
 
     return input_tile
 
