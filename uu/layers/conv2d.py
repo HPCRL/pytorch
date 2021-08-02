@@ -77,29 +77,31 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("weight shape", weight.size())
                 # print("grad_output shape", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
-                #print("final", grad_input.size())
+                print("final", grad_input.size())
             elif depth == ctx.num_conv-1:
                 #print("AAA")
                 # a whole grad_output as input of backward
                 new_grad_out = padding_calc.get_input_tile(info, grad_output, depth)
+                print("new_grad_out", new_grad_out.size())
                 weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
                 grad_input = F.conv2d(new_grad_out, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
-                #print(grad_input)
+                print("grad_input", grad_input.size())
             else:
                 #print("AAAA")
                 weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
                 grad_input = F.conv2d(grad_output, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
+                print("grad_input", grad_input.size())
 
         if ctx.needs_input_grad[1]:
             if depth == ctx.num_conv-1:
                 #print("info", info)
                 #print("BB")
-                Th = info[depth].orig_size[2]
-                Tw = info[depth].orig_size[3]
+                Th = info[depth].pt_size[2]
+                Tw = info[depth].pt_size[3]
                 H_index = info[depth].coord[0]* Th
                 W_index = info[depth].coord[1]* Tw
                 new_grad_out = grad_output[:,:, H_index:H_index+Th, W_index:W_index+Tw]

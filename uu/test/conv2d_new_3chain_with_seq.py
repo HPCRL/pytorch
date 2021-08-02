@@ -24,19 +24,19 @@ class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3):
         super().__init__()
         self.conv2d_1 = nn.Conv2d(in_channels=3, 
-                                  out_channels=16, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
                                   )
-        self.conv2d_2 = nn.Conv2d(in_channels=16, 
-                                  out_channels=16, 
+        self.conv2d_2 = nn.Conv2d(in_channels=1, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
                                   )
-        self.conv2d_3 = nn.Conv2d(in_channels=16, 
-                                  out_channels=16, 
+        self.conv2d_3 = nn.Conv2d(in_channels=1, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(1,1)
@@ -56,7 +56,7 @@ class Net_ref(nn.Module):
         out = self.conv2d_2(out)
         #print("ref 2nd out\n", out)
         out = self.conv2d_3(out)
-        out = self.relu(out)
+        #out = self.relu(out)
         return out
 
 class Net(nn.Module):
@@ -65,23 +65,23 @@ class Net(nn.Module):
         # TODO: when we rewirte the network, we should know the depth info.
         # depth is 0 if it is the last conv2d, reversely increased
         self.conv2d_1 = conv2d.TiledConv2d(in_channels=3, 
-                                  out_channels=16, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
                                   depth=2,
                                   num_conv=3
                                   )
-        self.conv2d_2 = conv2d.TiledConv2d(in_channels=16, 
-                                  out_channels=16, 
+        self.conv2d_2 = conv2d.TiledConv2d(in_channels=1, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
                                   depth=1,
                                   num_conv=3
                                   )
-        self.conv2d_3 = conv2d.TiledConv2d(in_channels=16, 
-                                  out_channels=16, 
+        self.conv2d_3 = conv2d.TiledConv2d(in_channels=1, 
+                                  out_channels=1, 
                                   kernel_size=(3,3),
                                   bias = False,
                                   padding=(0,0),
@@ -221,7 +221,14 @@ class Net(nn.Module):
         out_row_3 = self.tcat(out_7, out_8, out_9, 3)
         out = self.tcat(out_row_1, out_row_2, out_row_3, 2)
 
-        out = self.relu(out)
+
+        # out_row_1 = torch.cat([out_1, out_2, out_3], 3)
+        # out_row_2 = torch.cat([out_4, out_5, out_6], 3)
+        # out_row_3 = torch.cat([out_7, out_8, out_9], 3)
+        # out = torch.cat([out_row_1, out_row_2, out_row_3], 2)
+
+
+        #out = self.relu(out)
 
         return out
 
@@ -239,8 +246,8 @@ def main():
     model_ref =  Net_ref(w1, w2, w3).to(device)
     #print(model_ref.conv2d_1.weight, model_ref.conv2d_2.weight)
     
-    H = 270
-    W = 270
+    H = 3
+    W = 3
     Th = int(H/3)
     Tw = int(W/3)
     input = torch.rand(1,3,H,W, requires_grad = True)
@@ -261,10 +268,10 @@ def main():
 
     # print("out", out)
     # print("out_ref", out_ref)
-    # not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
+    # not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, out, out_ref)
     
     # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    # out_ref.sum().backward()
+    out_ref.sum().backward()
     # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
     
@@ -274,10 +281,10 @@ def main():
     # # print("model.conv2d_2.weight.grad", model.conv2d_2.weight.grad)
     # # print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
     # # print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
-    # # print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
-    # assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
-    # assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
-    # assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
+    # # # print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
+    assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
+    assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
+    assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
 
     print("~~~~DONE TEST~~~~")
 
