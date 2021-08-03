@@ -193,7 +193,7 @@ class TiledConv2d(_ConvNd):
         #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
 
 
-        if self.depth == 0:
+        if self.depth == 1:
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint)
         else:

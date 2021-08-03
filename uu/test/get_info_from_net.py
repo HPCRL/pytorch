@@ -41,77 +41,56 @@ class BasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x: Tensor) -> Tensor:
-        device = x.device
-        memUsage = memory.MeasureMemory(device)
-        print("==== init ...")
-        #print(memUsage.snapshot())
-        #print(memUsage.currentValue())      #init now should be around 6MB+8
-        print(memUsage.current())
-
         identity = x
-        
-       
-        
+
         out = self.conv1(x)
-        #out = self.bn1(out)
+        out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
-        #out = self.bn2(out)
+        out = self.bn2(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
 
         out += identity
         out = self.relu(out)
-
-        print("==== after ...")
-        #print(memUsage.snapshot())
-        #print(memUsage.currentValue())      #init now should be around 6MB+8
-        print(memUsage.current())
-
         return out
+
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.block1 = BasicBlock(3, 64)
+        self.maxp = nn.MaxPool2d((2,2), (2,2))
+        self.block2 = BasicBlock(64, 128)
 
 def main():
     torch.set_default_dtype(torch.float32)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    bb = BasicBlock(3, 64).to(device)
+    net = Net().to(device)
 
     H = 256
     W = 256 
     B = 1
     input_1 = torch.rand(B,3,H,W, requires_grad = True).cuda()
-    out = bb(input_1)
-    del out
-    del input_1
 
-    B = 4
-    input_2 = torch.rand(B,3,H,W, requires_grad = True).cuda()
-    out = bb(input_2)
-    del out
-    del input_2
+    opList = []
+    for name, layer in net.named_modules():
+        print(name, layer)
+        if isinstance(layer, nn.Conv2d):
+            opList.append(layer)
 
-    B = 8
-    input_3 = torch.rand(B,3,H,W, requires_grad = True).cuda()
-    out = bb(input_3)
-    del out
-    del input_3
+        if isinstance(layer, nn.MaxPool2d):
+            opList.append(layer)
+    # how to detect skip link here??
+    
 
+        
 
-    B = 16
-    input_4 = torch.rand(B,3,H,W, requires_grad = True).cuda()
-    out = bb(input_4)
-    del out
-    del input_4
+   
 
-
-    B = 32
-    input_5 = torch.rand(B,3,H,W, requires_grad = True).cuda()
-    out = bb(input_5)
-    del out
-    del input_5
-
+   
     print("done")
 
 if __name__=="__main__":
