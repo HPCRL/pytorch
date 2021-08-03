@@ -171,11 +171,11 @@ def main():
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, nTh, nTw )
 
-    print("out shape", out)
-    print("out_ref ", out_ref)
+    # print("out shape", out)
+    # print("out_ref ", out_ref)
     # print("~~ check forward correctness ~~")
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
-
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
+    out.sum().backward()
     print("done")
     
 
