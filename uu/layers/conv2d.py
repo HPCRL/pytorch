@@ -32,7 +32,8 @@ class TiledConv2dFunction(torch.autograd.Function):
         ctx.depth = depth 
         ctx.info = info   
         ctx.num_conv = num_conv             
-        if depth == 0 or s_depth == 0: # depth is 0 if it is the last conv or the last one in segment
+        if depth == 1 or s_depth == 0: 
+            # depth is 1 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
                 ctx.weight = weight
@@ -53,9 +54,9 @@ class TiledConv2dFunction(torch.autograd.Function):
                     
             # TODO: how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
-            input_tile_for_next = padding_calc.recreate_input_tile(info, out, depth-1)
-            # print("shape input_tile_for_next\n", input_tile_for_next.size())
-            #print("input_tile_for_next\n", input_tile_for_next)
+            input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, depth-1)
+            print("shape input_tile_for_next\n", input_tile_for_next.size())
+            # print("input_tile_for_next\n", input_tile_for_next)
             out = input_tile_for_next
         return out
 
@@ -76,6 +77,8 @@ class TiledConv2dFunction(torch.autograd.Function):
         #print("weight shape", weight.size())
         grad_input = None
         grad_weight = None
+        c_info = info[depth]
+        ordering = c_info.ordering_info
         if ctx.needs_input_grad[0]:
             if depth == ctx.num_conv * -1:
                 # for user input
@@ -86,24 +89,46 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # print("weight shape", weight.size())
                 # print("grad_output shape", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
-                print("final", grad_input.size())
+                print("final", grad_input.size(), grad_input)
             elif depth == -1:
                 print("AAA")
                 # a whole grad_output as input of backward
                 new_grad_out = padding_calc.get_input_tile(info, grad_output, depth)
+                # since I remove padding from get_input_tile, so manually do it here.
+                padding_info = c_info.padding_info
+                pd = torch.nn.ConstantPad2d(padding_info, 0)
+                new_grad_out = pd(new_grad_out)
+
                 print("new_grad_out", new_grad_out.size())
+                print(padding_info)
+                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+                grad_input = F.conv2d(new_grad_out, weight)
+                input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
+                grad_input = input_tile_for_next
+                print("grad_input", grad_input.size())
+            elif ordering[2] == 0:  
+                print("S_last")
+                # the last conv in local continous conv segment
+                padding_info = c_info.padding_info
+                pd = torch.nn.ConstantPad2d(padding_info, 0)
+                new_grad_out = pd(grad_output)
+
+                print("new_grad_out", new_grad_out.size())
+                # print(new_grad_out)
                 weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
                 grad_input = F.conv2d(new_grad_out, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
                 print("grad_input", grad_input.size())
             else:
-                print("AAAA")
+                print("MAA")
                 weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+                print("new_grad_out", grad_output.size())
                 grad_input = F.conv2d(grad_output, weight)
                 input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
                 grad_input = input_tile_for_next
                 print("grad_input", grad_input.size())
+                
 
         # if ctx.needs_input_grad[1]:
         #     if depth == ctx.num_conv-1:

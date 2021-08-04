@@ -6,6 +6,16 @@ from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
 
+def print_grad(self, grad_input, grad_output):
+    print('Inside '+ self.__class__.__name__+ ' backward')
+    # print('grad_input : ', len(grad_input))
+    # print('grad_output : ', len(grad_output))
+    print('grad_output size : ', grad_output[0].size())
+    print('ref grad_output  :\n ', grad_output[0])
+    print('grad_input size : ', grad_input[0].size())
+    print('ref grad_input  : \n', grad_input[0])
+
+
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4):
         super().__init__()
@@ -44,15 +54,21 @@ class Net_ref(nn.Module):
         self.conv2d_3.weight = Parameter(w3)
         self.conv2d_4.weight = Parameter(w4)
 
+
+        self.conv2d_1.register_full_backward_hook(print_grad)
+        self.conv2d_2.register_full_backward_hook(print_grad)
+        self.conv2d_3.register_full_backward_hook(print_grad)
+        self.conv2d_4.register_full_backward_hook(print_grad)
+        self.maxpool.register_full_backward_hook(print_grad)
+
     def forward(self, x):
         out = self.conv2d_1(x)
         #print("ref 1st out\n", out)
         out = self.conv2d_2(out)
-        #print("ref 2nd out\n", out)
+        print("ref 2nd out\n", out)
         
-
         out = self.maxpool(out)
-        #print("ref mxp out\n", out)
+        print("ref mxp out\n", out)
 
         out = self.conv2d_3(out)
         #print("ref 3rd out\n", out)
@@ -83,7 +99,7 @@ class Net(nn.Module):
                                   num_conv=4
                                   )
         
-        self.mxp = maxpool2d.cMaxPool2d((2, 2), (2, 2), is_last=False)
+        self.mxp = maxpool2d.cMaxPool2d((2, 2), (2, 2), mdepth=1, num_maxp=1)
 
         self.conv2d_3 = conv2d.TiledConv2d(in_channels=1, 
                                   out_channels=1, 
@@ -117,12 +133,13 @@ class Net(nn.Module):
             for j in range(0,4):
                 coord = [i,j]
                 num_conv = 4
+                num_maxp = 1
                 print(coord)
                 # TODO: here we have to somehow provide static info and num_conv. 
                 stream_structure = [("conv2d", 2), ("pooling", 1), ("conv2d", 2)]
                 #stream_structure = [("conv2d", 3)]
-                info = padding_calc.compute_info_beta([i,j], H, W, nTh, nTw, 1, 1, stream_structure, num_conv)
-                #print(info)
+                info = padding_calc.compute_info_beta([i,j], H, W, nTh, nTw, 1, 1, stream_structure, num_conv, num_maxp)
+                print(info)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(info, x, num_conv, model_device)
                 # print("input tile", input_tile.size())
@@ -140,7 +157,7 @@ class Net(nn.Module):
                 out_temp = self.conv2d_4(out_temp)
                 # print("4 out_temp", out_temp[0].size(), out_temp[0])
                 
-        #         # use customized copy
+        # #         # use customized copy
                 tile_size = [info[1].pt_size[2], info[1].pt_size[3]]
                 out = self.tcopy(out_temp, out, coord, tile_size)
                 
@@ -167,14 +184,16 @@ def main():
 
     input_ref = input.data
     input_ref = input_ref.cuda()
+    input_ref.requires_grad = True
     out_ref = model_ref(input_ref)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, nTh, nTw )
-
+    out_ref.sum().backward()
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     # print("out shape", out)
     # print("out_ref ", out_ref)
     # print("~~ check forward correctness ~~")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
     out.sum().backward()
     print("done")
     
