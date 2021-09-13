@@ -1,8 +1,7 @@
-from torch.nn.modules import conv
 import torch
 from typing import Dict, List
 from torch.autograd.variable import Variable
-from torch.nn.modules.utils import _pair
+from uu.layers import maxpool2d, conv2d
 import pdb
 
 def conv1d_padding_info(tile_indx: List, prb_size: List, pads: List):
@@ -42,7 +41,6 @@ def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
 
     # left , right, top, bottom
     real_index = [(tile_left-pads[1]), (tile_right+pads[1]), (tile_top-pads[0]), (tile_bottom+pads[0])]
-    
     return padding_info, slice_info, internal_expand, real_index
 
 # might need to create a memo structure. 
@@ -66,15 +64,24 @@ class Pad_info:
                     "".join([str(x)+"," for x in self.real_index]) + '>, \n)' + '\n'
         return rep
 
-def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure) -> Dict:
+def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, nTw, stream_structure, shape_dict) -> Dict:
     list_op__in_chckp_seg = []
-    for module in stream_structure._modules.values():
-        list_op__in_chckp_seg.append(module)
-    
-    print("op_list_in_seg", list_op__in_chckp_seg)
-    f_info = compute_fwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, list_op__in_chckp_seg)
-    # b_info = compute_bwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, stream_structure, num_conv, num_maxp)
+    has_maxpool = False
+    for op in stream_structure._modules.values():
+        if isinstance(op, maxpool2d.cMaxPool2d):
+            has_maxpool = True
+        list_op__in_chckp_seg.append(op)
+        print("hash", id(op))
 
+    print("op_list_in_seg", list_op__in_chckp_seg)
+    
+    if has_maxpool:
+        f_info = compute_fwd_info_beta(output_tile_coord, output_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict)
+        b_info = compute_bwd_info_beta(output_tile_coord, input_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict)
+    else:
+        f_info = compute_fwd_info_beta(output_tile_coord, output_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict)
+
+    
     # # print(f_info)
     # # print(b_info)
     # info = {**f_info, **b_info}
@@ -83,74 +90,33 @@ def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: in
 
 
 
-def compute_fwd_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, list_op__in_chckp_seg, num_conv:int) -> Dict:
+def compute_fwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict) -> Dict:
     # stream_structure is list of ops
-    
-        
+    # compute fwd is from the last stage
+    list_op__in_chckp_seg.reverse()
+    fwd_info_dict = {}
+    with torch.no_grad():
+        # calculate disjoint output tile first
+        # no partial tile here
+        Tile_h = output_shape[0] // nTh
+        Tile_w = output_shape[1] // nTw
+        for op in list_op__in_chckp_seg:
+            print("current op", id(op))
+            if isinstance(op, conv2d.TiledConv2d):
+                conv2d_padding_info()
+            elif isinstance(op, maxpool2d.cMaxPool2d):
+                print("TODO")
+   
     return 
 
 
-def compute_bwd_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair], num_conv:int, num_maxp:int) -> Dict:
-    with torch.no_grad():
-        b_info_dict = {}
-        depth_convs = 0
-        c_seg = 0 
-        conv_g_id = num_conv
-        maxp_g_id = num_maxp
+def compute_bwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_op__in_chckp_seg) -> Dict:
+    return
+    # bwd_info_dict = {}
+    # with torch.no_grad():
+       
 
-        #since doing backward padding computation, we start from very begining
-        real_index = []     # it is a iteratable variable
-        while c_seg < len(stream_structure):
-            p = stream_structure[c_seg]
-            if p[0] == "conv2d":
-                seg_num_convs = p[1]
-                depth_convs = seg_num_convs -1
-                while depth_convs >= 0: # depth in segment; if == 0 then last conv in the segment
-                    Th = H // nTh
-                    Tw = W // nTw
-                    if conv_g_id == num_conv:
-                        tile_top = output_tile_coord[0]*Th
-                        tile_bottom = tile_top+Th-1
-                        tile_left = output_tile_coord[1]*Tw
-                        tile_right = tile_left+Tw-1
-                        slice_info = [tile_left, tile_right, tile_top, tile_bottom]
-                        real_index = slice_info
-
-                    pt_size = [H, W, Th, Tw]
-                    # print("W , H ", H, W)
-                    # print("TW , TH ", Th, Tw)
-                    #print("real_index ", real_index)
-
-                    padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
-                    ordering_info = [c_seg, seg_num_convs-depth_convs-1, depth_convs]
-                    pi = Pad_info(output_tile_coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index)
-                    b_info_dict[-1*conv_g_id] = pi
-                    
-                    #print("input real_index ", real_index)
-                    #print("conv_g_id - pi", conv_g_id, pi)
-                    depth_convs -= 1
-                    conv_g_id -= 1
-            elif p[0] == "pooling":
-                # 1) reset depth_convs to 0; 
-                # 2) change H/W to half?? TODO: it is not general
-                depth_convs = seg_num_convs -1
-                #print("pp real_index ", real_index)
-                real_index = [x // 2 for x in real_index]
-                rule = lambda x: 0 if x < 0 else x
-                real_index = list(map(rule, real_index))
-                
-                H = H // 2
-                W = W // 2
-                
-                real_index[1] = min(W-1, real_index[1] +1)
-                real_index[3] = min(H-1, real_index[3] +1)
-                # right and bottom need plus 1
-                print("pp back real_index left right top bottom", real_index)
-                b_info_dict[-1*maxp_g_id-0.5] = real_index
-                maxp_g_id -= 1
-            c_seg += 1
-
-    return b_info_dict
+    # return b_info_dict
 
 
 def get_input_tile(info:Dict, input, depth: int):

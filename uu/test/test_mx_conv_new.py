@@ -52,9 +52,10 @@ class Net(nn.Module):
                                                 self.mxp, self.conv2d_3, self.conv2d_4])
         
     def forward(self, x, H, W, nTh, nTw):
+        #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).is_cuda
-        # TODO: here we have to somehow infer the shape of the output of the segment. 
-        N, C, oH, oW = shape_infer.shape_infer_sequence(self.block1, H, W, 1, 1)
+        N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, 1, 1)
+        print(shape_dict)
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
         for i in range(0,1): 
             for j in range(0,1):
@@ -62,7 +63,9 @@ class Net(nn.Module):
                 print(coord)
                 # TODO: here we have to somehow provide static info and num_conv. 
                 stream_structure = self.block1
-                info = padding_calc.compute_info_beta([i,j], H, W, nTh, nTw, 1, 1, stream_structure)
+                input_shape = (N,C,H,W)
+                output_shape = (N,C,oH,oW)
+                info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print(info)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
         #         input_tile = self.tsplit(info, x, num_conv, model_device)
