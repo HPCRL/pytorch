@@ -65,7 +65,7 @@ class Net(nn.Module):
                 stream_structure = self.block1
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
-                info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
+                info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure)
                 print(info)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
         #         input_tile = self.tsplit(info, x, num_conv, model_device)
