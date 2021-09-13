@@ -997,7 +997,7 @@ if __name__ == '__main__':
     uu_path = os.path.join(cwd, "uu")
     setup(
         name='uu',
-        packages=['uu', 'uu.layers'],
+        packages=['uu', 'uu.layers', 'uu.utils'],
         version='0.1',
     )
     if EMIT_BUILD_WARNING:

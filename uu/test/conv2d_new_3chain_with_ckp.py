@@ -233,24 +233,28 @@ def main():
     # print("input shape", input.size())
     # print(input)
 
+    if isinstance(model.conv2d_1, conv2d.TiledConv2d):
+        print ("Yes")
 
+    print (type(model.conv2d_1))
+    print (model.block)
 
-    out_ref = model_ref(input)
-    out = model(input, H, W, Th, Tw )
+    # out_ref = model_ref(input)
+    # out = model(input, H, W, Th, Tw )
     
 
-    print("out shape", out.size())
-    print("out_ref shape", out_ref.size())
+    # print("out shape", out.size())
+    # print("out_ref shape", out_ref.size())
     # print("~~ check forward correctness ~~")
 
     # print("out", out)
     # print("out_ref", out_ref)
     #not_same_num = correctness_check.point_wise_compare_4d(1,16,H, W, out, out_ref)
     
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    out_ref.sum().backward()
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    out.sum().backward()
+    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    # out_ref.sum().backward()
+    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    # out.sum().backward()
     
 
     # print("model.conv2d_1.weight.grad", model.conv2d_1.weight.grad)
@@ -259,9 +263,9 @@ def main():
     # print("model_ref.conv2d_2.weight.grad", model_ref.conv2d_2.weight.grad)
     # print("model.conv2d_3.weight.grad", model.conv2d_3.weight.grad)
     # print("model_ref.conv2d_3.weight.grad", model_ref.conv2d_3.weight.grad)
-    assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
-    assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
-    assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
+    # assert(torch.allclose(model.conv2d_1.weight.grad, model_ref.conv2d_1.weight.grad, atol=1e-10))
+    # assert(torch.allclose(model.conv2d_2.weight.grad, model_ref.conv2d_2.weight.grad, atol=1e-10))
+    # assert(torch.allclose(model.conv2d_3.weight.grad, model_ref.conv2d_3.weight.grad, atol=1e-10))
 
     print("~~~~DONE TEST~~~~")
 

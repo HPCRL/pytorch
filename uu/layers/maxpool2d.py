@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from torch.nn.common_types import _size_2_t
 import numpy as np
 from torch.autograd.variable import Variable
-
+import math
 
 class cMaxPool2dFunction(torch.autograd.Function):
     # create a static variable
@@ -24,7 +24,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
         in_height = input.size()[2]
         in_width = input.size()[3]
 
-        w_height = kernel_size[1]
+        w_height = kernel_size[1] #weight
         w_width = kernel_size[0]
 
         h_pad = padding[1]
@@ -33,8 +33,8 @@ class cMaxPool2dFunction(torch.autograd.Function):
         h_stride = stride[0]
         w_stride = stride[1]
 
-        out_height = int((in_height - w_height + 2 * h_pad) / h_stride) + 1
-        out_width = int((in_width - w_width + 2 * w_pad) / w_stride) + 1
+        out_height = math.floor((in_height+2*h_pad-(w_height-1)-1)/h_stride)+1
+        out_width = math.floor((in_width+2*w_pad-(w_width-1)-1)/w_stride)+1
 
         B = input.size()[0]
         C = input.size()[1]

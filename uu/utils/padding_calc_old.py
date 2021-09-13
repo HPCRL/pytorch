@@ -5,9 +5,6 @@ from torch.autograd.variable import Variable
 from torch.nn.modules.utils import _pair
 import pdb
 
-def conv1d_padding_info(tile_indx: List, prb_size: List, pads: List):
-    return
-
 def conv2d_padding_info(tile_indx: List, prb_size: List, pads: List):
     #pdb.set_trace()
     H = prb_size[0]
@@ -66,28 +63,121 @@ class Pad_info:
                     "".join([str(x)+"," for x in self.real_index]) + '>, \n)' + '\n'
         return rep
 
-def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure) -> Dict:
-    list_op__in_chckp_seg = []
-    for module in stream_structure._modules.values():
-        list_op__in_chckp_seg.append(module)
-    
-    print("op_list_in_seg", list_op__in_chckp_seg)
-    f_info = compute_fwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, list_op__in_chckp_seg)
-    # b_info = compute_bwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, stream_structure, num_conv, num_maxp)
+def compute_info(output_tile_coord: List, H: int, W: int, Th: int, Tw: int, ph: int, pw: int, input, num_convs: int) -> Dict:
+    with torch.no_grad():
+        info_dict = {}
+        tile_top = output_tile_coord[0]*Th
+        tile_bottom = tile_top+Th-1
+        tile_left = output_tile_coord[1]*Tw
+        tile_right = tile_left+Tw-1
 
-    # # print(f_info)
-    # # print(b_info)
-    # info = {**f_info, **b_info}
-    # return info
+        depth_convs = 0
+        slice_info = [tile_left, tile_right, tile_top, tile_bottom ]
+        real_index = slice_info
+        org_size = [H, W, Th, Tw]
+
+        #TODO: logic need to change. how to feed conv2d + pooling number
+        while depth_convs < num_convs:
+            padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
+            ordering_info = [0, depth_convs]
+            pi = Pad_info(output_tile_coord, ordering_info, org_size, padding_info, slice_info, internal_expand, real_index)
+            info_dict[depth_convs] = pi
+            depth_convs += 1
+            # print("pd info ", padding_info)
+            # print("slice info ", slice_info)
+            # print("indexing {}:{}, {}:{}".format(slice_info[2],slice_info[3]+1, slice_info[0],slice_info[1]+1) )
+    return info_dict
+
+def compute_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair], num_conv:int, num_maxp) -> Dict:
+    f_info = compute_fwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, stream_structure, num_conv)
+    b_info = compute_bwd_info_beta(output_tile_coord, H, W, nTh, nTw, ph, pw, stream_structure, num_conv, num_maxp)
+
+    # print(f_info)
+    # print(b_info)
+    info = {**f_info, **b_info}
+    return info
 
 
 
 
-def compute_fwd_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, list_op__in_chckp_seg, num_conv:int) -> Dict:
-    # stream_structure is list of ops
-    
-        
-    return 
+def compute_fwd_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair], num_conv:int) -> Dict:
+    # stream_structure provide inforation in a tilable segment which presents num of continious conv2d and num of pooling. 
+    # Store pair in an ordered list
+    # exp, [(conv2d, 3), (pooling, 1), (conv2d, 2),....]
+    with torch.no_grad():
+        info_dict = {}
+        depth_convs = 0
+        c_seg = len(stream_structure)-1 # reversed order
+        conv_g_id = 1 # reversed order and starting from 1. "1" is the last conv2d
+        maxp_g_id = 1 # reversed order and starting from 1. "1" is the last conv2d
+
+        stack = []  
+        for s in stream_structure:
+            stack.append(s)
+            if s[0] == "pooling":
+                H = H // 2
+                W = W // 2
+
+        real_index = []     # it is a iteratable variable
+        while c_seg >= 0:
+            p = stack.pop()
+            if p[0] == "conv2d":
+                seg_num_convs = p[1]
+                while depth_convs < seg_num_convs: # depth in segment; if == 0 then last conv in the segment
+                    Th = H // nTh
+                    Tw = W // nTw
+                    if conv_g_id == 1:
+                        tile_top = output_tile_coord[0]*Th
+                        tile_bottom = tile_top+Th-1
+                        tile_left = output_tile_coord[1]*Tw
+                        tile_right = tile_left+Tw-1
+                        slice_info = [tile_left, tile_right, tile_top, tile_bottom]
+                        real_index = slice_info
+
+                    pt_size = [H, W, Th, Tw]
+                    # print("W , H ", H, W)
+                    # print("TW , TH ", Th, Tw)
+                    #print("real_index ", real_index)
+
+                    padding_info, slice_info, internal_expand, real_index = conv2d_padding_info(real_index, [H, W], [ph, pw])
+                    ordering_info = [c_seg, seg_num_convs-depth_convs-1, depth_convs]
+                    pi = Pad_info(output_tile_coord, ordering_info, pt_size, padding_info, slice_info, internal_expand, real_index)
+                    info_dict[conv_g_id] = pi
+                    
+                    #print("input real_index ", real_index)
+                    #print("conv_g_id - pi", conv_g_id, pi)
+                    depth_convs += 1
+                    conv_g_id += 1
+            elif p[0] == "pooling":
+                # 1) reset depth_convs to 0; 
+                # 2) change H/W to half?? TODO: it is not general
+                depth_convs = 0
+                print("pp real_index ", real_index)
+                rule = lambda x: 0 if x < 0 else x
+                real_index = list(map(rule, real_index))
+
+                # get a logic global view
+                s_real_index = real_index.copy()
+                s_real_index[1] = min(W-1, s_real_index[1] +1)
+                s_real_index[3] = min(H-1, s_real_index[3] +1)
+                info_dict[maxp_g_id+0.5] = s_real_index
+                print("pp real_index ", s_real_index)
+
+
+                real_index = [x*2 for x in real_index]
+                H = H * 2
+                W = W * 2
+                
+                real_index[1] = min(W-1, real_index[1] +1)
+                real_index[3] = min(H-1, real_index[3] +1)
+                # right and bottom need plus 1
+                print("pp real_index left right top bot ", real_index)
+                
+                maxp_g_id += 1
+            c_seg -= 1
+
+    assert conv_g_id == num_conv+1
+    return info_dict
 
 
 def compute_bwd_info_beta(output_tile_coord: List, H: int, W: int, nTh: int, nTw: int, ph: int, pw: int, stream_structure: List[_pair], num_conv:int, num_maxp:int) -> Dict:

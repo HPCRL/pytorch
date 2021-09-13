@@ -129,8 +129,8 @@ class Net(nn.Module):
         # TODO: here we have to somehow infer the shape of the output of the segment. 
         out = torch.zeros(1, 1, H//2, W//2, requires_grad=True).cuda()
        
-        for i in range(0,4): 
-            for j in range(0,4):
+        for i in range(3,4): 
+            for j in range(3,4):
                 coord = [i,j]
                 num_conv = 4
                 num_maxp = 1
