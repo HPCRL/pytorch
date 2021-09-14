@@ -56,7 +56,7 @@ class Net(nn.Module):
         #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).is_cuda
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, 1, 1)
-        print("!!!!!!!", model_device)
+        #print("!!!!!!!", model_device)
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
         for i in range(1,2): 
             for j in range(1,2):
@@ -69,20 +69,19 @@ class Net(nn.Module):
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(info, x, stream_structure[0], model_device)
-                #print("input tile", input_tile)
+                print("input tile", input_tile.size())
                 out_temp = self.conv2d_1(input_tile, info)
-                #print("1 out_temp", out_temp[0].size(), out_temp[0])
+                print("1 out_temp", out_temp[0].size())
                 out_temp = self.conv2d_2(out_temp)
-        #         #print("2 out_temp", out_temp[0].size(), out_temp[0])
+                print("2 out_temp", out_temp[0].size())
                     
 
-        #         out_temp = self.mxp(out_temp)
-        #         #print("max ", out_temp[0].size(), out_temp[0])
-        #         out_temp = self.conv2d_3(out_temp)
-        #         #print("3 out_temp", out_temp[0].size(), out_temp[0])
-
-        #         out_temp = self.conv2d_4(out_temp)
-        #         # print("4 out_temp", out_temp[0].size(), out_temp[0])
+                out_temp = self.mxp(out_temp)
+                print("max ", out_temp[0].size())
+                out_temp = self.conv2d_3(out_temp)
+                print("3 out_temp", out_temp[0].size())
+                out_temp = self.conv2d_4(out_temp)
+                print("4 out_temp", out_temp[0].size())
                 
         # # #         # use customized copy
         #         tile_size = [info[1].pt_size[2], info[1].pt_size[3]]

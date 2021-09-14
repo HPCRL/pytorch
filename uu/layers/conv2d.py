@@ -27,7 +27,7 @@ class TiledConv2dFunction(torch.autograd.Function):
 
         #print("af input shape", input.size())
         ctx.info = info           
-        if s_depth == 1: 
+        if s_depth == 0: 
             # depth is 1 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
@@ -50,10 +50,12 @@ class TiledConv2dFunction(torch.autograd.Function):
             # TODO: how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
             # TODO : how to get the direct children after this??
-            input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, depth-1)
-            print("shape input_tile_for_next\n", input_tile_for_next.size())
+            next_id = c_info.next_id
+            input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
             # print("input_tile_for_next\n", input_tile_for_next)
             out = input_tile_for_next
+            #print("shape input_tile_for_next\n", input_tile_for_next.size())
+
         return out
 
     @staticmethod
@@ -216,6 +218,7 @@ class TiledConv2d(_ConvNd):
         tconv2d = TiledConv2dFunction.apply
         uniq_id = id(self)
         pi = info[0][uniq_id]
+        self.padding = (0,0) #force no auto padding in our customized functions.
         if pi.op_idex == 0:
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint)
