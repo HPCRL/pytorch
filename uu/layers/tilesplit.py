@@ -10,17 +10,18 @@ class TiledSplitFunction(torch.autograd.Function):
         # also we assume, the tiling only on H/W for a conv2d
         info = inputs[0]
         x = inputs[1]  
-        depth = inputs[2]
+        first_op_in_seg = id(inputs[2])
         model_device = inputs[3]
         
         ctx.input_is_cuda = x.is_cuda
-
-        ctx.abs_id = numpy.prod(info[1].coord)  
+        #info[0] fwd_info
+        ctx.coord = info[0][first_op_in_seg].coord
+        ctx.abs_id = numpy.prod(ctx.coord)  
         ctx.big_infput_shape = x.size()
-        ctx.coord = info[1].coord
-        input = padding_calc.get_input_tile(info, x, depth)
+        
+        input = padding_calc.get_input_tile(info[0], x, first_op_in_seg)
         if ctx.input_is_cuda != model_device:
-            # print(ctx.input_is_cuda)
+            # print("#########", ctx.input_is_cuda)
             # print(model_device)
             if model_device == True: # model is on GPU 
                 device = torch.device("cuda")
@@ -28,7 +29,7 @@ class TiledSplitFunction(torch.autograd.Function):
             else:
                 device = torch.device("cpu")
                 input = input.to(device)    # explicitly load input tile to device 
-        #print ("TiledSplitFunction input tile", input)
+        # print ("TiledSplitFunction input tile", input)
         return input
     
     @staticmethod

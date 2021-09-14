@@ -14,25 +14,20 @@ from torch.nn.parameter import Parameter
 class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
-                        padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
+                        padding, dilation, groups, info, uniq_id, is_ccheckpoint):
         print("== tiled conv2d forward")
-        
-        print("input shape", input.size())
-        c_info = info[depth]
-        
-        #print("current info", c_info)
-        ordering = c_info.ordering_info
-        s_depth = ordering[2]  # depth in current segment
-        if ordering[1] == 0: # if it is the first conv in a segment then padding
+        #print("input shape", input.size())
+        c_info = info[0][uniq_id]   
+        #print("current fwd info", c_info)
+        s_depth = c_info.local_idex  # depth in current segment
+        if c_info.op_idex == 0: # if it is the first conv in a segment then padding
             padding_info = c_info.padding_info
             pd = torch.nn.ConstantPad2d(padding_info, 0)
             input = pd(input)
 
         #print("af input shape", input.size())
-        ctx.depth = depth 
-        ctx.info = info   
-        ctx.num_conv = num_conv             
-        if depth == 1 or s_depth == 0: 
+        ctx.info = info           
+        if s_depth == 1: 
             # depth is 1 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
@@ -54,6 +49,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                     
             # TODO: how to save , stride, padding, dilation, groups ??
             #print("net_ out\n", out)
+            # TODO : how to get the direct children after this??
             input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, depth-1)
             print("shape input_tile_for_next\n", input_tile_for_next.size())
             # print("input_tile_for_next\n", input_tile_for_next)
@@ -62,73 +58,73 @@ class TiledConv2dFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        
-        print("\n** tiled conv2d backward")
-        # print("** grad_output", grad_output)
-        # print("** grad_output shape", grad_output.size())
-        depth = ctx.depth *-1
-        print("ctx.depth", ctx.depth)
-        print("depth", depth)
-        info = ctx.info
-        print("info coord", info[depth].coord)
-        input = ctx.saved_tensors[0]
-        weight = ctx.weight
-        #print("in_ grad_out shape", grad_output)
-        #print("input shape", input.size())
-        #print("weight shape", weight.size())
-        grad_input = None
-        grad_weight = None
-        c_info = info[depth]
-        ordering = c_info.ordering_info
-        if ctx.needs_input_grad[0]:
-            if depth == ctx.num_conv * -1:
-                # for user input
-                print("AA")
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
-                # print("input shape", input.size())
-                # print("out shape", out.size())
-                # print("weight shape", weight.size())
-                # print("grad_output shape", grad_output.size())
-                grad_input = F.conv2d(grad_output, weight)
-                print("final", grad_input.size(), grad_input)
-            elif depth == -1:
-                print("AAA")
-                # a whole grad_output as input of backward
-                new_grad_out = padding_calc.get_input_tile(info, grad_output, depth)
-                # since I remove padding from get_input_tile, so manually do it here.
-                padding_info = c_info.padding_info
-                pd = torch.nn.ConstantPad2d(padding_info, 0)
-                new_grad_out = pd(new_grad_out)
+        return
+        # print("\n** tiled conv2d backward")
+        # # print("** grad_output", grad_output)
+        # # print("** grad_output shape", grad_output.size())
+        # depth = ctx.depth *-1
+        # print("ctx.depth", ctx.depth)
+        # print("depth", depth)
+        # info = ctx.info
+        # print("info coord", info[depth].coord)
+        # input = ctx.saved_tensors[0]
+        # weight = ctx.weight
+        # #print("in_ grad_out shape", grad_output)
+        # #print("input shape", input.size())
+        # #print("weight shape", weight.size())
+        # grad_input = None
+        # grad_weight = None
+        # c_info = info[depth]
+        # ordering = c_info.ordering_info
+        # if ctx.needs_input_grad[0]:
+        #     if depth == ctx.num_conv * -1:
+        #         # for user input
+        #         print("AA")
+        #         weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+        #         # print("input shape", input.size())
+        #         # print("out shape", out.size())
+        #         # print("weight shape", weight.size())
+        #         # print("grad_output shape", grad_output.size())
+        #         grad_input = F.conv2d(grad_output, weight)
+        #         print("final", grad_input.size(), grad_input)
+        #     elif depth == -1:
+        #         print("AAA")
+        #         # a whole grad_output as input of backward
+        #         new_grad_out = padding_calc.get_input_tile(info, grad_output, depth)
+        #         # since I remove padding from get_input_tile, so manually do it here.
+        #         padding_info = c_info.padding_info
+        #         pd = torch.nn.ConstantPad2d(padding_info, 0)
+        #         new_grad_out = pd(new_grad_out)
 
-                print("new_grad_out", new_grad_out.size())
-                print(padding_info)
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
-                grad_input = F.conv2d(new_grad_out, weight)
-                input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
-                grad_input = input_tile_for_next
-                print("grad_input", grad_input.size())
-            elif ordering[2] == 0:  
-                print("S_last")
-                # the last conv in local continous conv segment
-                padding_info = c_info.padding_info
-                pd = torch.nn.ConstantPad2d(padding_info, 0)
-                new_grad_out = pd(grad_output)
+        #         print("new_grad_out", new_grad_out.size())
+        #         print(padding_info)
+        #         weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+        #         grad_input = F.conv2d(new_grad_out, weight)
+        #         input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
+        #         grad_input = input_tile_for_next
+        #         print("grad_input", grad_input.size())
+        #     elif ordering[2] == 0:  
+        #         print("S_last")
+        #         # the last conv in local continous conv segment
+        #         padding_info = c_info.padding_info
+        #         pd = torch.nn.ConstantPad2d(padding_info, 0)
+        #         new_grad_out = pd(grad_output)
 
-                print("new_grad_out", new_grad_out.size())
-                # print(new_grad_out)
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
-                grad_input = F.conv2d(new_grad_out, weight)
-                input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
-                grad_input = input_tile_for_next
-                print("grad_input", grad_input.size())
-            else:
-                print("MAA")
-                weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
-                print("new_grad_out", grad_output.size())
-                grad_input = F.conv2d(grad_output, weight)
-                input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
-                grad_input = input_tile_for_next
-                print("grad_input", grad_input.size())
+        #         print("new_grad_out", new_grad_out.size())
+        #         # print(new_grad_out)
+        #         weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+        #         grad_input = F.conv2d(new_grad_out, weight)
+        #         input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
+        #         grad_input = input_tile_for_next
+        #         print("grad_input", grad_input.size())
+        #     else:
+        #         print("MAA")
+        #         weight = Parameter(torch.rot90(weight.data, 2, [2,3])).transpose(0,1)
+        #         print("new_grad_out", grad_output.size())
+        #         grad_input = F.conv2d(grad_output, weight)
+        #         input_tile_for_next = padding_calc.recreate_input_tile(ctx.info, grad_input, depth-1)
+        #         grad_input = input_tile_for_next
+        #         print("grad_input", grad_input.size())
                 
 
         # if ctx.needs_input_grad[1]:
@@ -185,16 +181,16 @@ class TiledConv2d(_ConvNd):
         bias: bool = True,
         padding_mode: str = 'zeros',  
         # additional info
-        depth: int =  0,
-        num_conv: int = 0,  # num of conv in segment
+        # depth: int =  0,
+        # num_conv: int = 0,  # num of conv in segment
         is_ccheckpoint = False
     ):
         kernel_size_ = _pair(kernel_size)
         stride_ = _pair(stride)
         padding_ = _pair(padding)
         dilation_ = _pair(dilation)
-        self.depth = depth
-        self.num_conv = num_conv
+        # self.depth = depth
+        # self.num_conv = num_conv
         self.is_ccheckpoint = is_ccheckpoint
         super(TiledConv2d, self).__init__(
             in_channels, out_channels, kernel_size_, stride_, padding_, dilation_,
@@ -202,6 +198,7 @@ class TiledConv2d(_ConvNd):
 
     def forward(self, *inputs) -> Tensor:
         print("id", id(self))
+        first_op = False
         if type (inputs[0]) == tuple:
             # to remove additional packing in tuple
             inputs = list(inputs[0])
@@ -217,16 +214,14 @@ class TiledConv2d(_ConvNd):
         
         # TODO: I need to pass hash val to fwd and bwd
         tconv2d = TiledConv2dFunction.apply
-        # return tconv2d(input, self.weight, self.bias, self.stride,
-        #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
-
-
-        if self.depth == 1:
+        uniq_id = id(self)
+        pi = info[0][uniq_id]
+        if pi.op_idex == 0:
            return tconv2d(input, self.weight, self.bias, self.stride,
-                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint)
+                       self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint)
         else:
            return tconv2d(input, self.weight, self.bias, self.stride,
-                       self.padding, self.dilation, self.groups, info, self.depth, self.num_conv, self.is_ccheckpoint), info, self.is_ccheckpoint
+                       self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint), info, self.is_ccheckpoint
 
 
                 
