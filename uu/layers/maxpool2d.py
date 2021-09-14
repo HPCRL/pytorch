@@ -24,7 +24,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
         in_height = input.size()[2]
         in_width = input.size()[3]
 
-        w_height = kernel_size[1] #weight
+        w_height = kernel_size[1] #weight/kernel
         w_width = kernel_size[0]
 
         h_pad = padding[1]

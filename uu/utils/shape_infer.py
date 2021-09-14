@@ -22,14 +22,15 @@ def shape_infer_sequence(seq_ops, inputH, inputW, C, N):
     shape_dict = {}
     print("Input {}x{}x{}x{}".format(N, C, H, W))
     for op in seq_ops._modules.values():
+        print("L-->R current op", id(op))
         if isinstance(op, conv2d.TiledConv2d):
             stride = op.stride
             pad = op.padding
             input_shape = (N, C, H, W)
             RS = op.kernel_size[0]
             C = op.out_channels
-            H = math.floor((H+2*pad[0]-(RS-1)-1)/stride[0])+1
-            W = math.floor((W+2*pad[1]-(RS-1)-1)/stride[1])+1
+            H = math.floor((H+2*pad[0]-(RS-1)-1)/stride[0]+1)
+            W = math.floor((W+2*pad[1]-(RS-1)-1)/stride[1]+1)
             output_shape = (N, C, H, W)
             in_out_shape_info = in_out_shape(input_shape, output_shape)
             shape_dict[id(op)] = in_out_shape_info

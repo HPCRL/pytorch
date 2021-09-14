@@ -16,8 +16,8 @@ class TiledConv2dFunction(torch.autograd.Function):
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, depth, num_conv, is_ccheckpoint):
         print("== tiled conv2d forward")
-        print("depth", depth)
-        #print("input shape", input.size())
+        
+        print("input shape", input.size())
         c_info = info[depth]
         
         #print("current info", c_info)
@@ -62,6 +62,7 @@ class TiledConv2dFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
+        
         print("\n** tiled conv2d backward")
         # print("** grad_output", grad_output)
         # print("** grad_output shape", grad_output.size())
@@ -168,8 +169,8 @@ class TiledConv2dFunction(torch.autograd.Function):
         #         #print("grad_weight", grad_weight.size())
 
                 
-        grad_bias = None #TODO: bias shape??
-        return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
+        # grad_bias = None #TODO: bias shape??
+        # return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
 class TiledConv2d(_ConvNd):
     def __init__(
@@ -200,7 +201,7 @@ class TiledConv2d(_ConvNd):
             False, _pair(0), groups, bias, padding_mode)
 
     def forward(self, *inputs) -> Tensor:
-
+        print("id", id(self))
         if type (inputs[0]) == tuple:
             # to remove additional packing in tuple
             inputs = list(inputs[0])
@@ -213,6 +214,8 @@ class TiledConv2d(_ConvNd):
         else:
             print("missing info in cConv2d")
             assert False
+        
+        # TODO: I need to pass hash val to fwd and bwd
         tconv2d = TiledConv2dFunction.apply
         # return tconv2d(input, self.weight, self.bias, self.stride,
         #                 self.padding, self.dilation, self.groups, info, self.depth, self.num_conv), info
