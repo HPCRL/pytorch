@@ -58,9 +58,9 @@ class TiledConv2dFunction(torch.autograd.Function):
 
         return out
 
-    @staticmethod
-    def backward(ctx, grad_output):
-        return
+    #@staticmethod
+    #def backward(ctx, grad_output):
+    #   return
         # print("\n** tiled conv2d backward")
         # # print("** grad_output", grad_output)
         # # print("** grad_output shape", grad_output.size())

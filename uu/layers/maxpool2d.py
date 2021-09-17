@@ -19,59 +19,64 @@ class cMaxPool2dFunction(torch.autograd.Function):
         padding = inputs[3]
         mdepth = inputs[4]
         num_maxp = inputs[5]
+
+        out = F.max_pool2d(input, kernel_size, stride).cuda()
         
         
-        in_height = input.size()[2]
-        in_width = input.size()[3]
+        # in_height = input.size()[2]
+        # in_width = input.size()[3]
 
-        w_height = kernel_size[1] #weight/kernel
-        w_width = kernel_size[0]
+        # w_height = kernel_size[1] #weight/kernel
+        # w_width = kernel_size[0]
 
-        h_pad = padding[1]
-        w_pad = padding[0]
+        # h_pad = padding[1]
+        # w_pad = padding[0]
 
-        h_stride = stride[0]
-        w_stride = stride[1]
+        # h_stride = stride[0]
+        # w_stride = stride[1]
 
-        out_height = math.floor((in_height+2*h_pad-(w_height-1)-1)/h_stride)+1
-        out_width = math.floor((in_width+2*w_pad-(w_width-1)-1)/w_stride)+1
+        # out_height = math.floor((in_height+2*h_pad-(w_height-1)-1)/h_stride)+1
+        # out_width = math.floor((in_width+2*w_pad-(w_width-1)-1)/w_stride)+1
 
-        B = input.size()[0]
-        C = input.size()[1]
+        # B = input.size()[0]
+        # C = input.size()[1]
 
-        out = torch.zeros((B, C, out_height, out_width)).cuda()
-        # print(out.size())
-        # print(in_height)
-        # print(w_height)
-        # print(h_pad)
-        # print(h_stride)
-        # TODO: Very Inefficiency
-        arg_max = np.zeros((B, C, out_height, out_width), dtype=np.int32)
-        for b in range(B):
-            for c in range(C):
-                for i in range(out_height):
-                    for j in range(out_width):
-                        start_i = i * h_stride
-                        start_j = j * w_stride
-                        end_i = start_i + w_height
-                        end_j = start_j + w_width
-                        out[b, c, i, j] = torch.max(input[:, :, start_i: end_i, start_j: end_j])
-                        arg_max[b, c, i, j] = torch.argmax(input[:, :, start_i: end_i, start_j: end_j])
+        # out = torch.zeros((B, C, out_height, out_width)).cuda()
+        # # print(out.size())
+        # # print(in_height)
+        # # print(w_height)
+        # # print(h_pad)
+        # # print(h_stride)
+        # # TODO: Very Inefficiency
+        # arg_max = np.zeros((B, C, out_height, out_width), dtype=np.int32)
+        # for b in range(B):
+        #     for c in range(C):
+        #         for i in range(out_height):
+        #             for j in range(out_width):
+        #                 start_i = i * h_stride
+        #                 start_j = j * w_stride
+        #                 end_i = start_i + w_height
+        #                 end_j = start_j + w_width
+        #                 out[b, c, i, j] = torch.max(input[:, :, start_i: end_i, start_j: end_j])
+        #                 arg_max[b, c, i, j] = torch.argmax(input[:, :, start_i: end_i, start_j: end_j])
 
-        ctx.arg_max = arg_max
-        ctx.stride = stride
-        ctx.out_height = out_height
-        ctx.out_width = out_width
-        ctx.kernel_size = kernel_size
-        ctx.B = B
-        ctx.C = C
-        ctx.mdepth = mdepth
-        ctx.num_maxp = num_maxp
-        ctx.info = inputs[6]
+        # ctx.arg_max = arg_max
+        # ctx.stride = stride
+        # ctx.out_height = out_height
+        # ctx.out_width = out_width
+        # ctx.kernel_size = kernel_size
+        # ctx.B = B
+        # ctx.C = C
+        # ctx.mdepth = mdepth
+        # ctx.num_maxp = num_maxp
+        # ctx.info = inputs[6]
 
-        ctx.input = input
-        # print(input)
-        # print(out)
+        # ctx.input = input
+        # # print(input)
+        # # print(out)
+
+
+
         return Variable(out)
     
     @staticmethod

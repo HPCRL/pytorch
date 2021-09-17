@@ -46,11 +46,19 @@ class Net(nn.Module):
                                 #   depth=1,
                                 #   num_conv=4
                                   )   
+        # self.conv2d_5 = conv2d.TiledConv2d(in_channels=1, 
+        #                           out_channels=1, 
+        #                           kernel_size=(3,3),
+        #                           bias = False,
+        #                           padding=(1,1),
+        #                         #   depth=1,
+        #                         #   num_conv=4
+        #                           )   
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2,\
-                                                self.mxp, self.conv2d_3, self.conv2d_4])
+        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.conv2d_3,\
+                                                self.mxp,  self.conv2d_4])
         
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
@@ -58,8 +66,8 @@ class Net(nn.Module):
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, 1, 1)
         #print("!!!!!!!", model_device)
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
-        for i in range(1,2): 
-            for j in range(1,2):
+        for i in range(0,1): 
+            for j in range(0,1):
                 coord = [i,j]
                 print(coord)
                 # TODO: here we have to somehow provide static info and num_conv. 
@@ -68,20 +76,20 @@ class Net(nn.Module):
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(info, x, stream_structure[0], model_device)
-                print("input tile", input_tile.size())
-                out_temp = self.conv2d_1(input_tile, info)
-                print("1 out_temp", out_temp[0].size())
-                out_temp = self.conv2d_2(out_temp)
-                print("2 out_temp", out_temp[0].size())
-                    
+                # input_tile = self.tsplit(info, x, stream_structure[0], model_device)
+                # print("input tile", input_tile.size())
+                # out_temp = self.conv2d_1(input_tile, info)
+                # print("1 out_temp", out_temp[0].size())
+                # out_temp = self.conv2d_2(out_temp)
+                # print("2 out_temp", out_temp[0].size())
+                # out_temp = self.conv2d_3(out_temp)
+                # print("3 out_temp", out_temp[0].size())
 
-                out_temp = self.mxp(out_temp)
-                print("max ", out_temp[0].size())
-                out_temp = self.conv2d_3(out_temp)
-                print("3 out_temp", out_temp[0].size())
-                out_temp = self.conv2d_4(out_temp)
-                print("4 out_temp", out_temp[0].size())
+                # out_temp = self.mxp(out_temp)
+                # print("max ", out_temp[0].size())
+                
+                # out_temp = self.conv2d_4(out_temp)
+                # print("4 out_temp", out_temp[0].size())
                 
         # # #         # use customized copy
         #         tile_size = [info[1].pt_size[2], info[1].pt_size[3]]
