@@ -6,6 +6,7 @@ from uu.utils import correctness_check
 from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
+import time
 
 class Net_ref(nn.Module):
     def __init__(self):
@@ -38,8 +39,8 @@ def main():
     
     model_ref =  Net_ref().to(device)
 
-    H = 16 
-    W = 16
+    H = 4096 
+    W = 4096
     nTh = 1
     nTw = 1
     input = torch.rand(1,1,H,W, requires_grad = True)
@@ -47,20 +48,27 @@ def main():
     input_ref = input.data
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
+
+    ref_start = time.time() 
     out_ref = model_ref(input_ref)
+    ref_end = time.time()
+    print("ref time", ref_end-ref_start)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    our_start = time.time()
     out = model(input, H, W, nTh, nTw )[0]
+    our_end = time.time()
+    print("our time", our_end-our_start)
 
     print("out shape", out)
     print("out_ref ", out_ref)
     print("~~ check forward correctness ~~")
 
     not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
-    out_ref.sum().backward()
-    print(input_ref.grad)
+    # out_ref.sum().backward()
+    # print(input_ref.grad)
     
-    out.sum().backward()
-    print(input.grad)
+    # out.sum().backward()
+    # print(input.grad)
 
 if __name__=="__main__":
     main()

@@ -56,28 +56,27 @@ def recalc_left_to_right(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
     with torch.no_grad():
         # first op should be a maxpool
         assert isinstance(list_op__in_chckp_seg[0], maxpool2d.cMaxPool2d)
-        del list_op__in_chckp_seg[0]
+        # del list_op__in_chckp_seg[0]
         for op in list_op__in_chckp_seg:
             uniq_opid = id(op)
             if isinstance(op, conv2d.TiledConv2d):
-                conv2d_fwd_padding_info()
-            elif isinstance(op, maxpool2d.cMaxPool2d): # It should no maxpool in the list
-                maxp_stride = op.stride[0]
-                #print("pp real_index ", s_real_index)
-                real_index = [math.floor(x / maxp_stride) for x in input_slice]
-                H = math.floor(H / maxp_stride)
-                W = math.floor(W / maxp_stride)
-                cur_output_shape = (real_index[1]-real_index[0]+1, real_index[3]-real_index[2]+1) # r-l, b-t
-                # produce real_index for next op
-                real_index[1] = min(W-1, real_index[1])
-                real_index[3] = min(H-1, real_index[3])
-                input_slice = real_index    # maxpooling no padding here.
                 pi = old_f_info[uniq_opid]
+                ph = op.padding[0]
+                pw = op.padding[1]
+                padding_info, input_slice, internal_expand, real_index = conv2d_fwd_padding_info(real_index, cur_output_shape, [ph, pw], op.stride[0], op.kernel_size[0])
                 # update old one
                 pi.cur_output_shape = cur_output_shape
                 pi.input_slice = input_slice
                 pi.real_index = real_index
-                fwd_info_dict[uniq_opid] = pi # insert into info_dict
+                fwd_info_dict[uniq_opid] = pi  # insert into info_dict
+            elif isinstance(op, maxpool2d.cMaxPool2d): # It should no maxpool in the list
+                pi = b_info[uniq_opid]
+                input_slice = pi.input_slice
+                #print("pp real_index ", s_real_index)
+                cur_output_shape = shape_dict[uniq_opid].output_shape
+                # produce real_index for next op
+                real_index = pi.real_index
+                input_slice = pi.input_slice    # maxpooling no padding here.
                 next_id = -99
             else:
                 None     
@@ -86,8 +85,9 @@ def recalc_left_to_right(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
 def conv2d_fwd_padding_info(tile_indx: List, input_shape, pads: List, stride, RS):
     iH = input_shape[2]
     iW = input_shape[3]
-    oH = math.floor((iH+2*pads[0]-(RS-1)-1)/stride[0]+1)
-    oW = math.floor((iW+2*pads[1]-(RS-1)-1)/stride[1]+1)
+    print("@@@@@@@@@@@@@@@@", iH, iW)
+    oH = math.floor((iH+2*pads[0]-(RS-1)-1)/stride+1)
+    oW = math.floor((iW+2*pads[1]-(RS-1)-1)/stride+1)
 
     tile_top = tile_indx[2]
     tile_bottom = tile_indx[3]
@@ -100,9 +100,17 @@ def conv2d_fwd_padding_info(tile_indx: List, input_shape, pads: List, stride, RS
     pad_right = max((tile_right+pads[1])-(oW-1), 0)
     # padding 0 element
     padding_info = [pad_left, pad_right, pad_top, pad_bottom]
-    internal_expand = [0, 0, 0, 0]
-
-    #return padding_info, input_slice, internal_expand, real_index
+    internal_expand = [0, 0, 0, 0] # we do not need to do additional internal expansion, since the data is larger.
+    # input slice for next
+    input_top = max(0, (tile_top-pads[0]))
+    input_bottom = min(oH-1, (tile_bottom+pads[0]))
+    input_left = max(0, (tile_left-pads[1]))
+    input_right = min(oW-1, (tile_right+pads[1]))
+    #input_tile view, the 4 point(l,r,t,b) in input tenser. Value is include [l, r], [t, b]
+    input_slice = [input_left, input_right, input_top, input_bottom]
+    real_index = input_slice
+    # but final input slice is need to make write result correct
+    return padding_info, input_slice, internal_expand, real_index
 
 # Assume conv2d input output are same shape
 def conv2d_revr_padding_info(tile_indx: List, none_tiled_output_shape, pads: List, stride, RS):
@@ -182,7 +190,10 @@ def recompute_fwd_info(list_op__in_chckp_seg, op_indx, old_f_info, b_info, shape
     after_issue_maxpool = list_op__in_chckp_seg[op_indx:]
     
     new_fwd_info_dict_1st_half = recalc_right_to_left(before_issue_maxpool, shape_dict, old_f_info, b_info)
-    #new_fwd_info_dict_2nd_half = recalc_left_to_right(after_issue_maxpool, shape_dict, old_f_info, b_info)   
+    new_fwd_info_dict_2nd_half = recalc_left_to_right(after_issue_maxpool, shape_dict, old_f_info, b_info)   
+
+    print("###", new_fwd_info_dict_1st_half)
+    print("###", new_fwd_info_dict_2nd_half)
 
     return new_fwd_info_dict_1st_half
 

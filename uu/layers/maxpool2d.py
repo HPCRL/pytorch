@@ -5,12 +5,13 @@ from torch.nn.common_types import _size_2_t
 import numpy as np
 from torch.autograd.variable import Variable
 import math
+import pdb
 
 class cMaxPool2dFunction(torch.autograd.Function):
     # create a static variable
     @staticmethod
     def forward(ctx, *inputs):
-        print("\n^^^^^cMaxPool2dFunction fwd")
+        #print("\n^^^^^cMaxPool2dFunction fwd")
         input = inputs[0]
 
         
@@ -20,60 +21,62 @@ class cMaxPool2dFunction(torch.autograd.Function):
         mdepth = inputs[4]
         num_maxp = inputs[5]
 
-        out = F.max_pool2d(input, kernel_size, stride).cuda()
+        # need to talk to mirisa
+        #pdb.set_trace()
+        out = F.max_pool2d(input, kernel_size, stride)
+      
         
-        
-        # in_height = input.size()[2]
-        # in_width = input.size()[3]
+        in_height = input.size()[2]
+        in_width = input.size()[3]
 
-        # w_height = kernel_size[1] #weight/kernel
-        # w_width = kernel_size[0]
+        w_height = kernel_size[1] #weight/kernel
+        w_width = kernel_size[0]
 
-        # h_pad = padding[1]
-        # w_pad = padding[0]
+        h_pad = padding[1]
+        w_pad = padding[0]
 
-        # h_stride = stride[0]
-        # w_stride = stride[1]
+        h_stride = stride[0]
+        w_stride = stride[1]
 
-        # out_height = math.floor((in_height+2*h_pad-(w_height-1)-1)/h_stride)+1
-        # out_width = math.floor((in_width+2*w_pad-(w_width-1)-1)/w_stride)+1
+        out_height = math.floor((in_height+2*h_pad-(w_height-1)-1)/h_stride)+1
+        out_width = math.floor((in_width+2*w_pad-(w_width-1)-1)/w_stride)+1
 
-        # B = input.size()[0]
-        # C = input.size()[1]
+        B = input.size()[0]
+        C = input.size()[1]
 
-        # out = torch.zeros((B, C, out_height, out_width)).cuda()
-        # # print(out.size())
-        # # print(in_height)
-        # # print(w_height)
-        # # print(h_pad)
-        # # print(h_stride)
-        # # TODO: Very Inefficiency
-        # arg_max = np.zeros((B, C, out_height, out_width), dtype=np.int32)
-        # for b in range(B):
-        #     for c in range(C):
-        #         for i in range(out_height):
-        #             for j in range(out_width):
-        #                 start_i = i * h_stride
-        #                 start_j = j * w_stride
-        #                 end_i = start_i + w_height
-        #                 end_j = start_j + w_width
-        #                 out[b, c, i, j] = torch.max(input[:, :, start_i: end_i, start_j: end_j])
-        #                 arg_max[b, c, i, j] = torch.argmax(input[:, :, start_i: end_i, start_j: end_j])
+        out = torch.zeros((B, C, out_height, out_width)).cuda()
+        # print(out.size())
+        # print(in_height)
+        # print(w_height)
+        # print(h_pad)
+        # print(h_stride)
+        # TODO: Very Inefficiency
+        arg_max = np.zeros((B, C, out_height, out_width), dtype=np.int32)
+        for b in range(B):
+            for c in range(C):
+                for i in range(out_height):
+                    for j in range(out_width):
+                        start_i = i * h_stride
+                        start_j = j * w_stride
+                        end_i = start_i + w_height
+                        end_j = start_j + w_width
+                        out[b, c, i, j] = torch.max(input[:, :, start_i: end_i, start_j: end_j])
+                        arg_max[b, c, i, j] = torch.argmax(input[:, :, start_i: end_i, start_j: end_j])
 
-        # ctx.arg_max = arg_max
-        # ctx.stride = stride
-        # ctx.out_height = out_height
-        # ctx.out_width = out_width
-        # ctx.kernel_size = kernel_size
-        # ctx.B = B
-        # ctx.C = C
-        # ctx.mdepth = mdepth
-        # ctx.num_maxp = num_maxp
-        # ctx.info = inputs[6]
+        ctx.arg_max = arg_max
+        ctx.stride = stride
+        ctx.out_height = out_height
+        ctx.out_width = out_width
+        ctx.kernel_size = kernel_size
+        ctx.B = B
+        ctx.C = C
+        ctx.mdepth = mdepth
+        ctx.num_maxp = num_maxp
+        ctx.info = inputs[6]
 
-        # ctx.input = input
+        ctx.input = input
         # # print(input)
-        # # print(out)
+        # print(out)
 
 
 
@@ -81,8 +84,8 @@ class cMaxPool2dFunction(torch.autograd.Function):
     
     @staticmethod
     def backward(ctx, grad_output):
-        print("\n^^^^^cMaxPool2dFunction bwd")
-        print(grad_output.size())
+        # print("\n^^^^^cMaxPool2dFunction bwd")
+        # print(grad_output.size())
         # print(ctx.input)
         #print("arg_max size", ctx.arg_max)       
         # print(ctx.mdepth)
@@ -94,15 +97,15 @@ class cMaxPool2dFunction(torch.autograd.Function):
         f_info = ctx.info[f_info_id]
         b_info = ctx.info[b_info_id]
 
-        print("f_info", f_info)
-        print("b_info", b_info)
+        # print("f_info", f_info)
+        # print("b_info", b_info)
 
         # TODO, we assume forward shape in maxp >> backward shape 
         crop = []
         for i in range(len(f_info)):
             #crop.append( abs(b_info[i] - f_info[i]))
             crop.append(b_info[i] - f_info[i])
-        print("crop", crop)
+        #print("crop", crop)
 
         #NCHW
         left = crop[0]
@@ -119,7 +122,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
 
         grad_in = torch.zeros((ctx.B, ctx.C, grad_output.size()[2]*2,grad_output.size()[3]*2)).cuda()
         
-        print(grad_in.size())
+        #print(grad_in.size())
         # TODO: Very Inefficiency
         # TODO: get correct portion of the grad_output to do the upsampling
         for b in range(ctx.B):
@@ -134,7 +137,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
                         grad_in[b][c][start_i: end_i, start_j: end_j][index] = grad_output[b, c, i, j]
                        
 
-        print("##############grad_in in maxp", grad_in.size()) 
+        #print("##############grad_in in maxp", grad_in.size()) 
             
         return Variable(grad_in), None, None, None, None, None, None
 
