@@ -16,6 +16,9 @@ class TiledConv2dFunction(torch.autograd.Function):
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, uniq_id, is_ccheckpoint):
         print("== tiled conv2d forward")
+        #force no auto padding in our customized functions.
+        padding = (0,0)
+
         #print("input shape", input.size())
         c_info = info[0][uniq_id]   
         #print("current fwd info", c_info)
@@ -218,7 +221,7 @@ class TiledConv2d(_ConvNd):
         tconv2d = TiledConv2dFunction.apply
         uniq_id = id(self)
         pi = info[0][uniq_id]
-        self.padding = (0,0) #force no auto padding in our customized functions.
+        #self.padding = (0,0) 
         if pi.op_idex == 0:
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint)

@@ -23,7 +23,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
 
         # need to talk to mirisa
         #pdb.set_trace()
-        out = F.max_pool2d(input, kernel_size, stride)
+        # out = F.max_pool2d(input, kernel_size, stride)
       
         
         in_height = input.size()[2]
