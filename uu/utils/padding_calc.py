@@ -244,52 +244,35 @@ def peek_position(stream_structure, op_idex):
 
 def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, nTw, stream_structure, shape_dict) -> Dict:
     list_op__in_chckp_seg = []
-    has_maxpool = False
-
     #print("stream_structure", stream_structure)
     for op in stream_structure._modules.values():
-        if isinstance(op, maxpool2d.cMaxPool2d):
-            has_maxpool = True
         list_op__in_chckp_seg.append(op)
         #print("hash", id(op))
 
-    #print("op_list_in_seg", list_op__in_chckp_seg)
-    if has_maxpool:
-        f_info = compute_fwd_info_beta(output_tile_coord, output_shape, nTh, nTw, list_op__in_chckp_seg.copy(), shape_dict)
-        # print("old f_info", f_info)
-        # print("------------------------------")
-        b_info = compute_bwd_info_beta(output_tile_coord, input_shape, nTh, nTw, list_op__in_chckp_seg.copy(), shape_dict, f_info)
-        #print("b_info", b_info)
-        
-        op_indx = len(list_op__in_chckp_seg)-1
-        # reverse check if the op is the last maxpool
-        while op_indx >= 0:
-            op = list_op__in_chckp_seg[op_indx]
-            if isinstance(op, maxpool2d.cMaxPool2d):
-                fwd_out_shape = f_info[id(op)].cur_output_shape
-                bwd_out_shape = b_info[id(op)].cur_output_shape
-                if not shape_compatible(fwd_out_shape, bwd_out_shape):
-                    break
-            op_indx -= 1
-        #check compatiblity, fwd tile >= bwd tile; heuristic if the last maxpool shape is fine, all previous should be fine.
-        issue_maxpool = None
-        if op_indx >= 0:
-            issue_maxpool = list_op__in_chckp_seg[op_indx]
-            print("issue", op_indx, issue_maxpool)
-            new_f_info = adjust_fwd_info(list_op__in_chckp_seg, op_indx, f_info.copy(), b_info, shape_dict)
-            #print("new_f_info", new_f_info)
-    else:
-        f_info = compute_fwd_info_beta(output_tile_coord, output_shape, nTh, nTw, list_op__in_chckp_seg)
-
-    print("------------------------------")
-    print("f_info", f_info)
-    print("------------------------------")
+    # calc bwd_index info first
+    b_info = compute_bwd_info_beta(output_tile_coord, input_shape, nTh, nTw, list_op__in_chckp_seg.copy(), shape_dict)
     print("b_info", b_info)
+    bwd_out_shape = b_info[id(op)].cur_output_shape
+    
+    fwd_out_shape = (output_shape[2]//nTh, output_shape[3]//nTw)
+    print("bwd_out_shape ", bwd_out_shape)
+    print("fwd_out_shape ", fwd_out_shape)
+    if not shape_compatible(fwd_out_shape, bwd_out_shape):
+        print("Yes, fwd is smaller")
+    
 
-    assert len(f_info) != 0 and len(b_info) != 0
-    info = [f_info, b_info]
+    #print("op_list_in_seg", list_op__in_chckp_seg)
    
-    return info
+
+    # print("------------------------------")
+    # print("f_info", f_info)
+    # print("------------------------------")
+    # print("b_info", b_info)
+
+    # assert len(f_info) != 0 and len(b_info) != 0
+    # info = [f_info, b_info]
+   
+    # return info
 
 def compute_fwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_op__in_chckp_seg,shape_dict) -> Dict:
     # stream_structure is list of ops
@@ -357,13 +340,15 @@ def compute_fwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_
     return fwd_info_dict
 
 
-def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict, fwd_info_dict) -> Dict:
+def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_op__in_chckp_seg, shape_dict) -> Dict:
     bwd_info_dict = {}
     with torch.no_grad():
         H = input_shape[2]
         W = input_shape[3]
         next_id = -99 # end of a conv2d chain
         op_idex = 0
+        peek_conv2d_pos = 0
+
         for op in list_op__in_chckp_seg:
             uniq_id = id(op)
             if isinstance(op, conv2d.TiledConv2d):
@@ -376,6 +361,13 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                     tile_right = tile_left+Tw-1
                     input_slice = [tile_left, tile_right, tile_top, tile_bottom]
                     real_index = input_slice
+                
+                if peek_conv2d_pos == 0:
+                    peek_conv2d_pos = peek_position(list_op__in_chckp_seg, op_idex)
+                    total_conv2d_in_seg = peek_conv2d_pos
+                
+                local_idex = total_conv2d_in_seg-peek_conv2d_pos
+                peek_conv2d_pos -= 1
 
                 ph = op.padding[0]
                 pw = op.padding[1]
@@ -384,8 +376,6 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                 padding_info, input_slice, internal_expand, real_index = conv2d_revr_padding_info(real_index, none_tiled_input_shape, [ph, pw], op.stride[0], op.kernel_size[0])
                 cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
                 opname = "bk-conv2d"+str(id(op))
-                op_idex = fwd_info_dict[uniq_id].op_idex
-                local_idex = fwd_info_dict[uniq_id].local_idex
                 pi = Pad_info(output_tile_coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, op_idex, local_idex, next_id)
                 bwd_info_dict[uniq_id] = pi  # insert into info_dict
                 next_id = uniq_id
@@ -402,12 +392,9 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                 real_index[1] = min(W-1, real_index[1])
                 real_index[3] = min(H-1, real_index[3])
                 input_slice = real_index    # maxpooling no padding here.
-                # id need to rethink
-                op_idex = fwd_info_dict[uniq_id].op_idex
-                local_idex = fwd_info_dict[uniq_id].local_idex
-                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, local_idex, -199)
+                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, -1, next_id)
                 bwd_info_dict[id(op)] = pi # insert into info_dict
-                next_id = -99
+                next_id = uniq_id
             else:
                 None
             op_idex += 1

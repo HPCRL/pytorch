@@ -139,31 +139,31 @@ class Net(nn.Module):
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(info, x, stream_structure[0], model_device)
-                print("input tile", input_tile.size())
-                out_temp = self.conv2d_1(input_tile, info)
-                print("1 out_temp", out_temp[0].size())
-                out_temp = self.conv2d_2(out_temp)
-                print("2 out_temp", out_temp[0].size())
-                out_temp = self.conv2d_3(out_temp)
-                print("3 out_temp", out_temp[0].size())
+        #         input_tile = self.tsplit(info, x, stream_structure[0], model_device)
+        #         print("input tile", input_tile.size())
+        #         out_temp = self.conv2d_1(input_tile, info)
+        #         print("1 out_temp", out_temp[0].size())
+        #         out_temp = self.conv2d_2(out_temp)
+        #         print("2 out_temp", out_temp[0].size())
+        #         out_temp = self.conv2d_3(out_temp)
+        #         print("3 out_temp", out_temp[0].size())
 
-                out_temp = self.mxp(out_temp)
-                print("max ", out_temp[0].size())
+        #         out_temp = self.mxp(out_temp)
+        #         print("max ", out_temp[0].size())
                 
-                out_temp = self.conv2d_4(out_temp)
-                print("4 out_temp", out_temp[0].size())
+        #         out_temp = self.conv2d_4(out_temp)
+        #         print("4 out_temp", out_temp[0].size())
                 
-                # use customized copy
-                pi = info[0][id(stream_structure[-1])]
-                print(pi)
-                tile_shape = info[0][id(stream_structure[-1])].cur_output_shape
-                tile_size = [tile_shape[0],tile_shape[1]]
-                print(tile_shape, tile_size)
-                out = self.tcopy(out_temp, out, coord, tile_size)
-                del info
+        #         # use customized copy
+        #         pi = info[0][id(stream_structure[-1])]
+        #         print(pi)
+        #         tile_shape = info[0][id(stream_structure[-1])].cur_output_shape
+        #         tile_size = [tile_shape[0],tile_shape[1]]
+        #         print(tile_shape, tile_size)
+        #         out = self.tcopy(out_temp, out, coord, tile_size)
+        #         del info
             
-        return out
+        # return out
 
 def main():
     torch.set_default_dtype(torch.float64)
