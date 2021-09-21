@@ -44,6 +44,7 @@ def main():
     nTh = 1
     nTw = 1
     input = torch.rand(1,1,H,W, requires_grad = True)
+    input = input.cuda()
 
     input_ref = input.data
     input_ref = input_ref.cuda()
