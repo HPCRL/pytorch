@@ -14,8 +14,9 @@ class TiledCopyFunction(torch.autograd.Function):
        
         #ctx.input_num = len(inputs)
         # print ("**input[0]", input[0])
-        # print ("dim", dim)
-        out[:,:, coord[0]*tile_size[0]:(coord[0]+1)*tile_size[0], coord[1]*tile_size[1]:(coord[1]+1)*tile_size[1]] = out_temp
+        print ("coord", coord)
+        print("out_temp", out_temp.size())
+        out[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = out_temp
         #output.requires_grad = True #tensors[0].requires_grad
         return out
     

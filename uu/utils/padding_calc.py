@@ -4,6 +4,12 @@ from torch.autograd.variable import Variable
 from uu.layers import maxpool2d, conv2d
 import math
 
+
+
+
+
+
+
 def recalc_right_to_left(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
     list_op__in_chckp_seg.reverse()
     fwd_info_dict = {}
@@ -69,12 +75,12 @@ def recalc_left_to_right(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
                 cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
                 pi.cur_output_shape = cur_output_shape
                 old_input_slice = pi.input_slice
-                adjust_input_slice_diff = []     
-                for i in range(0, len(old_input_slice)):
-                    adjust_input_slice_diff.append(abs(old_input_slice[i]-input_slice[i]))
+                # adjust_input_slice_diff = []     
+                # for i in range(0, len(old_input_slice)):
+                #     adjust_input_slice_diff.append(abs(old_input_slice[i]-input_slice[i]))
                 pi.input_slice = input_slice
                 pi.real_index = real_index
-                pi.adjust_input_slice_diff = adjust_input_slice_diff
+                # pi.adjust_input_slice_diff = adjust_input_slice_diff
 
                 fwd_info_dict[uniq_opid] = pi  # insert into info_dict
 
@@ -179,7 +185,7 @@ def conv2d_revr_padding_info(tile_indx: List, none_tiled_output_shape, pads: Lis
 # might need to create a memo structure. 
 class Pad_info:
     def __init__(self, coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, \
-        op_idex, local_idex, next_id, adjust_input_slice_diff=[0,0,0,0]):
+        op_idex, local_idex, next_id, local_first):
         self.coord = coord
         # self.ordering_info = ordering_info # [seg_id, position(0 base), depth(0 base)]
         self.cur_output_shape = cur_output_shape # current op produce [problem, tile] size; use it to remodify fwd
@@ -191,7 +197,8 @@ class Pad_info:
         self.op_idex = op_idex
         self.local_idex = local_idex
         self.next_id = next_id
-        self.adjust_input_slice_diff = adjust_input_slice_diff
+        self.local_first = local_first
+        #self.adjust_input_slice_diff = adjust_input_slice_diff
         
     def copy(self): 
         return type(self)(self.coord, self.cur_output_shape, self.padding_info, \
@@ -203,8 +210,8 @@ class Pad_info:
                     "".join([str(x)+"," for x in self.padding_info]) + '>,\n <inpslidx ' + \
                     "".join([str(x)+"," for x in self.input_slice]) + '>, \n <internal ' + \
                     "".join([str(x)+"," for x in self.internal_expand]) + '>, \n <realidx ' + \
-                    "".join([str(x)+"," for x in self.real_index]) + '>, \n <adjdiff ' + \
-                    "".join([str(x)+"," for x in self.adjust_input_slice_diff]) + '>, \n'  + \
+                    "".join([str(x)+"," for x in self.real_index]) + '>, \n' + \
+                        " local_first " + str(self.local_first) +'\n' + \
                         " next_id " + str(self.next_id) + ")\n"
         return rep
 
@@ -251,56 +258,58 @@ def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, n
 
     # calc bwd_index info first
     b_info = compute_bwd_info_beta(output_tile_coord, input_shape, nTh, nTw, list_op__in_chckp_seg.copy(), shape_dict)
-    print("b_info", b_info)
     bwd_out_shape = b_info[id(op)].cur_output_shape
-    
     fwd_out_shape = (output_shape[2]//nTh, output_shape[3]//nTw)
     print("bwd_out_shape ", bwd_out_shape)
     print("fwd_out_shape ", fwd_out_shape)
     if not shape_compatible(fwd_out_shape, bwd_out_shape):
         print("Yes, fwd is smaller")
-    
+        f_info = compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg.copy(), shape_dict, b_info)
+    else:
+        f_info = compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg.copy(), shape_dict, b_info)
+
+
 
     #print("op_list_in_seg", list_op__in_chckp_seg)
    
 
-    # print("------------------------------")
-    # print("f_info", f_info)
-    # print("------------------------------")
-    # print("b_info", b_info)
+    print("------------------------------")
+    print("f_info", f_info)
+    print("------------------------------")
+    print("b_info", b_info)
 
-    # assert len(f_info) != 0 and len(b_info) != 0
-    # info = [f_info, b_info]
+    assert len(f_info) != 0 and len(b_info) != 0
+    info = [f_info, b_info]
    
-    # return info
+    return info
 
-def compute_fwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_op__in_chckp_seg,shape_dict) -> Dict:
+
+
+
+def compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg, shape_dict, b_info) -> Dict:
     # stream_structure is list of ops
     # compute fwd is from the last stage
     list_op__in_chckp_seg.reverse()
     fwd_info_dict = {}
     with torch.no_grad():
-        # calculate disjoint output tile first
-        # no partial tile here
-        H = output_shape[2]
-        W = output_shape[3]
+        # get info from b_info
         op_idex = 0
         local_idex = 0  # if after maxpool, local_idex reset to 0
         peek_conv2d_pos = 0
         next_id = -99 # end of a conv2d chain
         for op in list_op__in_chckp_seg:
-            uniq_id = id(op)
+            uniq_opid = id(op)
+            if op_idex == 0:    # the very first one(last), get info from b_info
+                cur_output_shape = b_info[uniq_opid].cur_output_shape
+                input_slice = b_info[uniq_opid].input_slice
+                real_index = input_slice
+                opname = "fake"
+                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, -11, -11, -11, False)
+                fwd_info_dict[-11] = pi
+
+
+
             if isinstance(op, conv2d.TiledConv2d):
-                if op_idex == 0:    # the very first one, compute info manually; 
-                    Th = H // nTh
-                    Tw = W // nTw
-                    tile_top = output_tile_coord[0]*Th
-                    tile_bottom = tile_top+Th-1
-                    tile_left = output_tile_coord[1]*Tw
-                    tile_right = tile_left+Tw-1
-                    input_slice = [tile_left, tile_right, tile_top, tile_bottom]
-                    real_index = input_slice
-                
                 if peek_conv2d_pos == 0:
                     peek_conv2d_pos = peek_position(list_op__in_chckp_seg, op_idex)
                     total_conv2d_in_seg = peek_conv2d_pos
@@ -309,34 +318,42 @@ def compute_fwd_info_beta(output_tile_coord: List, output_shape, nTh, nTw, list_
                 ph = op.padding[0]
                 pw = op.padding[1]
                 # real_index is the key loop variable 
-                none_tiled_output_shape = shape_dict[uniq_id].output_shape
+                none_tiled_output_shape = shape_dict[uniq_opid].output_shape
                 cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
                 padding_info, input_slice, internal_expand, real_index = conv2d_revr_padding_info(real_index, none_tiled_output_shape, [ph, pw], op.stride[0], op.kernel_size[0])
-                opname = "conv2d"+str(uniq_id)
+                opname = "conv2d"+str(uniq_opid)
                 local_idex = total_conv2d_in_seg-peek_conv2d_pos
                 peek_conv2d_pos -= 1
-                pi = Pad_info(output_tile_coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, op_idex, local_idex, next_id)
-                fwd_info_dict[uniq_id] = pi  # insert into info_dict
-                next_id = uniq_id
+                if peek_conv2d_pos == 0:
+                    local_first = True
+                else:
+                    local_first = False
+                pi = Pad_info(output_tile_coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, op_idex, local_idex, next_id, local_first)
+                fwd_info_dict[uniq_opid] = pi  # insert into info_dict
+                next_id = uniq_opid
             elif isinstance(op, maxpool2d.cMaxPool2d):
                 cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
-                opname = "maxpool2d"+str(uniq_id)
+                opname = "maxpool2d"+str(uniq_opid)
                 #produce input shape
                 mxp_stride = op.stride[0]
                 real_index = [x*mxp_stride for x in input_slice] # expand it and get parent index
-                H = H * mxp_stride
-                W = W * mxp_stride
+                none_tiled_input_shape = shape_dict[uniq_opid].input_shape
+
+                H = none_tiled_input_shape[2]
+                W = none_tiled_input_shape[3]
                 # produce real_index for next op
                 real_index[1] = min(W-1, real_index[1] +1) # +1 since 0-based 
                 real_index[3] = min(H-1, real_index[3] +1)
                 input_slice = real_index    # maxpooling no padding here.
-                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, -1, -199)
-                fwd_info_dict[uniq_id] = pi # insert into info_dict
-                next_id = -99
+                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, -1, next_id, False)
+                fwd_info_dict[uniq_opid] = pi # insert into info_dict
+                next_id = uniq_opid
             else:
                 None
             op_idex += 1
-            
+        
+        # fake dummy node to give output info
+       
     return fwd_info_dict
 
 
@@ -376,7 +393,7 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                 padding_info, input_slice, internal_expand, real_index = conv2d_revr_padding_info(real_index, none_tiled_input_shape, [ph, pw], op.stride[0], op.kernel_size[0])
                 cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
                 opname = "bk-conv2d"+str(id(op))
-                pi = Pad_info(output_tile_coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, op_idex, local_idex, next_id)
+                pi = Pad_info(output_tile_coord, cur_output_shape, padding_info, input_slice, internal_expand, real_index, opname, op_idex, local_idex, next_id, False)
                 bwd_info_dict[uniq_id] = pi  # insert into info_dict
                 next_id = uniq_id
             elif isinstance(op, maxpool2d.cMaxPool2d):
@@ -392,7 +409,7 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                 real_index[1] = min(W-1, real_index[1])
                 real_index[3] = min(H-1, real_index[3])
                 input_slice = real_index    # maxpooling no padding here.
-                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, -1, next_id)
+                pi = Pad_info(output_tile_coord, cur_output_shape, (), input_slice, (), real_index, opname, op_idex, -1, next_id, False)
                 bwd_info_dict[id(op)] = pi # insert into info_dict
                 next_id = uniq_id
             else:
@@ -409,8 +426,8 @@ def get_input_tile(info:Dict, input, first_op_in_seg):
         padding_info = pi.padding_info
         slice_info = pi.input_slice
         input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
-        pd = torch.nn.ConstantPad2d(padding_info, 0)
-        input_tile = pd(input_tile)
+        # pd = torch.nn.ConstantPad2d(padding_info, 0)
+        # input_tile = pd(input_tile)
     
     input_tile.requires_grad = input.requires_grad
     assert input_tile is not None

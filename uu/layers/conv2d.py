@@ -19,11 +19,12 @@ class TiledConv2dFunction(torch.autograd.Function):
         #force no auto padding in our customized functions.
         padding = (0,0)
 
-        #print("input shape", input.size())
+        print("input shape", input.size())
         c_info = info[0][uniq_id]   
         #print("current fwd info", c_info)
         s_depth = c_info.local_idex  # depth in current segment
-        if c_info.op_idex == 0: # if it is the first conv in a segment then padding
+        if c_info.local_first: # if it is the first conv in a segment then padding
+            print("here????")
             padding_info = c_info.padding_info
             pd = torch.nn.ConstantPad2d(padding_info, 0)
             input = pd(input)
@@ -31,7 +32,7 @@ class TiledConv2dFunction(torch.autograd.Function):
         #print("af input shape", input.size())
         ctx.info = info           
         if s_depth == 0: 
-            # depth is 1 if it is the last conv or the last one in segment
+            # depth is 0 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
                 ctx.save_for_backward(input)
                 ctx.weight = weight
@@ -40,6 +41,7 @@ class TiledConv2dFunction(torch.autograd.Function):
             else:
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+            print("shape input_tile_for_next\n", out.size())
         else:
             if not is_ccheckpoint:            
                 ctx.save_for_backward(input)
@@ -55,9 +57,9 @@ class TiledConv2dFunction(torch.autograd.Function):
             # TODO : how to get the direct children after this??
             next_id = c_info.next_id
             input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
-            # print("input_tile_for_next\n", input_tile_for_next)
+            #print("input_tile_for_next\n", input_tile_for_next)
             out = input_tile_for_next
-            #print("shape input_tile_for_next\n", input_tile_for_next.size())
+            print("shape input_tile_for_next\n", input_tile_for_next.size())
 
         return out
 
