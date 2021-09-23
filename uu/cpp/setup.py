@@ -12,9 +12,9 @@ setup(
 
 
 setup(
-    name='maxpool_2d_bkw',
+    name='maxpool_2d_bkw_cpp',
     ext_modules=[
-        CppExtension('maxpool_2d_bkw', ['maxpool_2d_bkw.cpp']),
+        CppExtension('maxpool_2d_bkw_cpp', ['maxpool_2d_bkw.cpp']),
     ],
     cmdclass={
         'build_ext': BuildExtension

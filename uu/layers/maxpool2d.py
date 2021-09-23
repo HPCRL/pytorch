@@ -6,7 +6,7 @@ import numpy as np
 from torch.autograd.variable import Variable
 import math
 import pdb
-import maxpool_2d_bkw
+import maxpool_2d_bkw_cpp, maxpool_2d_bkw_cuda
 
 class cMaxPool2dFunction(torch.autograd.Function):
     # create a static variable
@@ -46,12 +46,14 @@ class cMaxPool2dFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         print("\n^^^^^cMaxPool2dFunction bwd")
-        print(ctx.input)
-        print(grad_output)
-        print(ctx.arg_max)
+        # print(ctx.input)
+        # print(grad_output)
+        # print(ctx.arg_max)
 
-
-        grad_in = maxpool_2d_bkw.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        if ctx.input.is_cuda:
+            grad_in = maxpool_2d_bkw_cuda.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        else:
+            grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         print("##############grad_in in maxp", grad_in.size()) 
         print("grad in", grad_in)
             
