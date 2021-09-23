@@ -1057,6 +1057,9 @@ def arg_parser_unpack_method(t: Type, has_default: bool) -> str:
         elif str(t.elem) == 'int':
             # accept definite size
             return 'intlist'
+        # elif str(t.elem) == 'bool':
+        #     return 'boollist'
+
         elif str(t) == 'float[]':
             return 'doublelist'
         elif str(t) == 'Scalar[]':

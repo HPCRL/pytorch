@@ -37,8 +37,8 @@ def main():
     model = Net().to(device)
     model_ref =  Net_ref().to(device)
 
-    H = 2048 
-    W = 2048
+    H = 512 
+    W = 512
     nTh = 1
     nTw = 1
     input = torch.rand(1,1,H,W)
@@ -53,7 +53,7 @@ def main():
     ref_start = time.time() 
     out_ref = model_ref(input_ref)
     out_ref.sum().backward()
-    #print(input_ref.grad)
+    print(input_ref.grad)
     ref_end = time.time()
     print("ref time", ref_end-ref_start)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
