@@ -36,18 +36,17 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
     
-    
-    model_ref =  Net_ref().to(device)
+    model_ref =  Net_ref()
 
-    H = 4096 
-    W = 4096
+    H = 4 
+    W = 4
     nTh = 1
     nTw = 1
     input = torch.rand(1,1,H,W, requires_grad = True)
-    input = input.cuda()
+    input = input
 
     input_ref = input.data
-    input_ref = input_ref.cuda()
+    input_ref = input_ref
     input_ref.requires_grad = True
 
     ref_start = time.time() 
@@ -60,16 +59,17 @@ def main():
     our_end = time.time()
     print("our time", our_end-our_start)
 
-    print("out shape", out)
-    print("out_ref ", out_ref)
+    print("input \n", input)
+    print("out shape \n", out)
+    print("out_ref \n", out_ref)
     print("~~ check forward correctness ~~")
 
     not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
-    # out_ref.sum().backward()
-    # print(input_ref.grad)
+    out_ref.sum().backward()
+    print(input_ref.grad)
     
-    # out.sum().backward()
-    # print(input.grad)
+    out.sum().backward()
+    print("DONE")
 
 if __name__=="__main__":
     main()

@@ -178,10 +178,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 256
-    W = 256
-    nTh = 8
-    nTw = 16
+    H = 270
+    W = 270
+    nTh = 18
+    nTw = 18
     input = torch.rand(1,1,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, nTh, nTw )
