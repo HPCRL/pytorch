@@ -20,10 +20,11 @@ class TiledConv2dFunction(torch.autograd.Function):
         padding = (0,0)
 
         print("input shape", input.size())
-        c_info = info[0][uniq_id]   
+        c_info = None # info[0][uniq_id]   
         #print("current fwd info", c_info)
-        s_depth = c_info.local_idex  # depth in current segment
-        if c_info.local_first: # if it is the first conv in a segment then padding
+        s_depth = 0    # c_info.local_idex  # depth in current segment
+        
+        if False and c_info.local_first: # if it is the first conv in a segment then padding
             print("here????")
             padding_info = c_info.padding_info
             pd = torch.nn.ConstantPad2d(padding_info, 0)
@@ -34,8 +35,11 @@ class TiledConv2dFunction(torch.autograd.Function):
         if s_depth == 0: 
             # depth is 0 if it is the last conv or the last one in segment
             if not is_ccheckpoint:    
-                ctx.save_for_backward(input)
+                ctx.input = input
                 ctx.weight = weight
+                ctx.padding = padding
+                ctx.stride = stride
+                ctx.groups = groups
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             else:
@@ -44,8 +48,11 @@ class TiledConv2dFunction(torch.autograd.Function):
             print("shape input_tile_for_next\n", out.size())
         else:
             if not is_ccheckpoint:            
-                ctx.save_for_backward(input)
+                ctx.input = input
                 ctx.weight = weight
+                ctx.padding = padding
+                ctx.stride = stride
+                ctx.groups = groups
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             else:
@@ -61,11 +68,33 @@ class TiledConv2dFunction(torch.autograd.Function):
             out = input_tile_for_next
             print("shape input_tile_for_next\n", input_tile_for_next.size())
 
+        
         return out
 
-    #@staticmethod
-    #def backward(ctx, grad_output):
-    #   return
+    @staticmethod
+    def backward(ctx, grad_output):
+        c_info = ctx.info
+        if ctx.input.is_cuda:
+            if torch.backends.cudnn.enabled:
+                print("using cudnn bkw")
+                weight_tensor = ctx.weight
+                weight_size = weight_tensor.size()
+                padding = ctx.padding
+                stride = ctx.stride
+                group = ctx.groups 
+                input_tensor = ctx.input 
+                input_size = input_tensor.size()
+                dilation = (1,1)
+                grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                grad_weight = torch.cudnn_convolution_backward_weight(weight_size , grad_output, input_tensor, padding, stride, dilation, group, False, False, False)
+                grad_bias = None
+            else:
+                print("using naive cuda bkw")
+        else:
+            print("using cpu bkw")
+        
+        return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
+
         # print("\n** tiled conv2d backward")
         # # print("** grad_output", grad_output)
         # # print("** grad_output shape", grad_output.size())
@@ -219,12 +248,15 @@ class TiledConv2d(_ConvNd):
             print("missing info in cConv2d")
             assert False
         
-        # TODO: I need to pass hash val to fwd and bwd
+        
         tconv2d = TiledConv2dFunction.apply
         uniq_id = id(self)
-        pi = info[0][uniq_id]
-        #self.padding = (0,0) 
-        if pi.op_idex == 0:
+        
+        #TODO: force to comment out
+        # pi = info[0][uniq_id]
+        pi = None
+        
+        if True or pi.op_idex == 0:
            return tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint)
         else:

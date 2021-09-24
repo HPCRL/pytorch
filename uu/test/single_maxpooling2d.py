@@ -9,13 +9,21 @@ from torch.nn.parameter import Parameter
 import time
 
 class Net_ref(nn.Module):
-    def __init__(self):
+    def __init__(self, w1):
         super().__init__()
         
         self.maxpool = nn.MaxPool2d((2,2), (2,2))
+        self.conv1 = nn.Conv2d(in_channels=1, 
+                                  out_channels=1, 
+                                  kernel_size=(3,3),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )
+        self.conv1.weight = Parameter(w1)
 
     def forward(self, x):
         out = self.maxpool(x)
+        out = self.conv1(out)
         #print("ref mxp out\n", out)
         return out
 
@@ -24,10 +32,17 @@ class Net(nn.Module):
         super().__init__()
         
         self.mxp = maxpool2d.cMaxPool2d((2, 2), (2, 2))
-
+        self.conv1 = conv2d.TiledConv2d(in_channels=1, 
+                                  out_channels=1, 
+                                  kernel_size=(3,3),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )
+        
     def forward(self, x, H, W, nTh, nTw):
         info = None
         out = self.mxp(x, info)
+        out = self.conv1(out)
         return out
 
 def main():
@@ -35,7 +50,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
-    model_ref =  Net_ref().to(device)
+    
 
     H = 512 
     W = 512
@@ -45,6 +60,16 @@ def main():
     input = input.to(device)
     input.requires_grad = True
 
+    our_start = time.time()
+    out = model(input, H, W, nTh, nTw )
+    out.sum().backward()    
+    our_end = time.time()
+    #print("our time", our_end-our_start)
+    w1 = model.conv1.weight.data
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    
+    
+    model_ref =  Net_ref(w1).to(device)
     input_ref = input.data
     input_ref = input_ref
     input_ref.requires_grad = True
@@ -52,26 +77,25 @@ def main():
 
     ref_start = time.time() 
     out_ref = model_ref(input_ref)
-    out_ref.sum().backward()
-    print(input_ref.grad)
+    out_ref.sum().backward()    
     ref_end = time.time()
-    print("ref time", ref_end-ref_start)
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    our_start = time.time()
-    out = model(input, H, W, nTh, nTw )[0]
-    out.sum().backward()
-    #print(input.grad)
-    our_end = time.time()
-    print("our time", our_end-our_start)
-
-    print("input \n", input)
+    #print("ref time", ref_end-ref_start)
+    
+    
+    # print("input \n", input)
     # print("out shape \n", out)
     # print("out_ref \n", out_ref)
+    Hout = out.size()[2]
+    Wout = Hout
     print("~~ check forward correctness ~~")
-
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input_ref.grad, input.grad)
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,Hout, Wout, out, out_ref)
     
     
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    # print(input.grad)
+    # print(input_ref.grad)
+    print("~~ check bkw correctness ~~")
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad)
     
     print("DONE")
 

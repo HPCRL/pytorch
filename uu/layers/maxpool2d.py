@@ -51,20 +51,21 @@ class cMaxPool2dFunction(torch.autograd.Function):
         # print(grad_output)
         # print(ctx.arg_max)
 
-        if ctx.input.is_cuda:
-            grad_in = maxpool_2d_bkw_cuda.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
-        else:
-            grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        # #case1
+        # if ctx.input.is_cuda:
+        #     grad_in = maxpool_2d_bkw_cuda.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        # else:
+        #     grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
-        grad_in_1 = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        #case2
+        grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
-        print("##############grad_in in maxp", grad_in.size()) 
-        print("grad in", grad_in)
-
-        print("##############grad_in in maxp", grad_in.size()) 
-        print("grad in1", grad_in_1)
-        print("comapre grad_1 grad\n")
-        correctness_check.point_wise_compare_4d(1,1,grad_in.size()[2], grad_in.size()[3], grad_in, grad_in_1)
+        
+        # print("##############grad_in in maxp", grad_in.size()) 
+        # print("grad in", grad_in)
+        # print("grad in1", grad_in_1)
+        # print("comapre grad_1 grad\n")
+        # correctness_check.point_wise_compare_4d(1,1,grad_in.size()[2], grad_in.size()[3], grad_in, grad_in_1)
         return grad_in, None, None, None, None
 
 class cMaxPool2d(_MaxPoolNd):
