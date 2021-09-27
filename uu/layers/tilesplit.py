@@ -8,15 +8,14 @@ class TiledSplitFunction(torch.autograd.Function):
     def forward(ctx, *inputs):
         # here we have to decide sending to machine or not.
         # also we assume, the tiling only on H/W for a conv2d
-        info = inputs[0]
-        x = inputs[1]  
+        x = inputs[0] 
+        info = inputs[1]
+         
         first_op_in_seg = id(inputs[2])
         model_device = inputs[3]
-        
+        ctx.num_tile = inputs[4]
         ctx.input_is_cuda = x.is_cuda
-        #info[0] fwd_info
-        ctx.coord = info[0][first_op_in_seg].coord
-        ctx.abs_id = numpy.prod(ctx.coord)  
+        ctx.info = info
         ctx.big_infput_shape = x.size()
         
         input = padding_calc.get_input_tile(info[0], x, first_op_in_seg)
@@ -34,12 +33,32 @@ class TiledSplitFunction(torch.autograd.Function):
     
     @staticmethod
     def backward(ctx, grad_output):
-        return None, None, None, None
-        # if ctx.abs_id == 0: 
-        #     # very first tile
-        #     return
-        # else:
-        #     final_grad_out = torch.zeros(ctx.big_infput_shape)
+        # TODO: need to regather all tile-grad-in
+        f_info = ctx.info[0][-11]
+        b_info = ctx.info[1][-11]
+        tile_coord = b_info.coord
+        print(tile_coord)
+        if tile_coord == ctx.num_tile:
+            # last one create the space
+            if ctx.input_is_cuda:
+                # create a cuda-tensor
+                N = ctx.big_infput_shape[0]
+                C = ctx.big_infput_shape[1]
+                H = ctx.big_infput_shape[2]
+                W = ctx.big_infput_shape[3]
+                grad_in = torch.zeros(N, C, H, W).cuda()
+            else:
+                N = ctx.big_infput_shape[0]
+                C = ctx.big_infput_shape[1]
+                H = ctx.big_infput_shape[2]
+                W = ctx.big_infput_shape[3]
+                grad_in = torch.zeros(N, C, H, W) 
+        else:
+            # copy in
+            grad_in = torch.zeros(1,1,1,1) 
+
+        return grad_in, None, None, None, None
+       
 
 
 

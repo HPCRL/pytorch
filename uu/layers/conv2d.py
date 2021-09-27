@@ -75,7 +75,7 @@ class TiledConv2dFunction(torch.autograd.Function):
         b_info = ctx.info[1][ctx.uniq_id]
         if ctx.input.is_cuda:
             if torch.backends.cudnn.enabled:
-                print("using cudnn bkw")
+                print("@@@ using cudnn bkw")
                 weight_tensor = ctx.weight
                 weight_size = weight_tensor.size()
                 padding = ctx.padding
@@ -92,14 +92,19 @@ class TiledConv2dFunction(torch.autograd.Function):
                 if ctx.needs_input_grad[0]:
                     if g_depth == 0: 
                         # for user input
-                        # print("input shape", input_size)
-                        # print("weight shape", weight_size)
-                        # print("grad_output shape", grad_output.size())
+                        print("input grad ++ input shape", input_size)
+                        print("weight shape", weight_size)
+                        print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
-                        # print("final", grad_input.size(), grad_input)
+                        # reshape to tile size before end of the segment
+                        
+                        print("final", grad_input.size(), grad_input)
                     elif rev_g_depth == 0:
                         # the last stage in regular order
                         # a whole grad_output as input of backward
+                        print("ouput grad ++ input shape", input_size)
+                        print("weight shape", weight_size)
+                        print("grad_output shape", grad_output.size())
                         new_grad_out = padding_calc.get_input_tile(b_info, grad_output, 0)
                         # since I remove padding from get_input_tile, so manually do it here.
                         #  TODO: do I need to resize input_size
@@ -108,11 +113,23 @@ class TiledConv2dFunction(torch.autograd.Function):
                     elif l_depth == 0:  
                         # the last conv in local continous conv segment
                         #  TODO: do I need to resize input_size
+                        print("local last ++ input shape", input_size)
+                        print("local last ++ input", input_tensor)
+                        print("weight shape", weight_size)
+                        print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        #shrink if original input is padded.
                         print("grad_input", grad_input.size())
+                        grad_input = padding_calc.resize_grad_in(f_info, grad_input)
+                        print("new grad_input", grad_input.size())
                     else:
                         #  TODO: do I need to resize input_size
+                        print("in the middle ++ input shape", input_size)
+                        print("weight shape", weight_size)
+                        print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        #shrink if original input is padded.
+                        grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("grad_input", grad_input.size())
 
                 # TODO: Handle Grad_weight

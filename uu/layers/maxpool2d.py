@@ -6,7 +6,6 @@ import numpy as np
 from torch.autograd.variable import Variable
 import math
 import pdb
-import maxpool_2d_bkw_cpp, maxpool_2d_bkw_cuda
 from uu.utils import correctness_check 
 
 class cMaxPool2dFunction(torch.autograd.Function):
@@ -49,41 +48,34 @@ class cMaxPool2dFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         print("\n^^^^^cMaxPool2dFunction bwd")
-        # print(ctx.input.size())
-        # print(grad_output.size())
-        # print(ctx.arg_max.size())
+        print("input size", ctx.input.size())
+        print("grad_out size",grad_output.size())
+        print("arg size",ctx.arg_max.size())
 
         # #case1
         # if ctx.input.is_cuda:
         #     grad_in = maxpool_2d_bkw_cuda.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         # else:
         #     grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
-        
-
         f_info = ctx.info[0][ctx.uniq_id]
         b_info = ctx.info[1][ctx.uniq_id]
 
-        # not sure if these logic is correct
-        crop = []
-        for i in range(len(f_info)):
-            crop.append(b_info[i] - f_info[i])
-        #print("crop", crop)
+        print(f_info)
+        print(b_info)
+        rev_g_depth = f_info.op_idex
 
-        #NCHW
-        left = crop[0]
-        right = ctx.arg_max.shape[3]-crop[1]
-        top = crop[2]
-        bottom = ctx.arg_max.shape[2]-crop[3]
-        new_arg_max = ctx.arg_max[:, :, top:bottom, left:right]
-
-
-        #case2
-        grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        if rev_g_depth == 0:
+            # the last stage in regular order
+            new_grad_out = grad_output[:, :, b_info.input_slice[2]:b_info.input_slice[3]+1, b_info.input_slice[0]:b_info.input_slice[1]+1]
+            print("new_grad_out", new_grad_out.size())
+            grad_in = torch._C._nn.max_pool2d_with_indices_backward(new_grad_out, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        else:
+            grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
         
-        # print("##############grad_in in maxp", grad_in.size()) 
+        print("##############grad_in in maxp", grad_in.size()) 
         # print("grad in", grad_in)
-        return grad_in, None, None, None, None
+        return grad_in, None, None, None, None, None, None
 
 class cMaxPool2d(_MaxPoolNd):
     def __init__(self, kernel_size: _size_2_t, stride: _size_2_t = None,
@@ -118,10 +110,17 @@ class cMaxPool2d(_MaxPoolNd):
         cmaxplool = cMaxPool2dFunction.apply
        
         uniq_id = id(self)
-        next_input = cmaxplool(input, self.kernel_size, self.stride,
-                            self.padding, info, uniq_id, is_ccheckpoint)
-        # need to handle padded for next if needed. 
-        return next_input, info, self.is_ccheckpoint
-    
+
+        pi = info[0][uniq_id]
         
+        if pi.op_idex == 0: # last stage in the segment or in the global network
+            return cmaxplool(input, self.kernel_size, self.stride,
+                            self.padding, info, uniq_id, is_ccheckpoint)
+        else:
+            next_input = cmaxplool(input, self.kernel_size, self.stride,
+                            self.padding, info, uniq_id, is_ccheckpoint)
+            return next_input, info, self.is_ccheckpoint
+
+
+
  
