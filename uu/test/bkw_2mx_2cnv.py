@@ -105,7 +105,7 @@ class Net(nn.Module):
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh, nTw])
+                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
                 out_temp = self.conv2d_1(input_tile, info)
                 print("1 out_temp", out_temp[0].size())
@@ -164,10 +164,12 @@ def main():
 
 
     out_ref.sum().backward()
-    print(input_ref.grad)
+    #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
+
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
 
 if __name__=="__main__":
     main()

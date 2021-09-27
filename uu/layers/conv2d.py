@@ -96,9 +96,9 @@ class TiledConv2dFunction(torch.autograd.Function):
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        print("final", grad_input.size())
                         # reshape to tile size before end of the segment
-                        
-                        print("final", grad_input.size(), grad_input)
+                        grad_input = padding_calc.reshape_for_final(ctx.info[1][-11], f_info, grad_input)
                     elif rev_g_depth == 0:
                         # the last stage in regular order
                         # a whole grad_output as input of backward

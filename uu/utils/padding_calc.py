@@ -381,7 +381,7 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
                 tile_right = tile_left+Tw-1
                 input_slice = [tile_left, tile_right, tile_top, tile_bottom]
                 real_index = input_slice
-                opname = "fake"
+                opname = "fake-bp"
                 pi = Pad_info(output_tile_coord, [Th, Tw], (), input_slice, (), real_index, opname, -11, -11, -11, False, [])
                 bwd_info_dict[-11] = pi
             
@@ -449,6 +449,23 @@ def resize_grad_in(info, grad_input):
         grad_input = grad_input[:, :, info.padding_info[2]:grad_input.size()[2]-info.padding_info[3], \
                     info.padding_info[0]:grad_input.size()[3]-info.padding_info[1]]
     return grad_input
+
+def reshape_for_final(need_info, f_info, grad_input):
+    #remove padding part
+    grad_input = resize_grad_in(f_info, grad_input)
+    print("f_info ::", f_info, need_info)
+    need_info_index = need_info.input_slice
+    b_info_index = f_info.input_slice
+    crop = []
+    # assumption: b_info >> need_info
+    for i in range(len(need_info_index)):
+        crop.append(abs( b_info_index[i] - need_info_index[i]))
+    print("crop", crop)
+    print("##", crop[2], grad_input.size()[2]-crop[3], crop[0], grad_input.size()[3]-crop[1] )
+    grad_input = grad_input[:,:,crop[2]:grad_input.size()[2]-crop[3], crop[0]:grad_input.size()[3]-crop[1]]
+    print("after crop g_in", grad_input.size())
+    return grad_input
+
 
 
 #TODO can simplify

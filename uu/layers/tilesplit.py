@@ -2,8 +2,10 @@ import torch
 from uu.utils import padding_calc
 import numpy
 
-final_grad_out = None
+
+
 class TiledSplitFunction(torch.autograd.Function):
+    big_grad_in = None
     @staticmethod
     def forward(ctx, *inputs):
         # here we have to decide sending to machine or not.
@@ -31,13 +33,16 @@ class TiledSplitFunction(torch.autograd.Function):
         # print ("TiledSplitFunction input tile", input)
         return input
     
+    
     @staticmethod
     def backward(ctx, grad_output):
         # TODO: need to regather all tile-grad-in
-        f_info = ctx.info[0][-11]
         b_info = ctx.info[1][-11]
         tile_coord = b_info.coord
+        coord = b_info.input_slice
         print(tile_coord)
+        print(ctx.num_tile)
+        # print(TiledSplitFunction.big_grad_in)
         if tile_coord == ctx.num_tile:
             # last one create the space
             if ctx.input_is_cuda:
@@ -46,23 +51,17 @@ class TiledSplitFunction(torch.autograd.Function):
                 C = ctx.big_infput_shape[1]
                 H = ctx.big_infput_shape[2]
                 W = ctx.big_infput_shape[3]
-                grad_in = torch.zeros(N, C, H, W).cuda()
+                TiledSplitFunction.big_grad_in = torch.zeros(N, C, H, W).cuda()
             else:
                 N = ctx.big_infput_shape[0]
                 C = ctx.big_infput_shape[1]
                 H = ctx.big_infput_shape[2]
                 W = ctx.big_infput_shape[3]
-                grad_in = torch.zeros(N, C, H, W) 
-        else:
-            # copy in
-            grad_in = torch.zeros(1,1,1,1) 
-
-        return grad_in, None, None, None, None
+                TiledSplitFunction.big_grad_in = torch.zeros(N, C, H, W) 
+        
+        TiledSplitFunction.big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output
+        return TiledSplitFunction.big_grad_in, None, None, None, None
        
-
-
-
-
 class TiledSplit(torch.nn.Module):
     def __init__(self):
         super(TiledSplit, self).__init__()
