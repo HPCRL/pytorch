@@ -89,10 +89,12 @@ class TiledConv2dFunction(torch.autograd.Function):
                 rev_g_depth = f_info.op_idex
                 l_depth = f_info.local_idex
                 # Handle Grad_in
+                # TODO: maybe need clean up branch logic
                 if ctx.needs_input_grad[0]:
                     if g_depth == 0: 
                         # for user input
                         print("input grad ++ input shape", input_size)
+                        print("input grad ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
@@ -103,16 +105,16 @@ class TiledConv2dFunction(torch.autograd.Function):
                         # the last stage in regular order
                         # a whole grad_output as input of backward
                         print("ouput grad ++ input shape", input_size)
+                        print("ouput grad ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
                         new_grad_out = padding_calc.get_input_tile(b_info, grad_output, 0)
                         # since I remove padding from get_input_tile, so manually do it here.
-                        #  TODO: do I need to resize input_size
                         grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_out, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("grad_input", grad_input.size())
                     elif l_depth == 0:  
                         # the last conv in local continous conv segment
-                        #  TODO: do I need to resize input_size
                         print("local last ++ input shape", input_size)
                         print("local last ++ input", input_tensor)
                         print("weight shape", weight_size)
@@ -123,8 +125,8 @@ class TiledConv2dFunction(torch.autograd.Function):
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("new grad_input", grad_input.size())
                     else:
-                        #  TODO: do I need to resize input_size
                         print("in the middle ++ input shape", input_size)
+                        print("in the middle ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
                         grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
@@ -134,13 +136,16 @@ class TiledConv2dFunction(torch.autograd.Function):
 
                 # TODO: Handle Grad_weight
                 if ctx.needs_input_grad[1]:
-                    grad_weight = torch.cudnn_convolution_backward_weight(weight_size , grad_output, input_tensor, padding, stride, dilation, group, False, False, False)
+                    # need to reshape both grad_out and input_tensor
+                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, padding, stride)
+                    grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, padding, stride, dilation, group, False, False, False)
                 grad_bias = None
             else:
                 print("using naive cuda bkw")
         else:
             print("using cpu bkw")
-        
+
+        print("##############grad_in in conv2d", grad_input) 
         return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
     
@@ -192,7 +197,6 @@ class TiledConv2d(_ConvNd):
         
         tconv2d = TiledConv2dFunction.apply
         uniq_id = id(self)
-        
         pi = info[0][uniq_id]
         
         if pi.op_idex == 0: # last stage in the segment or in the global network

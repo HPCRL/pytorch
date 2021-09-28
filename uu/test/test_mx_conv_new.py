@@ -108,7 +108,7 @@ class Net(nn.Module):
                                   padding=(1,1),
                                   )   
         
-        self.mxp = maxpool2d.cMaxPool2d((2, 2), (2, 2), mdepth=1, num_maxp=1)
+        self.mxp = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
         self.conv2d_4 = conv2d.TiledConv2d(in_channels=1, 
                                   out_channels=1, 
@@ -136,16 +136,16 @@ class Net(nn.Module):
         stream_structure = self.block1
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
-        for i in range(0,nTh): 
-            for j in range(0,nTw):
+        for i in range(0,1): 
+            for j in range(0,1):
                 coord = [i,j]
                 print("coord", coord)
                 # TODO: here we have to somehow provide static info and num_conv. 
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
-                print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(info, x, stream_structure[0], model_device)
+                print("++++++++++++++++++++++++++++++++++++++++++++++++", info)
+                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
                 out_temp = self.conv2d_1(input_tile, info)
                 print("1 out_temp", out_temp[0].size())
@@ -178,10 +178,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 270
-    W = 270
-    nTh = 18
-    nTw = 18
+    H = 16
+    W = 16
+    nTh = 4
+    nTw = 4
     input = torch.rand(1,1,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, nTh, nTw )
@@ -203,10 +203,10 @@ def main():
     out_ref = model_ref(input_ref)
     print("done")
 
-    print("out shape", out)
-    print("out_ref ", out_ref)
-    print("~~ check forward correctness ~~")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
+    # print("out shape", out)
+    # print("out_ref ", out_ref)
+    # print("~~ check forward correctness ~~")
+    # not_same_num = correctness_check.point_wise_compare_4d(1,1,H//2, W//2, out, out_ref)
     
 
 if __name__=="__main__":

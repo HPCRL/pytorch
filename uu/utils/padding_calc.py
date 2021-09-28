@@ -266,12 +266,10 @@ def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, n
 
 
     #print("op_list_in_seg", list_op__in_chckp_seg)
-   
-
-    print("------------------------------")
-    print("f_info", f_info)
-    print("------------------------------")
-    print("b_info", b_info)
+    # print("------------------------------")
+    # print("f_info", f_info)
+    # print("------------------------------")
+    # print("b_info", b_info)
 
     assert len(f_info) != 0 and len(b_info) != 0
     info = [f_info, b_info]
@@ -429,18 +427,15 @@ def compute_bwd_info_beta(output_tile_coord: List, input_shape, nTh, nTw, list_o
 
 def get_input_tile(info:Dict, input, first_op_in_seg):
     input_tile = None
-    #print("depth", depth)
     with torch.no_grad():
         pi = info[first_op_in_seg]
-        padding_info = pi.padding_info
         slice_info = pi.input_slice
         input_tile = input[:, :, slice_info[2]:slice_info[3]+1, slice_info[0]:slice_info[1]+1]       #NCHW
-        # pd = torch.nn.ConstantPad2d(padding_info, 0)
-        # input_tile = pd(input_tile)
-    
+
     input_tile.requires_grad = input.requires_grad
     assert input_tile is not None
-    return Variable(input_tile, requires_grad = True)
+    return input_tile
+    #return Variable(input_tile, requires_grad = True)
 
 
 def resize_grad_in(info, grad_input):
@@ -453,7 +448,7 @@ def resize_grad_in(info, grad_input):
 def reshape_for_final(need_info, f_info, grad_input):
     #remove padding part
     grad_input = resize_grad_in(f_info, grad_input)
-    print("f_info ::", f_info, need_info)
+    # print("f_info ::", f_info, need_info)
     need_info_index = need_info.input_slice
     b_info_index = f_info.input_slice
     crop = []
@@ -465,6 +460,13 @@ def reshape_for_final(need_info, f_info, grad_input):
     grad_input = grad_input[:,:,crop[2]:grad_input.size()[2]-crop[3], crop[0]:grad_input.size()[3]-crop[1]]
     print("after crop g_in", grad_input.size())
     return grad_input
+
+def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, padding, stride):
+    # to get disjoint part of grad_output
+    # for stride 1 and same shape in/out-put
+    # cal disjoint g_index
+    # cal input index based on f_info and pure-calc
+    return grad_output, input_tensor
 
 
 

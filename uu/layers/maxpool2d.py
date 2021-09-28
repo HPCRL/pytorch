@@ -49,7 +49,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
     def backward(ctx, grad_output):
         print("\n^^^^^cMaxPool2dFunction bwd")
         print("input size", ctx.input.size())
-        print("grad_out size",grad_output.size())
+        print("grad_out size",grad_output.size(), grad_output)
         print("arg size",ctx.arg_max.size())
 
         # #case1
@@ -67,7 +67,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
         if g_depth == 0: 
             grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
             # reshape to tile size before leaving the segment
-            
+
         elif rev_g_depth == 0:
             # the last stage in regular order
             new_grad_out = grad_output[:, :, b_info.input_slice[2]:b_info.input_slice[3]+1, b_info.input_slice[0]:b_info.input_slice[1]+1]
@@ -77,7 +77,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
             grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
         
-        print("##############grad_in in maxp", grad_in.size()) 
+        print("##############grad_in in maxp", grad_in.size(), grad_in) 
         # print("grad in", grad_in)
         return grad_in, None, None, None, None, None, None
 
