@@ -168,9 +168,17 @@ def main():
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
-    print("input ref grad", input_ref.grad)
-    print("input grad", input.grad)
+    # print("input ref grad", input_ref.grad)
+    # print("input grad", input.grad)
     not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    
+    
+
+    print("w1 ref grad", model_ref.conv2d_1.weight.grad)
+    print("w1 grad", model.conv2d_1.weight.grad)
+
+    print("w2 ref grad", model_ref.conv2d_2.weight.grad)
+    print("w2 grad", model.conv2d_2.weight.grad)
 
 if __name__=="__main__":
     main()

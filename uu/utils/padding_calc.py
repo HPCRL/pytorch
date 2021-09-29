@@ -455,17 +455,39 @@ def reshape_for_final(need_info, f_info, grad_input):
     # assumption: b_info >> need_info
     for i in range(len(need_info_index)):
         crop.append(abs( b_info_index[i] - need_info_index[i]))
-    print("crop", crop)
-    print("##", crop[2], grad_input.size()[2]-crop[3], crop[0], grad_input.size()[3]-crop[1] )
+    # print("crop", crop)
+    # print("##", crop[2], grad_input.size()[2]-crop[3], crop[0], grad_input.size()[3]-crop[1] )
     grad_input = grad_input[:,:,crop[2]:grad_input.size()[2]-crop[3], crop[0]:grad_input.size()[3]-crop[1]]
     print("after crop g_in", grad_input.size())
     return grad_input
 
-def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, padding, stride):
+def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, info_list, padding, stride):
     # to get disjoint part of grad_output
     # for stride 1 and same shape in/out-put
     # cal disjoint g_index
     # cal input index based on f_info and pure-calc
+    Th = f_info.non_disjoint_tile_size[0]
+    Tw = f_info.non_disjoint_tile_size[1]
+    tile_top = f_info.coord[0]*Th
+    tile_bottom = tile_top+Th-1
+    tile_left = f_info.coord[1]*Tw
+    tile_right = tile_left+Tw-1
+    actual_index = [tile_left, tile_right, tile_top, tile_bottom]
+    current_stage_g_index = info_list[f_info.next_id].input_slice
+    input_g_index = f_info.input_slice
+
+    crop = []
+    # assumption: current_stage_g_index >> actual_index
+    for i in range(len(actual_index)):
+        crop.append(abs( current_stage_g_index[i] - actual_index[i]))
+    
+    print("crop", crop, current_stage_g_index, actual_index)
+    print("##", crop[2],grad_output.size()[2]-crop[3], crop[0],grad_output.size()[3]-crop[1])
+    print(f_info)
+    grad_output = grad_output[:,:,crop[2]:grad_output.size()[2]-crop[3], crop[0]:grad_output.size()[3]-crop[1]]
+    print("g_out", grad_output.size())
+    input_tensor = input_tensor[:,:,crop[2]:input_tensor.size()[2]-crop[3], crop[0]:input_tensor.size()[3]-crop[1]]
+    print("input", input_tensor.size())
     return grad_output, input_tensor
 
 

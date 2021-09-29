@@ -137,7 +137,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # TODO: Handle Grad_weight
                 if ctx.needs_input_grad[1]:
                     # need to reshape both grad_out and input_tensor
-                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, padding, stride)
+                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, ctx.info[0], padding, stride)
                     grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, padding, stride, dilation, group, False, False, False)
                 grad_bias = None
             else:
