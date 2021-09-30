@@ -44,7 +44,7 @@ class TiledSplitFunction(torch.autograd.Function):
         # print(tile_coord)
         # print(ctx.num_tile)
         # print(coord[2], coord[3]+1, coord[0], coord[1]+1)
-        print("TiledSplitFunction bwd", grad_output)
+        #print("TiledSplitFunction bwd", grad_output)
         # print(TiledSplitFunction.big_grad_in)
         if True or tile_coord == ctx.num_tile:
             # last one create the space
@@ -65,8 +65,8 @@ class TiledSplitFunction(torch.autograd.Function):
         
         
         big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output
-        if tile_coord == [0, 0]:
-            print("TiledSplitFunction.big_grad_in", big_grad_in)
+        # if tile_coord == [0, 0]:
+        #     print("TiledSplitFunction.big_grad_in", big_grad_in)
         
         
         return big_grad_in, None, None, None, None

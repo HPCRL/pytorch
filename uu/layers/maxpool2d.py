@@ -49,7 +49,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
     def backward(ctx, grad_output):
         print("\n^^^^^cMaxPool2dFunction bwd")
         print("input size", ctx.input.size())
-        print("grad_out size",grad_output.size(), grad_output)
+        print("grad_out size",grad_output.size())
         print("arg size",ctx.arg_max.size())
 
         # #case1
@@ -77,7 +77,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
             grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
         
-        print("##############grad_in in maxp", grad_in.size(), grad_in) 
+        print("##############grad_in in maxp", grad_in.size()) 
         # print("grad in", grad_in)
         return grad_in, None, None, None, None, None, None
 
