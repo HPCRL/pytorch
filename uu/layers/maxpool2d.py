@@ -59,9 +59,6 @@ class cMaxPool2dFunction(torch.autograd.Function):
         #     grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         f_info = ctx.info[0][ctx.uniq_id]
         b_info = ctx.info[1][ctx.uniq_id]
-
-        print(f_info)
-        print(b_info)
         rev_g_depth = f_info.op_idex
         g_depth = b_info.op_idex    # global depth
         if g_depth == 0: 

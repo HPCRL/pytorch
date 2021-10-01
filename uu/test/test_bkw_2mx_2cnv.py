@@ -7,6 +7,7 @@ from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
 
 li = []
+li_act = []
 grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
@@ -16,7 +17,13 @@ def print_grad(self, grad_input, grad_output):
     #print('ref grad_output  :\n ', grad_output[0])
     print('grad_input size : ', grad_input[0].size())
     #print('ref grad_input  : \n', grad_input[0])
-    li.append( [grad_input, grad_output])
+    li.append( grad_output[0])
+
+def print_activa(self, input, output):
+    print('Inside '+ self.__class__.__name__+ ' forward')
+    print('input size : ', input[0].size())
+    print('output size : ', output[0].size())
+    li_act.append(input[0])
 
     
 
@@ -48,7 +55,10 @@ class Net_ref(nn.Module):
         self.conv2d_1.weight = Parameter(w1)
         self.conv2d_2.weight = Parameter(w2)
        
-
+        self.conv2d_1.register_forward_hook(print_activa)
+        self.conv2d_2.register_forward_hook(print_activa)
+        self.maxpool1.register_forward_hook(print_activa)
+        self.maxpool2.register_forward_hook(print_activa)
         
         self.conv2d_1.register_full_backward_hook(print_grad)
         self.conv2d_2.register_full_backward_hook(print_grad)
@@ -101,15 +111,20 @@ class Net(nn.Module):
         #print("!!!!!!!", model_device)
         stream_structure = self.block1
 
-        # prepare grad info for correctness check(only for linear )
+    # prepare grad info for correctness check(only for linear )
+        li_act_p = []
+        for elm in li_act:
+            print(elm.size())
+            pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
+            li_act_p.append(pd(elm))
         i = len(li)
+        ii = 0
         for op in self.block1._modules.values():
-            grad_dict_bk[id(op)*-1] = li[i-1]
+            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
             i -= 1
+            ii+= 1
+    # prepare grad info for correctness check(only for linear )
 
-        
-
-        
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
         for i in range(0,nTh): 
@@ -154,10 +169,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 144
-    W = 144
-    nTh = 3
-    nTw = 3
+    H = 64
+    W = 64
+    nTh = 4
+    nTw = 4
     input = torch.rand(1,1,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
@@ -170,8 +185,7 @@ def main():
     out_ref = model_ref(input_ref)
     print("done ref")
     out_ref.sum().backward()
-
-
+    print("done ref bkw")
 
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
@@ -184,33 +198,31 @@ def main():
     # print("out_ref ", out_ref)
 
     #print(input_ref.grad)
-    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    # print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    # out.sum().backward()
-    # # print("input ref grad", input_ref.grad)
-    # # print("input grad", input.grad)
-    # print("~~ check forward correctness ~~")
-    # oH = out.size()[2]
-    # oW = out.size()[3]
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    out.sum().backward()
+    # print("input ref grad", input_ref.grad)
+    # print("input grad", input.grad)
+    print("~~ check forward correctness ~~")
+    oH = out.size()[2]
+    oW = out.size()[3]
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     
 
 
-    # print("#### compare grad_in")
-    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    # # print(type(li[0][0][0]))
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, li[-1][0][0].to('cpu'))
-    
+    print("#### compare grad_in")
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+   
 
     # # print("w1 ref grad", model_ref.conv2d_1.weight.grad)
     # # print("w1 grad", model.conv2d_1.weight.grad)
-    # print("#### compare w1")
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
+    print("#### compare w1")
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
 
     # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
     # # print("w2 grad", model.conv2d_2.weight.grad)
-    # print("#### compare w2")
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
+    print("#### compare w2")
+    not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
 
 if __name__=="__main__":
     main()

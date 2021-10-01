@@ -37,8 +37,8 @@ def point_wise_compare_4d(I, J, K, L, out, out_ref) -> int:
                 for l in range(0, L):
                     if out[i, j, k, l] != out_ref[i, j, k, l]:
                         if count <= 20:
-                            print("out {:>25}, out_ref {:>25}, diff {:>25}".format(
-                                out[i,j,k,l], out_ref[i,j,k,l], (out[i,j,k,l]-out_ref[i,j,k,l])
+                            print("{}{}{}{}, out {:>25}, out_ref {:>25}, diff {:>25}".format(
+                                i,j,k,l, out[i,j,k,l], out_ref[i,j,k,l], (out[i,j,k,l]-out_ref[i,j,k,l])
                             ))
                         count += 1
 

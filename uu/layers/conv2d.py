@@ -16,10 +16,7 @@ class TiledConv2dFunction(torch.autograd.Function):
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, uniq_id, is_ccheckpoint):
         print("== tiled conv2d forward")
-        #force no auto padding in our customized functions.
-        padding = (0,0)
-
-        print("input shape", input.size())
+        #print("input shape", input.size())
         c_info = info[0][uniq_id]   
         #print("current fwd info", c_info)
         s_depth = c_info.local_idex  # depth in current segment
@@ -39,10 +36,14 @@ class TiledConv2dFunction(torch.autograd.Function):
                 ctx.padding = padding
                 ctx.stride = stride
                 ctx.groups = groups
-                ctx.uniq_id=uniq_id
+                ctx.uniq_id = uniq_id
+                #force no auto padding in our customized functions.
+                padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             else:
+                #force no auto padding in our customized functions.
+                padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             print("shape input_tile_for_next\n", out.size())
@@ -54,9 +55,13 @@ class TiledConv2dFunction(torch.autograd.Function):
                 ctx.stride = stride
                 ctx.groups = groups
                 ctx.uniq_id=uniq_id
+                #force no auto padding in our customized functions.
+                padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             else:
+                #force no auto padding in our customized functions.
+                padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
          
@@ -78,12 +83,13 @@ class TiledConv2dFunction(torch.autograd.Function):
                 print("@@@ using cudnn bkw")
                 weight_tensor = ctx.weight
                 weight_size = weight_tensor.size()
-                padding = ctx.padding
+                padding = ctx.padding   #original padding
                 stride = ctx.stride
                 group = ctx.groups 
                 input_tensor = ctx.input 
                 input_size = input_tensor.size()
                 dilation = (1,1)
+                our_padding = (0,0)
 
                 g_depth = b_info.op_idex    # global depth
                 rev_g_depth = f_info.op_idex
@@ -97,7 +103,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                         #print("input grad ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
-                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                         print("final", grad_input.size())
                         # reshape to tile size before end of the segment
                         grad_input = padding_calc.reshape_for_final(ctx.info[1][-11], f_info, grad_input)
@@ -110,7 +116,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                         print("grad_output shape", grad_output.size())
                         new_grad_out = padding_calc.get_input_tile(b_info, grad_output, 0)
                         # since I remove padding from get_input_tile, so manually do it here.
-                        grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_out, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_out, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("grad_input", grad_input.size())
                     elif l_depth == 0:  
@@ -119,7 +125,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                         #print("local last ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
-                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                         #shrink if original input is padded.
                         print("grad_input", grad_input.size())
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
@@ -129,16 +135,22 @@ class TiledConv2dFunction(torch.autograd.Function):
                         #print("in the middle ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
-                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, padding, stride, dilation, group, False, False, False)
+                        grad_input = torch.cudnn_convolution_backward_input(input_size, grad_output, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                         #shrink if original input is padded.
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("grad_input", grad_input.size())
 
-                # TODO: Handle Grad_weight
                 if ctx.needs_input_grad[1]:
                     # need to reshape both grad_out and input_tensor
-                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, ctx.info[0], padding, stride)
-                    grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, padding, stride, dilation, group, False, False, False)
+
+                    #debug 
+                    nontiled_grad_out = ctx.info[0][-1*ctx.uniq_id][1]
+                    nontiled_activation = ctx.info[0][-1*ctx.uniq_id][0]
+                    next_f_info = ctx.info[0][f_info.next_id]
+                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
+                                                        f_info, next_f_info, weight_size,\
+                                                        padding, stride, nontiled_grad_out, nontiled_activation)
+                    grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, our_padding, stride, dilation, group, False, False, False)
                 grad_bias = None
             else:
                 print("using naive cuda bkw")
