@@ -11,8 +11,6 @@ li_act = []
 grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
-    # print('grad_input : ', len(grad_input))
-    # print('grad_output : ', len(grad_output))
     print('grad_output size : ', grad_output[0].size())
     #print('ref grad_output  :\n ', grad_output[0])
     print('grad_input size : ', grad_input[0].size())
@@ -31,12 +29,13 @@ Kh = 3
 Kw = 3
 Ph = 1
 Pw = 1
+chanel = 1
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2):
         super().__init__()
-        self.conv2d_1 = nn.Conv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_1 = nn.Conv2d(in_channels=chanel, 
+                                  out_channels=chanel, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -44,8 +43,8 @@ class Net_ref(nn.Module):
         
                                 
         self.maxpool1 = nn.MaxPool2d((2,2), (2,2))
-        self.conv2d_2 = nn.Conv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_2 = nn.Conv2d(in_channels=chanel, 
+                                  out_channels=chanel, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -83,16 +82,16 @@ class Net_ref(nn.Module):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv2d_1 = conv2d.TiledConv2d(in_channels=1, 
-                                  out_channels=1, 
+        self.conv2d_1 = conv2d.TiledConv2d(in_channels=chanel, 
+                                  out_channels=chanel, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw),
                                   )   
         self.mxp1 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_2 = conv2d.TiledConv2d(in_channels=1, 
-                                        out_channels=1, 
+        self.conv2d_2 = conv2d.TiledConv2d(in_channels=chanel, 
+                                        out_channels=chanel, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -173,7 +172,7 @@ def main():
     W = 64
     nTh = 4
     nTw = 4
-    input = torch.rand(1,1,H,W, requires_grad = True)
+    input = torch.rand(1,chanel,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
     w2 = model.conv2d_2.weight.data
@@ -192,8 +191,6 @@ def main():
     out = model(input, H, W, nTh, nTw )
 
 
-    
-
     # print("out shape", out)
     # print("out_ref ", out_ref)
 
@@ -204,25 +201,24 @@ def main():
     # print("input ref grad", input_ref.grad)
     # print("input grad", input.grad)
     print("~~ check forward correctness ~~")
-    oH = out.size()[2]
-    oW = out.size()[3]
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
-    
+    # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
+    correctness_check.check_equal(out, out_ref, False)
 
 
     print("#### compare grad_in")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-   
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    correctness_check.check_equal(input.grad, input_ref.grad, False)
 
     # # print("w1 ref grad", model_ref.conv2d_1.weight.grad)
     # # print("w1 grad", model.conv2d_1.weight.grad)
     print("#### compare w1")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
-    # correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
+    correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
     # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
     # # print("w2 grad", model.conv2d_2.weight.grad)
     print("#### compare w2")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
+    correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
 
 if __name__=="__main__":
     main()
