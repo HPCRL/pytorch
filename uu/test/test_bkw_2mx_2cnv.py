@@ -218,7 +218,7 @@ def main():
     # # print("w1 grad", model.conv2d_1.weight.grad)
     print("#### compare w1")
     not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
-
+    # correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
     # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
     # # print("w2 grad", model.conv2d_2.weight.grad)
     print("#### compare w2")

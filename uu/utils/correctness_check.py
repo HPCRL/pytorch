@@ -1,4 +1,5 @@
 
+import numpy as np
 def point_wise_compare_2d(m, n, out, out_ref) -> int:
     count = 0
     for i in range(0, m):
@@ -44,3 +45,16 @@ def point_wise_compare_4d(I, J, K, L, out, out_ref) -> int:
 
     print (" precentile {} / {} = {}".format(count, I*J*K*L, (count/I/J/K/L)))
     return count
+
+def check_equal(first, second, verbose):
+    if verbose:
+        print()
+    for i, (x, y) in enumerate(zip(first, second)):
+        x = x.cpu().detach().numpy()
+        y = y.cpu().detach().numpy()
+        if verbose:
+            print("x = {}".format(x.flatten()))
+            print("y = {}".format(y.flatten()))
+            print('-' * 80)
+        #np.testing.assert_allclose(x, y, err_msg="Index: {}".format(i))
+        np.testing.assert_equal(x, y, err_msg="Index: {}".format(i))

@@ -3,7 +3,8 @@ from typing import Dict, List
 from torch.autograd.variable import Variable
 from uu.layers import maxpool2d, conv2d
 import math
-import numpy as np
+
+from uu.utils import correctness_check
 
 def recalc_right_to_left(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
     list_op__in_chckp_seg.reverse()
@@ -463,19 +464,6 @@ def reshape_for_final(need_info, f_info, grad_input):
     return grad_input
 
 
-def check_equal(first, second, verbose):
-    if verbose:
-        print()
-    for i, (x, y) in enumerate(zip(first, second)):
-        x = x.cpu().detach().numpy()
-        y = y.cpu().detach().numpy()
-        if verbose:
-            print("x = {}".format(x.flatten()))
-            print("y = {}".format(y.flatten()))
-            print('-' * 80)
-        np.testing.assert_allclose(x, y, err_msg="Index: {}".format(i))
-
-
 def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride, nontiled_grad_out, nontiled_activation):
     # to get disjoint part of grad_output
     # for stride 1 and same shape in/out-put
@@ -518,8 +506,8 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     # print("nontiled_activation", nontiled_activation.size(), nontiled_activation)
     # nontiled_activation[0][0][0][0] = -99
 
-    check_equal(grad_output, nontiled_grad_out, False)
-    check_equal(input_tensor, nontiled_activation, False)
+    correctness_check.check_equal(grad_output, nontiled_grad_out, False)
+    correctness_check.check_equal(input_tensor, nontiled_activation, False)
     
     return grad_output, input_tensor
 
