@@ -110,19 +110,19 @@ class Net(nn.Module):
         #print("!!!!!!!", model_device)
         stream_structure = self.block1
 
-    # prepare grad info for correctness check(only for linear )
-        li_act_p = []
-        for elm in li_act:
-            print(elm.size())
-            pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
-            li_act_p.append(pd(elm))
-        i = len(li)
-        ii = 0
-        for op in self.block1._modules.values():
-            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
-            i -= 1
-            ii+= 1
-    # prepare grad info for correctness check(only for linear )
+    # # prepare grad info for correctness check(only for linear )
+    #     li_act_p = []
+    #     for elm in li_act:
+    #         print(elm.size())
+    #         pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
+    #         li_act_p.append(pd(elm))
+    #     i = len(li)
+    #     ii = 0
+    #     for op in self.block1._modules.values():
+    #         grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
+    #         i -= 1
+    #         ii+= 1
+    # # prepare grad info for correctness check(only for linear )
 
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
@@ -134,9 +134,9 @@ class Net(nn.Module):
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
-    # add grad_payload as negate keys
-                info[0].update(grad_dict_bk)
-      # add grad_payload as negate keys
+    # # add grad_payload as negate keys
+    #             info[0].update(grad_dict_bk)
+    #   # add grad_payload as negate keys
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
@@ -207,18 +207,18 @@ def main():
 
     print("#### compare grad_in")
     #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
+    #correctness_check.check_equal(input.grad, input_ref.grad, False)
 
     # # print("w1 ref grad", model_ref.conv2d_1.weight.grad)
     # # print("w1 grad", model.conv2d_1.weight.grad)
     print("#### compare w1")
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
-    correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
+    # not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
+    #correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
     # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
     # # print("w2 grad", model.conv2d_2.weight.grad)
     print("#### compare w2")
     #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
-    correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
+    #correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
 
 if __name__=="__main__":
     main()

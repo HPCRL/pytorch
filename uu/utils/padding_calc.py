@@ -464,7 +464,8 @@ def reshape_for_final(need_info, f_info, grad_input):
     return grad_input
 
 
-def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride, nontiled_grad_out, nontiled_activation):
+def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride):
+    # debug (, nontiled_grad_out, nontiled_activation)
     # to get disjoint part of grad_output
     # for stride 1 and same shape in/out-put
     # cal disjoint g_index
@@ -489,15 +490,15 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     grad_output = grad_output[:,:,crop[2]:grad_output.size()[2]-crop[3], crop[0]:grad_output.size()[3]-crop[1]]
     input_tensor = input_tensor[:,:,crop[2]:input_tensor.size()[2]-crop[3], crop[0]:input_tensor.size()[3]-crop[1]]
 
-    # for debug
-    nontiled_grad_out = nontiled_grad_out[:,:, tile_top: tile_bottom+1, tile_left: tile_right+1]
-    iH = nontiled_activation.size()[2]
-    iW = nontiled_activation.size()[3]
-    input_top = tile_top
-    input_bottom = min(iH-1, (tile_top+Th*stride[0]-1+weight_size[2]-1))
-    input_left = tile_left
-    input_right = min(iW-1, (tile_left+Tw*stride[1]-1+weight_size[3]-1))
-    nontiled_activation = nontiled_activation[:,:, input_top: input_bottom+1, input_left: input_right+1]    
+    # # for debug
+    # nontiled_grad_out = nontiled_grad_out[:,:, tile_top: tile_bottom+1, tile_left: tile_right+1]
+    # iH = nontiled_activation.size()[2]
+    # iW = nontiled_activation.size()[3]
+    # input_top = tile_top
+    # input_bottom = min(iH-1, (tile_top+Th*stride[0]-1+weight_size[2]-1))
+    # input_left = tile_left
+    # input_right = min(iW-1, (tile_left+Tw*stride[1]-1+weight_size[3]-1))
+    # nontiled_activation = nontiled_activation[:,:, input_top: input_bottom+1, input_left: input_right+1]    
     # print("A", tile_top, tile_bottom+1, tile_left, tile_right+1)
     # print("B", input_top, input_bottom+1, input_left, input_right+1)
 
@@ -506,8 +507,8 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     # print("nontiled_activation", nontiled_activation.size(), nontiled_activation)
     # nontiled_activation[0][0][0][0] = -99
 
-    correctness_check.check_equal(grad_output, nontiled_grad_out, False)
-    correctness_check.check_equal(input_tensor, nontiled_activation, False)
+    # correctness_check.check_equal(grad_output, nontiled_grad_out, False)
+    # correctness_check.check_equal(input_tensor, nontiled_activation, False)
     
     return grad_output, input_tensor
 

@@ -139,19 +139,24 @@ class TiledConv2dFunction(torch.autograd.Function):
                         #shrink if original input is padded.
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                         print("grad_input", grad_input.size())
+                else:
+                    grad_input = None
 
                 if ctx.needs_input_grad[1]:
                     # need to reshape both grad_out and input_tensor
 
                     #debug 
-                    nontiled_grad_out = ctx.info[0][-1*ctx.uniq_id][1]
-                    nontiled_activation = ctx.info[0][-1*ctx.uniq_id][0]
-                    next_f_info = ctx.info[0][f_info.next_id]
+                    # nontiled_grad_out = ctx.info[0][-1*ctx.uniq_id][1]
+                    # nontiled_activation = ctx.info[0][-1*ctx.uniq_id][0]
+                    next_f_info = ctx.info[0][f_info.next_id] # TODO how to get next info....
                     new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
                                                         f_info, next_f_info, weight_size,\
-                                                        padding, stride, nontiled_grad_out, nontiled_activation)
+                                                        padding, stride) # , nontiled_grad_out, nontiled_activation
                     grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, our_padding, stride, dilation, group, False, False, False)
-                grad_bias = None
+                    grad_bias = None
+                else:
+                    grad_weight = None
+                    grad_bias = None
             else:
                 print("using naive cuda bkw")
         else:

@@ -16,7 +16,7 @@ class in_out_shape:
         return rep 
 
 #we only consider 4D tensor, later can extend to arbitrary
-def shape_infer_sequence(seq_ops, inputH, inputW, C, N):
+def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
     H = inputH
     W = inputW
     shape_dict = {}

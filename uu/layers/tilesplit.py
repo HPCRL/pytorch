@@ -21,16 +21,16 @@ class TiledSplitFunction(torch.autograd.Function):
         ctx.big_infput_shape = x.size()
         
         input = padding_calc.get_input_tile(info[0], x, first_op_in_seg)
-        if ctx.input_is_cuda != model_device:
+        is_m_cuda = True if "cuda" in str(model_device) else False
+        if ctx.input_is_cuda != is_m_cuda:
             # print("#########", ctx.input_is_cuda)
             # print(model_device)
-            if model_device == True: # model is on GPU 
-                device = torch.device("cuda")
-                input = input.to(device)    # explicitly load input tile to device 
+            if is_m_cuda == True: # model is on GPU 
+                input = input.to(model_device)    # explicitly load input tile to device 
             else:
                 device = torch.device("cpu")
                 input = input.to(device)    # explicitly load input tile to device 
-        # print ("TiledSplitFunction input tile", input)
+        #print ("TiledSplitFunction input tile", input)
         return input
     
     
