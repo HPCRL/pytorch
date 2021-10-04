@@ -445,14 +445,29 @@ def resize_grad_in(info, grad_input):
     if info.padding_info != [0] * len(info.padding_info):
         grad_input = grad_input[:, :, info.padding_info[2]:grad_input.size()[2]-info.padding_info[3], \
                     info.padding_info[0]:grad_input.size()[3]-info.padding_info[1]]
+        # TODO: if not in the first ...
+        # pd = torch.nn.ConstantPad2d(info.padding_info, 0)
+        # grad_input = pd(grad_input)
+    return grad_input
+
+def resize_grad_in_1(info, grad_input):
+    print("padding info ::", info.padding_info)
+    if info.padding_info != [0] * len(info.padding_info):
+        grad_input = grad_input[:, :, info.padding_info[2]:grad_input.size()[2]-info.padding_info[3], \
+                    info.padding_info[0]:grad_input.size()[3]-info.padding_info[1]]
+       
     return grad_input
 
 def reshape_for_final(need_info, f_info, grad_input):
+    print("reshape_for_final", grad_input)
+
     #remove padding part
-    grad_input = resize_grad_in(f_info, grad_input)
+    grad_input = resize_grad_in_1(f_info, grad_input)
     # print("f_info ::", f_info, need_info)
     need_info_index = need_info.input_slice
     b_info_index = f_info.input_slice
+    
+    
     crop = []
     # assumption: b_info >> need_info
     for i in range(len(need_info_index)):
