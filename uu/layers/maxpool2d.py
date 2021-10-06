@@ -50,7 +50,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
         print("\n^^^^^cMaxPool2dFunction bwd")
         print("input size", ctx.input.size())
         print("grad_out size",grad_output.size())
-        print("grad_out ",grad_output)
+        #print("grad_out ",grad_output)
         print("arg size",ctx.arg_max.size())
 
         # #case1
@@ -76,7 +76,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
         
         
         print("##############grad_in in maxp", grad_in.size()) 
-        print("grad in", grad_in)
+        #print("grad in", grad_in)
         return grad_in, None, None, None, None, None, None
 
 class cMaxPool2d(_MaxPoolNd):

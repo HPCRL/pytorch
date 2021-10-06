@@ -10,111 +10,535 @@
 [torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
 [torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
 [torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
 [torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
-[torch/csrc/autograd/engine.cpp] call_function SumBackward0
-[torch/csrc/autograd/engine.cpp] call_function TiledCopyFunctionBackward
-[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
-[torch/csrc/autograd/engine.cpp] call_function torch::autograd::CopyBackwards
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function MaxPool2DWithIndicesBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
 [torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
-[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
 [torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
-[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
-
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function MaxPool2DWithIndicesBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function MaxPool2DWithIndicesBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autogr
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 Inside Conv2d forward
-input size :  torch.Size([1, 1, 4, 4])
-input :  tensor([[[[0.7527, 0.1750, 0.4649, 0.2965],
-          [0.4341, 0.3677, 0.0579, 0.8407],
-          [0.8873, 0.4013, 0.2498, 0.9730],
-          [0.7053, 0.9584, 0.6878, 0.5474]]]], device='cuda:0',
-       grad_fn=<BackwardHookFunctionBackward>)
-output size :  torch.Size([1, 4, 4])
+input size :  torch.Size([1, 1, 160, 160])
+output size :  torch.Size([1, 160, 160])
 Inside Conv2d forward
-input size :  torch.Size([1, 1, 4, 4])
-input :  tensor([[[[ 0.1316,  0.0780,  0.0291, -0.0369],
-          [ 0.0984,  0.2688,  0.0115,  0.2102],
-          [ 0.1572, -0.0729,  0.4702,  0.4217],
-          [ 0.5395,  0.2966,  0.4147,  0.0473]]]], device='cuda:0',
-       grad_fn=<BackwardHookFunctionBackward>)
-output size :  torch.Size([1, 4, 4])
+input size :  torch.Size([1, 1, 160, 160])
+output size :  torch.Size([1, 160, 160])
 Inside MaxPool2d forward
-input size :  torch.Size([1, 1, 4, 4])
-input :  tensor([[[[ 0.0316, -0.0998, -0.0340, -0.0799],
-          [-0.0846,  0.1225, -0.1088, -0.1870],
-          [-0.1166, -0.2615, -0.1533, -0.0255],
-          [ 0.1302, -0.1391,  0.0183,  0.0387]]]], device='cuda:0',
-       grad_fn=<BackwardHookFunctionBackward>)
-output size :  torch.Size([1, 2, 2])
+input size :  torch.Size([1, 1, 160, 160])
+output size :  torch.Size([1, 80, 80])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 80, 80])
+output size :  torch.Size([1, 80, 80])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 80, 80])
+output size :  torch.Size([1, 80, 80])
+Inside MaxPool2d forward
+input size :  torch.Size([1, 1, 80, 80])
+output size :  torch.Size([1, 40, 40])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 40, 40])
+output size :  torch.Size([1, 40, 40])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 40, 40])
+output size :  torch.Size([1, 40, 40])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 40, 40])
+output size :  torch.Size([1, 40, 40])
+Inside MaxPool2d forward
+input size :  torch.Size([1, 1, 40, 40])
+output size :  torch.Size([1, 20, 20])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 20, 20])
+output size :  torch.Size([1, 20, 20])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 20, 20])
+output size :  torch.Size([1, 20, 20])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 20, 20])
+output size :  torch.Size([1, 20, 20])
+Inside MaxPool2d forward
+input size :  torch.Size([1, 1, 20, 20])
+output size :  torch.Size([1, 10, 10])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 10, 10])
+output size :  torch.Size([1, 10, 10])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 10, 10])
+output size :  torch.Size([1, 10, 10])
+Inside Conv2d forward
+input size :  torch.Size([1, 1, 10, 10])
+output size :  torch.Size([1, 10, 10])
+Inside MaxPool2d forward
+input size :  torch.Size([1, 1, 10, 10])
+output size :  torch.Size([1, 5, 5])
 done ref
 Inside MaxPool2d backward
-grad_output size :  torch.Size([1, 1, 2, 2])
-ref grad_output  :
-  tensor([[[[1., 1.],
-          [1., 1.]]]], device='cuda:0')
-grad_input size :  torch.Size([1, 1, 4, 4])
-ref grad_input  : 
- tensor([[[[0., 0., 1., 0.],
-          [0., 1., 0., 0.],
-          [0., 0., 0., 0.],
-          [1., 0., 0., 1.]]]], device='cuda:0')
+grad_output size :  torch.Size([1, 1, 5, 5])
+grad_input size :  torch.Size([1, 1, 10, 10])
 Inside Conv2d backward
-grad_output size :  torch.Size([1, 1, 4, 4])
-ref grad_output  :
-  tensor([[[[0., 0., 1., 0.],
-          [0., 1., 0., 0.],
-          [0., 0., 0., 0.],
-          [1., 0., 0., 1.]]]], device='cuda:0')
-grad_input size :  torch.Size([1, 1, 4, 4])
-ref grad_input  : 
- tensor([[[[ 0.0702, -0.0203,  0.0634, -0.1768],
-          [-0.0953,  0.0361, -0.4796,  0.1396],
-          [-0.1754, -0.5258,  0.2098,  0.0750],
-          [ 0.2865, -0.1768, -0.0953,  0.2865]]]], device='cuda:0')
+grad_output size :  torch.Size([1, 1, 10, 10])
+grad_input size :  torch.Size([1, 1, 10, 10])
 Inside Conv2d backward
-grad_output size :  torch.Size([1, 1, 4, 4])
-ref grad_output  :
-  tensor([[[[ 0.0702, -0.0203,  0.0634, -0.1768],
-          [-0.0953,  0.0361, -0.4796,  0.1396],
-          [-0.1754, -0.5258,  0.2098,  0.0750],
-          [ 0.2865, -0.1768, -0.0953,  0.2865]]]], device='cuda:0')
-grad_input size :  torch.Size([1, 1, 4, 4])
-ref grad_input  : 
- tensor([[[[ 1.9536e-02,  1.2530e-02,  3.3475e-02, -1.9201e-01],
-          [ 2.3501e-04, -9.7156e-03, -3.8378e-01,  2.1789e-02],
-          [ 8.1067e-02, -2.4441e-01, -6.4732e-02,  1.6063e-01],
-          [-1.0098e-02,  1.5768e-01,  3.8601e-02,  8.5263e-03]]]],
-       device='cuda:0')
+grad_output size :  torch.Size([1, 1, 10, 10])
+grad_input size :  torch.Size([1, 1, 10, 10])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 10, 10])
+grad_input size :  torch.Size([1, 1, 10, 10])
+Inside MaxPool2d backward
+grad_output size :  torch.Size([1, 1, 10, 10])
+grad_input size :  torch.Size([1, 1, 20, 20])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 20, 20])
+grad_input size :  torch.Size([1, 1, 20, 20])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 20, 20])
+grad_input size :  torch.Size([1, 1, 20, 20])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 20, 20])
+grad_input size :  torch.Size([1, 1, 20, 20])
+Inside MaxPool2d backward
+grad_output size :  torch.Size([1, 1, 20, 20])
+grad_input size :  torch.Size([1, 1, 40, 40])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 40, 40])
+grad_input size :  torch.Size([1, 1, 40, 40])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 40, 40])
+grad_input size :  torch.Size([1, 1, 40, 40])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 40, 40])
+grad_input size :  torch.Size([1, 1, 40, 40])
+Inside MaxPool2d backward
+grad_output size :  torch.Size([1, 1, 40, 40])
+grad_input size :  torch.Size([1, 1, 80, 80])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 80, 80])
+grad_input size :  torch.Size([1, 1, 80, 80])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 80, 80])
+grad_input size :  torch.Size([1, 1, 80, 80])
+Inside MaxPool2d backward
+grad_output size :  torch.Size([1, 1, 80, 80])
+grad_input size :  torch.Size([1, 1, 160, 160])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 160, 160])
+grad_input size :  torch.Size([1, 1, 160, 160])
+Inside Conv2d backward
+grad_output size :  torch.Size([1, 1, 160, 160])
+grad_input size :  torch.Size([1, 1, 160, 160])
 done ref bkw
 
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-Input 1x1x4x4
-L-->R current op 139638781506272
-after conv2d 1x1x4x4
-L-->R current op 139638781507760
-after conv2d 1x1x4x4
-L-->R current op 139638781506464
-after maxpool2d 1x1x2x2
+Input 1x1x160x160
+L-->R current op 140030728076640
+after conv2d 1x1x160x160
+L-->R current op 140030728076784
+after conv2d 1x1x160x160
+L-->R current op 140028925106592
+after maxpool2d 1x1x80x80
+L-->R current op 140028919680496
+after conv2d 1x1x80x80
+L-->R current op 140030727993328
+after conv2d 1x1x80x80
+L-->R current op 140030727993088
+after maxpool2d 1x1x40x40
+L-->R current op 140030727992752
+after conv2d 1x1x40x40
+L-->R current op 140030727992512
+after conv2d 1x1x40x40
+L-->R current op 140030727992656
+after conv2d 1x1x40x40
+L-->R current op 140030727992416
+after maxpool2d 1x1x20x20
+L-->R current op 140028919041280
+after conv2d 1x1x20x20
+L-->R current op 140028919040128
+after conv2d 1x1x20x20
+L-->R current op 140028919041568
+after conv2d 1x1x20x20
+L-->R current op 140028919041616
+after maxpool2d 1x1x10x10
+L-->R current op 140028919041664
+after conv2d 1x1x10x10
+L-->R current op 140028919041712
+after conv2d 1x1x10x10
+L-->R current op 140028919041760
+after conv2d 1x1x10x10
+L-->R current op 140028919041808
+after maxpool2d 1x1x5x5
+torch.Size([1, 1, 160, 160])
+torch.Size([1, 1, 160, 160])
+torch.Size([1, 1, 160, 160])
+torch.Size([1, 1, 80, 80])
+torch.Size([1, 1, 80, 80])
+torch.Size([1, 1, 80, 80])
+torch.Size([1, 1, 40, 40])
+torch.Size([1, 1, 40, 40])
+torch.Size([1, 1, 40, 40])
+torch.Size([1, 1, 40, 40])
+torch.Size([1, 1, 20, 20])
+torch.Size([1, 1, 20, 20])
+torch.Size([1, 1, 20, 20])
+torch.Size([1, 1, 20, 20])
+torch.Size([1, 1, 10, 10])
+torch.Size([1, 1, 10, 10])
+torch.Size([1, 1, 10, 10])
+torch.Size([1, 1, 10, 10])
 coord [0, 0]
-bwd_out_shape  (2, 2)
+bwd_out_shape  (5, 5)
 fwd_out_shape  (2, 2)
+Yes, fwd is smaller
 ++++++++++++++++++++++++++++++++++++++++++++++++
-***input tile torch.Size([1, 1, 4, 4])
+***input tile torch.Size([1, 1, 160, 160])
 in customized Sequential 2
-id 139638781506272
+id 140030728076640
 == tiled conv2d forward
 shape input_tile_for_next
- torch.Size([1, 1, 6, 6])
+ torch.Size([1, 1, 162, 162])
 in customized Sequential 3
-id 139638781507760
+id 140030728076784
 == tiled conv2d forward
 shape input_tile_for_next
- torch.Size([1, 1, 4, 4])
+ torch.Size([1, 1, 160, 160])
 in customized Sequential 3
-(2, 2) [2, 2] [0, 1, 0, 1]
-coord [0, 1, 0, 1]
-out_temp torch.Size([1, 1, 2, 2])
+in customized Sequential 3
+id 140028919680496
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 82, 82])
+in customized Sequential 3
+id 140030727993328
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 80, 80])
+in customized Sequential 3
+in customized Sequential 3
+id 140030727992752
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 44, 44])
+in customized Sequential 3
+id 140030727992512
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 42, 42])
+in customized Sequential 3
+id 140030727992656
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 40, 40])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041280
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 24, 24])
+in customized Sequential 3
+id 140028919040128
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 22, 22])
+in customized Sequential 3
+id 140028919041568
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 20, 20])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041664
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 14, 14])
+in customized Sequential 3
+id 140028919041712
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 12, 12])
+in customized Sequential 3
+id 140028919041760
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 10, 10])
+in customized Sequential 3
+(5, 5) [5, 5] [0, 4, 0, 4]
+coord [0, 4, 0, 4]
+out_temp torch.Size([1, 1, 5, 5])
+coord [0, 1]
+bwd_out_shape  (5, 5)
+fwd_out_shape  (2, 2)
+Yes, fwd is smaller
+++++++++++++++++++++++++++++++++++++++++++++++++
+***input tile torch.Size([1, 1, 160, 160])
+in customized Sequential 2
+id 140030728076640
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 162, 162])
+in customized Sequential 3
+id 140030728076784
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 160, 160])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919680496
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 82, 82])
+in customized Sequential 3
+id 140030727993328
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 80, 80])
+in customized Sequential 3
+in customized Sequential 3
+id 140030727992752
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 44, 44])
+in customized Sequential 3
+id 140030727992512
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 42, 42])
+in customized Sequential 3
+id 140030727992656
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 40, 40])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041280
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 24, 24])
+in customized Sequential 3
+id 140028919040128
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 22, 22])
+in customized Sequential 3
+id 140028919041568
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 20, 20])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041664
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 14, 14])
+in customized Sequential 3
+id 140028919041712
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 12, 12])
+in customized Sequential 3
+id 140028919041760
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 10, 10])
+in customized Sequential 3
+(5, 5) [5, 5] [0, 4, 0, 4]
+coord [0, 4, 0, 4]
+out_temp torch.Size([1, 1, 5, 5])
+coord [1, 0]
+bwd_out_shape  (5, 5)
+fwd_out_shape  (2, 2)
+Yes, fwd is smaller
+++++++++++++++++++++++++++++++++++++++++++++++++
+***input tile torch.Size([1, 1, 160, 160])
+in customized Sequential 2
+id 140030728076640
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 162, 162])
+in customized Sequential 3
+id 140030728076784
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 160, 160])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919680496
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 82, 82])
+in customized Sequential 3
+id 140030727993328
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 80, 80])
+in customized Sequential 3
+in customized Sequential 3
+id 140030727992752
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 44, 44])
+in customized Sequential 3
+id 140030727992512
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 42, 42])
+in customized Sequential 3
+id 140030727992656
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 40, 40])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041280
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 24, 24])
+in customized Sequential 3
+id 140028919040128
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 22, 22])
+in customized Sequential 3
+id 140028919041568
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 20, 20])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041664
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 14, 14])
+in customized Sequential 3
+id 140028919041712
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 12, 12])
+in customized Sequential 3
+id 140028919041760
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 10, 10])
+in customized Sequential 3
+(5, 5) [5, 5] [0, 4, 0, 4]
+coord [0, 4, 0, 4]
+out_temp torch.Size([1, 1, 5, 5])
+coord [1, 1]
+bwd_out_shape  (5, 5)
+fwd_out_shape  (2, 2)
+Yes, fwd is smaller
+++++++++++++++++++++++++++++++++++++++++++++++++
+***input tile torch.Size([1, 1, 160, 160])
+in customized Sequential 2
+id 140030728076640
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 162, 162])
+in customized Sequential 3
+id 140030728076784
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 160, 160])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919680496
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 82, 82])
+in customized Sequential 3
+id 140030727993328
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 80, 80])
+in customized Sequential 3
+in customized Sequential 3
+id 140030727992752
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 44, 44])
+in customized Sequential 3
+id 140030727992512
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 42, 42])
+in customized Sequential 3
+id 140030727992656
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 40, 40])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041280
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 24, 24])
+in customized Sequential 3
+id 140028919040128
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 22, 22])
+in customized Sequential 3
+id 140028919041568
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 20, 20])
+in customized Sequential 3
+in customized Sequential 3
+id 140028919041664
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 14, 14])
+in customized Sequential 3
+id 140028919041712
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 12, 12])
+in customized Sequential 3
+id 140028919041760
+== tiled conv2d forward
+shape input_tile_for_next
+ torch.Size([1, 1, 10, 10])
+in customized Sequential 3
+(5, 5) [5, 5] [0, 4, 0, 4]
+coord [0, 4, 0, 4]
+out_temp torch.Size([1, 1, 5, 5])
 
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -123,45 +547,1401 @@ out_temp torch.Size([1, 1, 2, 2])
 
 
 ^^^^^cMaxPool2dFunction bwd
-input size torch.Size([1, 1, 4, 4])
-grad_out size torch.Size([1, 1, 2, 2])
-grad_out  tensor([[[[1., 1.],
-          [1., 1.]]]], device='cuda:0')
-arg size torch.Size([1, 1, 2, 2])
-new_grad_out torch.Size([1, 1, 2, 2])
-##############grad_in in maxp torch.Size([1, 1, 4, 4])
-grad in tensor([[[[0., 0., 1., 0.],
-          [0., 1., 0., 0.],
-          [0., 0., 0., 0.],
-          [1., 0., 0., 1.]]]], device='cuda:0')
+input size torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 5, 5])
+arg size torch.Size([1, 1, 5, 5])
+new_grad_out torch.Size([1, 1, 5, 5])
+##############grad_in in maxp torch.Size([1, 1, 10, 10])
+I am [1, 1]
 @@@ using cudnn bkw
-local last ++ input shape torch.Size([1, 1, 6, 6])
-local last ++ input tensor([[[[ 0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000],
-          [ 0.0000,  0.1316,  0.0780,  0.0291, -0.0369,  0.0000],
-          [ 0.0000,  0.0984,  0.2688,  0.0115,  0.2102,  0.0000],
-          [ 0.0000,  0.1572, -0.0729,  0.4702,  0.4217,  0.0000],
-          [ 0.0000,  0.5395,  0.2966,  0.4147,  0.0473,  0.0000],
-          [ 0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000]]]],
-       device='cuda:0', grad_fn=<TiledConv2dFunctionBackward>)
+local last ++ input shape torch.Size([1, 1, 12, 12])
 weight shape torch.Size([1, 1, 3, 3])
-grad_output shape torch.Size([1, 1, 4, 4])
-grad_input torch.Size([1, 1, 6, 6])
+grad_output shape torch.Size([1, 1, 10, 10])
+grad_input torch.Size([1, 1, 12, 12])
 padding info :: [1, 1, 1, 1]
-new grad_input torch.Size([1, 1, 4, 4])
-##############grad_in in conv2d tensor([[[[ 0.0702, -0.0203,  0.0634, -0.1768],
-          [-0.0953,  0.0361, -0.4796,  0.1396],
-          [-0.1754, -0.5258,  0.2098,  0.0750],
-          [ 0.2865, -0.1768, -0.0953,  0.2865]]]], device='cuda:0')
+grad_input old torch.Size([1, 1, 12, 12])
+grad_input new torch.Size([1, 1, 12, 12])
+new grad_input torch.Size([1, 1, 12, 12])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 5, 0] [0, 9, 0, 9] [5, 9, 5, 9]
+## 5 10 5 10
+A 5 10 5 10
+B 5 12 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
 @@@ using cudnn bkw
-input grad ++ input shape torch.Size([1, 1, 8, 8])
-input grad ++ input tensor([[[[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.7527, 0.1750, 0.4649, 0.2965, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.4341, 0.3677, 0.0579, 0.8407, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.8873, 0.4013, 0.2498, 0.9730, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.7053, 0.9584, 0.6878, 0.5474, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000],
-          [0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000]]]],
-       device='cuda:0')
+in the middle ++ input shape torch.Size([1, 1, 14, 14])
 weight shape torch.Size([1, 1, 3, 3])
-grad_output shape torch.Size([1, 1, 4, 4])
+grad_output shape torch.Size([1, 1, 12, 12])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 14, 14])
+grad_input new torch.Size([1, 1, 14, 14])
+grad_input torch.Size([1, 1, 14, 14])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 5, 0] [0, 9, 0, 9] [5, 9, 5, 9]
+## 5 10 5 10
+A 5 10 5 10
+B 5 12 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 16, 16])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 14, 14])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 5, 0] [0, 9, 0, 9] [5, 9, 5, 9]
+## 5 10 5 10
+A 5 10 5 10
+B 5 12 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 10, 10])
+arg size torch.Size([1, 1, 10, 10])
+##############grad_in in maxp torch.Size([1, 1, 20, 20])
+I am [1, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 22, 22])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 20, 20])
+grad_input torch.Size([1, 1, 22, 22])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 22, 22])
+grad_input new torch.Size([1, 1, 22, 22])
+new grad_input torch.Size([1, 1, 22, 22])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 10, 0] [0, 19, 0, 19] [10, 19, 10, 19]
+## 10 20 10 20
+A 10 20 10 20
+B 10 22 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 24, 24])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 22, 22])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 24, 24])
+grad_input new torch.Size([1, 1, 24, 24])
+grad_input torch.Size([1, 1, 24, 24])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 10, 0] [0, 19, 0, 19] [10, 19, 10, 19]
+## 10 20 10 20
+A 10 20 10 20
+B 10 22 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 26, 26])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 24, 24])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 10, 0] [0, 19, 0, 19] [10, 19, 10, 19]
+## 10 20 10 20
+A 10 20 10 20
+B 10 22 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 20, 20])
+arg size torch.Size([1, 1, 20, 20])
+##############grad_in in maxp torch.Size([1, 1, 40, 40])
+I am [1, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 42, 42])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 40, 40])
+grad_input torch.Size([1, 1, 42, 42])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 42, 42])
+grad_input new torch.Size([1, 1, 42, 42])
+new grad_input torch.Size([1, 1, 42, 42])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 20, 0] [0, 39, 0, 39] [20, 39, 20, 39]
+## 20 40 20 40
+A 20 40 20 40
+B 20 42 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 44, 44])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 42, 42])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 44, 44])
+grad_input new torch.Size([1, 1, 44, 44])
+grad_input torch.Size([1, 1, 44, 44])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 20, 0] [0, 39, 0, 39] [20, 39, 20, 39]
+## 20 40 20 40
+A 20 40 20 40
+B 20 42 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 46, 46])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 44, 44])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 20, 0] [0, 39, 0, 39] [20, 39, 20, 39]
+## 20 40 20 40
+A 20 40 20 40
+B 20 42 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 40, 40])
+arg size torch.Size([1, 1, 40, 40])
+##############grad_in in maxp torch.Size([1, 1, 80, 80])
+I am [1, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 82, 82])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 80, 80])
+grad_input torch.Size([1, 1, 82, 82])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 82, 82])
+grad_input new torch.Size([1, 1, 82, 82])
+new grad_input torch.Size([1, 1, 82, 82])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [40, 0, 40, 0] [0, 79, 0, 79] [40, 79, 40, 79]
+## 40 80 40 80
+A 40 80 40 80
+B 40 82 40 82
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 84, 84])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 82, 82])
+padding info :: [2, 2, 2, 2]
+grad_input torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [40, 0, 40, 0] [0, 79, 0, 79] [40, 79, 40, 79]
+## 40 80 40 80
+A 40 80 40 80
+B 40 82 40 82
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 160, 160])
+grad_out size torch.Size([1, 1, 80, 80])
+arg size torch.Size([1, 1, 80, 80])
+##############grad_in in maxp torch.Size([1, 1, 160, 160])
+I am [1, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 162, 162])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 160, 160])
+grad_input torch.Size([1, 1, 162, 162])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 162, 162])
+grad_input new torch.Size([1, 1, 162, 162])
+new grad_input torch.Size([1, 1, 162, 162])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [80, 0, 80, 0] [0, 159, 0, 159] [80, 159, 80, 159]
+## 80 160 80 160
+A 80 160 80 160
+B 80 162 80 162
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 1]
+@@@ using cudnn bkw
+input grad ++ input shape torch.Size([1, 1, 164, 164])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 162, 162])
+final torch.Size([1, 1, 164, 164])
+padding info :: [2, 2, 2, 2]
+after crop g_in torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [80, 0, 80, 0] [0, 159, 0, 159] [80, 159, 80, 159]
+## 80 160 80 160
+A 80 160 80 160
+B 80 162 80 162
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 5, 5])
+arg size torch.Size([1, 1, 5, 5])
+new_grad_out torch.Size([1, 1, 5, 5])
+##############grad_in in maxp torch.Size([1, 1, 10, 10])
+I am [1, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 12, 12])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 10, 10])
+grad_input torch.Size([1, 1, 12, 12])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 12, 12])
+grad_input new torch.Size([1, 1, 12, 12])
+new grad_input ad/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function MaxPool2DWithIndicesBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function CudnnConvolutionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function BackwardHookFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function SumBackward0
+[torch/csrc/autograd/engine.cpp] call_function TiledCopyFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledCopyFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledCopyFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledCopyFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::CopyBackwards
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledSplitFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+torch.Size([1, 1, 12, 12])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 5, 0] [0, 9, 0, 9] [0, 4, 5, 9]
+## 5 10 0 5
+A 5 10 0 5
+B 5 12 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 14, 14])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 12, 12])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 14, 14])
+grad_input new torch.Size([1, 1, 14, 14])
+grad_input torch.Size([1, 1, 14, 14])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 5, 0] [0, 9, 0, 9] [0, 4, 5, 9]
+## 5 10 0 5
+A 5 10 0 5
+B 5 12 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 16, 16])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 14, 14])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 5, 0] [0, 9, 0, 9] [0, 4, 5, 9]
+## 5 10 0 5
+A 5 10 0 5
+B 5 12 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 10, 10])
+arg size torch.Size([1, 1, 10, 10])
+##############grad_in in maxp torch.Size([1, 1, 20, 20])
+I am [1, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 22, 22])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 20, 20])
+grad_input torch.Size([1, 1, 22, 22])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 22, 22])
+grad_input new torch.Size([1, 1, 22, 22])
+new grad_input torch.Size([1, 1, 22, 22])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 10, 0] [0, 19, 0, 19] [0, 9, 10, 19]
+## 10 20 0 10
+A 10 20 0 10
+B 10 22 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 24, 24])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 22, 22])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 24, 24])
+grad_input new torch.Size([1, 1, 24, 24])
+grad_input torch.Size([1, 1, 24, 24])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 10, 0] [0, 19, 0, 19] [0, 9, 10, 19]
+## 10 20 0 10
+A 10 20 0 10
+B 10 22 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 26, 26])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 24, 24])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 10, 0] [0, 19, 0, 19] [0, 9, 10, 19]
+## 10 20 0 10
+A 10 20 0 10
+B 10 22 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 20, 20])
+arg size torch.Size([1, 1, 20, 20])
+##############grad_in in maxp torch.Size([1, 1, 40, 40])
+I am [1, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 42, 42])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 40, 40])
+grad_input torch.Size([1, 1, 42, 42])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 42, 42])
+grad_input new torch.Size([1, 1, 42, 42])
+new grad_input torch.Size([1, 1, 42, 42])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 20, 0] [0, 39, 0, 39] [0, 19, 20, 39]
+## 20 40 0 20
+A 20 40 0 20
+B 20 42 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 44, 44])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 42, 42])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 44, 44])
+grad_input new torch.Size([1, 1, 44, 44])
+grad_input torch.Size([1, 1, 44, 44])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 20, 0] [0, 39, 0, 39] [0, 19, 20, 39]
+## 20 40 0 20
+A 20 40 0 20
+B 20 42 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 46, 46])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 44, 44])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 20, 0] [0, 39, 0, 39] [0, 19, 20, 39]
+## 20 40 0 20
+A 20 40 0 20
+B 20 42 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 40, 40])
+arg size torch.Size([1, 1, 40, 40])
+##############grad_in in maxp torch.Size([1, 1, 80, 80])
+I am [1, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 82, 82])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 80, 80])
+grad_input torch.Size([1, 1, 82, 82])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 82, 82])
+grad_input new torch.Size([1, 1, 82, 82])
+new grad_input torch.Size([1, 1, 82, 82])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [0, 40, 40, 0] [0, 79, 0, 79] [0, 39, 40, 79]
+## 40 80 0 40
+A 40 80 0 40
+B 40 82 0 42
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 84, 84])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 82, 82])
+padding info :: [2, 2, 2, 2]
+grad_input torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [0, 40, 40, 0] [0, 79, 0, 79] [0, 39, 40, 79]
+## 40 80 0 40
+A 40 80 0 40
+B 40 82 0 42
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 160, 160])
+grad_out size torch.Size([1, 1, 80, 80])
+arg size torch.Size([1, 1, 80, 80])
+##############grad_in in maxp torch.Size([1, 1, 160, 160])
+I am [1, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 162, 162])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 160, 160])
+grad_input torch.Size([1, 1, 162, 162])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 162, 162])
+grad_input new torch.Size([1, 1, 162, 162])
+new grad_input torch.Size([1, 1, 162, 162])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [0, 80, 80, 0] [0, 159, 0, 159] [0, 79, 80, 159]
+## 80 160 0 80
+A 80 160 0 80
+B 80 162 0 82
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [1, 0]
+@@@ using cudnn bkw
+input grad ++ input shape torch.Size([1, 1, 164, 164])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 162, 162])
+final torch.Size([1, 1, 164, 164])
+padding info :: [2, 2, 2, 2]
+after crop g_in torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [0, 80, 80, 0] [0, 159, 0, 159] [0, 79, 80, 159]
+## 80 160 0 80
+A 80 160 0 80
+B 80 162 0 82
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 5, 5])
+arg size torch.Size([1, 1, 5, 5])
+new_grad_out torch.Size([1, 1, 5, 5])
+##############grad_in in maxp torch.Size([1, 1, 10, 10])
+I am [0, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 12, 12])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 10, 10])
+grad_input torch.Size([1, 1, 12, 12])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 12, 12])
+grad_input new torch.Size([1, 1, 12, 12])
+new grad_input torch.Size([1, 1, 12, 12])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 0, 5] [0, 9, 0, 9] [5, 9, 0, 4]
+## 0 5 5 10
+A 0 5 5 10
+B 0 7 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 14, 14])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 12, 12])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 14, 14])
+grad_input new torch.Size([1, 1, 14, 14])
+grad_input torch.Size([1, 1, 14, 14])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 0, 5] [0, 9, 0, 9] [5, 9, 0, 4]
+## 0 5 5 10
+A 0 5 5 10
+B 0 7 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 16, 16])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 14, 14])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [5, 0, 0, 5] [0, 9, 0, 9] [5, 9, 0, 4]
+## 0 5 5 10
+A 0 5 5 10
+B 0 7 5 12
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 10, 10])
+arg size torch.Size([1, 1, 10, 10])
+##############grad_in in maxp torch.Size([1, 1, 20, 20])
+I am [0, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 22, 22])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 20, 20])
+grad_input torch.Size([1, 1, 22, 22])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 22, 22])
+grad_input new torch.Size([1, 1, 22, 22])
+new grad_input torch.Size([1, 1, 22, 22])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 0, 10] [0, 19, 0, 19] [10, 19, 0, 9]
+## 0 10 10 20
+A 0 10 10 20
+B 0 12 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 24, 24])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 22, 22])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 24, 24])
+grad_input new torch.Size([1, 1, 24, 24])
+grad_input torch.Size([1, 1, 24, 24])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 0, 10] [0, 19, 0, 19] [10, 19, 0, 9]
+## 0 10 10 20
+A 0 10 10 20
+B 0 12 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 26, 26])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 24, 24])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [10, 0, 0, 10] [0, 19, 0, 19] [10, 19, 0, 9]
+## 0 10 10 20
+A 0 10 10 20
+B 0 12 10 22
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 20, 20])
+arg size torch.Size([1, 1, 20, 20])
+##############grad_in in maxp torch.Size([1, 1, 40, 40])
+I am [0, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 42, 42])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 40, 40])
+grad_input torch.Size([1, 1, 42, 42])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 42, 42])
+grad_input new torch.Size([1, 1, 42, 42])
+new grad_input torch.Size([1, 1, 42, 42])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 0, 20] [0, 39, 0, 39] [20, 39, 0, 19]
+## 0 20 20 40
+A 0 20 20 40
+B 0 22 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 44, 44])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 42, 42])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 44, 44])
+grad_input new torch.Size([1, 1, 44, 44])
+grad_input torch.Size([1, 1, 44, 44])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 0, 20] [0, 39, 0, 39] [20, 39, 0, 19]
+## 0 20 20 40
+A 0 20 20 40
+B 0 22 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 46, 46])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 44, 44])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [20, 0, 0, 20] [0, 39, 0, 39] [20, 39, 0, 19]
+## 0 20 20 40
+A 0 20 20 40
+B 0 22 20 42
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 40, 40])
+arg size torch.Size([1, 1, 40, 40])
+##############grad_in in maxp torch.Size([1, 1, 80, 80])
+I am [0, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 82, 82])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 80, 80])
+grad_input torch.Size([1, 1, 82, 82])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 82, 82])
+grad_input new torch.Size([1, 1, 82, 82])
+new grad_input torch.Size([1, 1, 82, 82])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [40, 0, 0, 40] [0, 79, 0, 79] [40, 79, 0, 39]
+## 0 40 40 80
+A 0 40 40 80
+B 0 42 40 82
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 84, 84])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 82, 82])
+padding info :: [2, 2, 2, 2]
+grad_input torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [40, 0, 0, 40] [0, 79, 0, 79] [40, 79, 0, 39]
+## 0 40 40 80
+A 0 40 40 80
+B 0 42 40 82
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 160, 160])
+grad_out size torch.Size([1, 1, 80, 80])
+arg size torch.Size([1, 1, 80, 80])
+##############grad_in in maxp torch.Size([1, 1, 160, 160])
+I am [0, 1]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 162, 162])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 160, 160])
+grad_input torch.Size([1, 1, 162, 162])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 162, 162])
+grad_input new torch.Size([1, 1, 162, 162])
+new grad_input torch.Size([1, 1, 162, 162])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [80, 0, 0, 80] [0, 159, 0, 159] [80, 159, 0, 79]
+## 0 80 80 160
+A 0 80 80 160
+B 0 82 80 162
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 1]
+@@@ using cudnn bkw
+input grad ++ input shape torch.Size([1, 1, 164, 164])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 162, 162])
+final torch.Size([1, 1, 164, 164])
+padding info :: [2, 2, 2, 2]
+after crop g_in torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [80, 0, 0, 80] [0, 159, 0, 159] [80, 159, 0, 79]
+## 0 80 80 160
+A 0 80 80 160
+B 0 82 80 162
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 5, 5])
+arg size torch.Size([1, 1, 5, 5])
+new_grad_out torch.Size([1, 1, 5, 5])
+##############grad_in in maxp torch.Size([1, 1, 10, 10])
+I am [0, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 12, 12])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 10, 10])
+grad_input torch.Size([1, 1, 12, 12])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 12, 12])
+grad_input new torch.Size([1, 1, 12, 12])
+new grad_input torch.Size([1, 1, 12, 12])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 0, 5] [0, 9, 0, 9] [0, 4, 0, 4]
+## 0 5 0 5
+A 0 5 0 5
+B 0 7 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 14, 14])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 12, 12])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 14, 14])
+grad_input new torch.Size([1, 1, 14, 14])
+grad_input torch.Size([1, 1, 14, 14])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 0, 5] [0, 9, 0, 9] [0, 4, 0, 4]
+## 0 5 0 5
+A 0 5 0 5
+B 0 7 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 16, 16])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 14, 14])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 10, 10])
+grad_out size torch.Size([1, 1, 10, 10])
+crop [0, 5, 0, 5] [0, 9, 0, 9] [0, 4, 0, 4]
+## 0 5 0 5
+A 0 5 0 5
+B 0 7 0 7
+csaved input torch.Size([1, 1, 7, 7])
+cgrad_output torch.Size([1, 1, 5, 5])
+real nontiled_activation torch.Size([1, 1, 7, 7])
+real nontiled_grad_out torch.Size([1, 1, 5, 5])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 10, 10])
+arg size torch.Size([1, 1, 10, 10])
+##############grad_in in maxp torch.Size([1, 1, 20, 20])
+I am [0, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 22, 22])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 20, 20])
+grad_input torch.Size([1, 1, 22, 22])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 22, 22])
+grad_input new torch.Size([1, 1, 22, 22])
+new grad_input torch.Size([1, 1, 22, 22])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 0, 10] [0, 19, 0, 19] [0, 9, 0, 9]
+## 0 10 0 10
+A 0 10 0 10
+B 0 12 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 24, 24])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 22, 22])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 24, 24])
+grad_input new torch.Size([1, 1, 24, 24])
+grad_input torch.Size([1, 1, 24, 24])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 0, 10] [0, 19, 0, 19] [0, 9, 0, 9]
+## 0 10 0 10
+A 0 10 0 10
+B 0 12 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 26, 26])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 24, 24])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 20, 20])
+grad_out size torch.Size([1, 1, 20, 20])
+crop [0, 10, 0, 10] [0, 19, 0, 19] [0, 9, 0, 9]
+## 0 10 0 10
+A 0 10 0 10
+B 0 12 0 12
+csaved input torch.Size([1, 1, 12, 12])
+cgrad_output torch.Size([1, 1, 10, 10])
+real nontiled_activation torch.Size([1, 1, 12, 12])
+real nontiled_grad_out torch.Size([1, 1, 10, 10])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 40, 40])
+grad_out size [torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledSplitFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledSplitFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function cMaxPool2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledConv2dFunctionBackward
+[torch/csrctorch.Size([1, 1, 20, 20])
+arg size torch.Size([1, 1, 20, 20])
+##############grad_in in maxp torch.Size([1, 1, 40, 40])
+I am [0, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 42, 42])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 40, 40])
+grad_input torch.Size([1, 1, 42, 42])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 42, 42])
+grad_input new torch.Size([1, 1, 42, 42])
+new grad_input torch.Size([1, 1, 42, 42])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 0, 20] [0, 39, 0, 39] [0, 19, 0, 19]
+## 0 20 0 20
+A 0 20 0 20
+B 0 22 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the middle ++ input shape torch.Size([1, 1, 44, 44])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 42, 42])
+padding info :: [2, 2, 2, 2]
+grad_input old torch.Size([1, 1, 44, 44])
+grad_input new torch.Size([1, 1, 44, 44])
+grad_input torch.Size([1, 1, 44, 44])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 0, 20] [0, 39, 0, 39] [0, 19, 0, 19]
+## 0 20 0 20
+A 0 20 0 20
+B 0 22 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 46, 46])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 44, 44])
+padding info :: [3, 3, 3, 3]
+grad_input torch.Size([1, 1, 40, 40])
+grad_out size torch.Size([1, 1, 40, 40])
+crop [0, 20, 0, 20] [0, 39, 0, 39] [0, 19, 0, 19]
+## 0 20 0 20
+A 0 20 0 20
+B 0 22 0 22
+csaved input torch.Size([1, 1, 22, 22])
+cgrad_output torch.Size([1, 1, 20, 20])
+real nontiled_activation torch.Size([1, 1, 22, 22])
+real nontiled_grad_out torch.Size([1, 1, 20, 20])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 40, 40])
+arg size torch.Size([1, 1, 40, 40])
+##############grad_in in maxp torch.Size([1, 1, 80, 80])
+I am [0, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 82, 82])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 80, 80])
+grad_input torch.Size([1, 1, 82, 82])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 82, 82])
+grad_input new torch.Size([1, 1, 82, 82])
+new grad_input torch.Size([1, 1, 82, 82])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [0, 40, 0, 40] [0, 79, 0, 79] [0, 39, 0, 39]
+## 0 40 0 40
+A 0 40 0 40
+B 0 42 0 42
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+in the local first ++ input shape torch.Size([1, 1, 84, 84])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 82, 82])
+padding info :: [2, 2, 2, 2]
+grad_input torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 80, 80])
+crop [0, 40, 0, 40] [0, 79, 0, 79] [0, 39, 0, 39]
+## 0 40 0 40
+A 0 40 0 40
+B 0 42 0 42
+csaved input torch.Size([1, 1, 42, 42])
+cgrad_output torch.Size([1, 1, 40, 40])
+real nontiled_activation torch.Size([1, 1, 42, 42])
+real nontiled_grad_out torch.Size([1, 1, 40, 40])
+-----------------------------------------
+
+-----------------------------------------
+
+
+^^^^^cMaxPool2dFunction bwd
+input size torch.Size([1, 1, 160, 160])
+grad_out size torch.Size([1, 1, 80, 80])
+arg size torch.Size([1, 1, 80, 80])
+##############grad_in in maxp torch.Size([1, 1, 160, 160])
+I am [0, 0]
+@@@ using cudnn bkw
+local last ++ input shape torch.Size([1, 1, 162, 162])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 160, 160])
+grad_input torch.Size([1, 1, 162, 162])
+padding info :: [1, 1, 1, 1]
+grad_input old torch.Size([1, 1, 162, 162])
+grad_input new torch.Size([1, 1, 162, 162])
+new grad_input torch.Size([1, 1, 162, 162])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [0, 80, 0, 80] [0, 159, 0, 159] [0, 79, 0, 79]
+## 0 80 0 80
+A 0 80 0 80
+B 0 82 0 82
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+I am [0, 0]
+@@@ using cudnn bkw
+input grad ++ input shape torch.Size([1, 1, 164, 164])
+weight shape torch.Size([1, 1, 3, 3])
+grad_output shape torch.Size([1, 1, 162, 162])
+final torch.Size([1, 1, 164, 164])
+padding info :: [2, 2, 2, 2]
+after crop g_in torch.Size([1, 1, 80, 80])
+grad_out size torch.Size([1, 1, 160, 160])
+crop [0, 80, 0, 80] [0, 159, 0, 159] [0, 79, 0, 79]
+## 0 80 0 80
+A 0 80 0 80
+B 0 82 0 82
+csaved input torch.Size([1, 1, 82, 82])
+cgrad_output torch.Size([1, 1, 80, 80])
+real nontiled_activation torch.Size([1, 1, 82, 82])
+real nontiled_grad_out torch.Size([1, 1, 80, 80])
+-----------------------------------------
+
+-----------------------------------------
+
+~~ check forward correctness ~~
+-----------------------------------------
+
+#### compare grad_in
+-----------------------------------------
+
+#### compare w1
+-----------------------------------------
+
+#### compare w2
+-----------------------------------------
+
+#### compare w3
+-----------------------------------------
+
+#### compare w4
+-----------------------------------------
+
+#### compare w5
+-----------------------------------------
+
+#### compare w6
+-----------------------------------------
+
+#### compare w7
+-----------------------------------------
+
+#### compare w8
+-----------------------------------------
+
+#### compare w9
+-----------------------------------------
+
+#### compare w10
+-----------------------------------------
+
+/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad
+[torch/csrc/autograd/engine.cpp] call_function TiledSplitFunctionBackward
+[torch/csrc/autograd/engine.cpp] call_function torch::autograd::AccumulateGrad

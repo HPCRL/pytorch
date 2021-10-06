@@ -47,6 +47,7 @@ def point_wise_compare_4d(I, J, K, L, out, out_ref) -> int:
     return count
 
 def check_equal(first, second, verbose):
+    print("-----------------------------------------\n")
     if verbose:
         print()
     for i, (x, y) in enumerate(zip(first, second)):
@@ -56,6 +57,7 @@ def check_equal(first, second, verbose):
             print("x = {}".format(x.flatten()))
             print("y = {}".format(y.flatten()))
             print('-' * 80)
-        #np.testing.assert_allclose(x, y, err_msg="Index: {}".format(i))
-        #print("-----------------------------------------\n")
-        np.testing.assert_equal(x, y, err_msg="Index: {}".format(i))
+        
+        np.testing.assert_allclose(x, y, err_msg="Index: {}".format(i))
+        #
+        #np.testing.assert_equal(x, y, err_msg="Index: {}".format(i))

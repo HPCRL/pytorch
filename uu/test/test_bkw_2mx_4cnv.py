@@ -22,8 +22,6 @@ def print_activa(self, input, output):
     print('input size : ', input[0].size())
     print('input : ', input[0])
     print('output size : ', output[0].size())
-
-
     li_act.append(input[0])
 
     
@@ -72,12 +70,16 @@ class Net_ref(nn.Module):
         self.conv2d_4.weight = Parameter(w4)
        
         self.conv2d_1.register_forward_hook(print_activa)
+        self.conv2d_3.register_forward_hook(print_activa)
+        self.conv2d_4.register_forward_hook(print_activa)
         self.conv2d_2.register_forward_hook(print_activa)
         self.maxpool1.register_forward_hook(print_activa)
         self.maxpool2.register_forward_hook(print_activa)
         
         self.conv2d_1.register_full_backward_hook(print_grad)
         self.conv2d_2.register_full_backward_hook(print_grad)
+        self.conv2d_3.register_full_backward_hook(print_grad)
+        self.conv2d_4.register_full_backward_hook(print_grad)
         self.maxpool1.register_full_backward_hook(print_grad)
         self.maxpool2.register_full_backward_hook(print_grad)
 
@@ -88,11 +90,11 @@ class Net_ref(nn.Module):
 
         out = self.maxpool1(out)
         #print("ref mxp1 out\n", out)
-        # out = self.conv2d_3(out)
+        out = self.conv2d_3(out)
 
-        # out = self.conv2d_4(out)
-        # #print("ref 2nd out\n", out)
-        # out = self.maxpool2(out)
+        out = self.conv2d_4(out)
+        #print("ref 2nd out\n", out)
+        out = self.maxpool2(out)
         #print("ref mxp2 out\n", out)
       
         return out
@@ -135,7 +137,7 @@ class Net(nn.Module):
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.mxp1]) #, self.conv2d_3, self.conv2d_4,self.mxp2
+        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.mxp1, self.conv2d_3, self.conv2d_4,self.mxp2]) #
         
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
@@ -144,19 +146,19 @@ class Net(nn.Module):
         #print("!!!!!!!", model_device)
         stream_structure = self.block1
 
-    # # prepare grad info for correctness check(only for linear )
-    #     li_act_p = []
-    #     for elm in li_act:
-    #         print(elm.size())
-    #         pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
-    #         li_act_p.append(pd(elm))
-    #     i = len(li)
-    #     ii = 0
-    #     for op in self.block1._modules.values():
-    #         grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
-    #         i -= 1
-    #         ii+= 1
-    # # prepare grad info for correctness check(only for linear )
+    # prepare grad info for correctness check(only for linear )
+        li_act_p = []
+        for elm in li_act:
+            print(elm.size())
+            pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
+            li_act_p.append(pd(elm))
+        i = len(li)
+        ii = 0
+        for op in self.block1._modules.values():
+            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
+            i -= 1
+            ii+= 1
+    # prepare grad info for correctness check(only for linear )
 
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
@@ -168,26 +170,14 @@ class Net(nn.Module):
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
-    # # add grad_payload as negate keys
-    #             info[0].update(grad_dict_bk)
-    #   # add grad_payload as negate keys
+                print(info[0])
+    # add grad_payload as negate keys
+                info[0].update(grad_dict_bk)
+      # add grad_payload as negate keys
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
                 out_temp = self.block1(input_tile, info)
-
-                # out_temp = self.conv2d_1(input_tile, info)
-                # print("1 out_temp", out_temp[0].size())
-
-                # out_temp = self.conv2d_2(out_temp)
-                # print("2 out_temp", out_temp[0].size())
-
-                # out_temp = self.mxp1(out_temp)
-                # print("max 1", out_temp[0].size())
-
-                
-                # out_temp = self.mxp2(out_temp)
-                # print("max 2", out_temp[0].size())
 
                 
                 # use customized copy
@@ -231,34 +221,44 @@ def main():
     out = model(input, H, W, nTh, nTw )
 
 
-    # print("out shape", out)
-    # print("out_ref ", out_ref)
+    
 
     #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
-    # print("~~ check forward correctness ~~")
+
+    print("~~ check forward correctness ~~")
+    # print("out shape", out)
+    # print("out_ref ", out_ref)
     # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
-    # correctness_check.check_equal(out, out_ref, False)
+    correctness_check.check_equal(out, out_ref, False)
 
 
     print("#### compare grad_in")
-    not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    #correctness_check.check_equal(input.grad, input_ref.grad, False)
+    # print("input ref grad", input_ref.grad)
+    # print("input grad", input.grad)
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    correctness_check.check_equal(input.grad, input_ref.grad, False)
 
     # # print("w1 ref grad", model_ref.conv2d_1.weight.grad)
     # # print("w1 grad", model.conv2d_1.weight.grad)
     print("#### compare w1")
-    # not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
-    #correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
-    # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
-    # # print("w2 grad", model.conv2d_2.weight.grad)
+    # # not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad)
+    correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
+    # # # print("w2 ref grad", model_ref.conv2d_2.weight.grad)
+    # # # print("w2 grad", model.conv2d_2.weight.grad)
     print("#### compare w2")
     #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
-    #correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
+    correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
+
+    print("#### compare w3")
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
+    correctness_check.check_equal(model_ref.conv2d_3.weight.grad, model.conv2d_3.weight.grad, False)
+
+    print("#### compare w4")
+    #not_same_num = correctness_check.point_wise_compare_4d(1,1,Kh,Kw, model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad)
+    correctness_check.check_equal(model_ref.conv2d_4.weight.grad, model.conv2d_4.weight.grad, False)
 
 if __name__=="__main__":
     main()

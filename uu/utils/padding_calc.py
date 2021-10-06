@@ -6,130 +6,6 @@ import math
 
 from uu.utils import correctness_check
 
-def recalc_right_to_left(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
-    list_op__in_chckp_seg.reverse()
-    fwd_info_dict = {}
-    # print("in recalc_right_to_left", list_op__in_chckp_seg)
-    with torch.no_grad():
-        # first op should be a maxpool
-        assert isinstance(list_op__in_chckp_seg[0], maxpool2d.cMaxPool2d)
-        for op in list_op__in_chckp_seg:
-            uniq_opid = id(op)
-            if isinstance(op, conv2d.TiledConv2d):
-                pi = old_f_info[uniq_opid].copy()
-                ph = op.padding[0]
-                pw = op.padding[1]
-                # real_index is the key loop variable 
-
-                none_tiled_output_shape = shape_dict[uniq_opid].output_shape
-                cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
-
-
-                padding_info, input_slice, internal_expand, real_index = conv2d_revr_padding_info(real_index, none_tiled_output_shape, [ph, pw], op.stride[0], op.kernel_size[0])
-                # update old one
-                # shape has tiny issue!!
-                pi.cur_output_shape = cur_output_shape
-                pi.input_slice = input_slice
-                pi.real_index = real_index
-                fwd_info_dict[uniq_opid] = pi  # insert into info_dict
-            elif isinstance(op, maxpool2d.cMaxPool2d):
-                cur_output_shape = b_info[uniq_opid].cur_output_shape
-                input_slice = b_info[uniq_opid].input_slice
-                #produce input shape
-                mxp_stride = op.stride[0]
-                real_index = [x*mxp_stride for x in input_slice] # expand it and get parent index
-                none_tiled_output_shape = shape_dict[uniq_opid].output_shape
-                H = none_tiled_output_shape[2]
-                W = none_tiled_output_shape[3]
-                H = H * mxp_stride
-                W = W * mxp_stride
-                # produce real_index for next op
-                real_index[1] = min(W-1, real_index[1] +1) # +1 since 0-based 
-                real_index[3] = min(H-1, real_index[3] +1)
-                input_slice = real_index    # maxpooling no padding here.
-                pi = old_f_info[uniq_opid].copy()
-                # update old one
-                pi.cur_output_shape = cur_output_shape
-                pi.input_slice = input_slice
-                pi.real_index = real_index
-                fwd_info_dict[uniq_opid] = pi # insert into info_dict
-            else:
-                None   
-    return fwd_info_dict
-
-def recalc_left_to_right(list_op__in_chckp_seg, shape_dict, old_f_info, b_info):
-    fwd_info_dict = {}
-    with torch.no_grad():
-        # first op should be a maxpool
-        assert isinstance(list_op__in_chckp_seg[0], maxpool2d.cMaxPool2d)
-        # del list_op__in_chckp_seg[0]
-        for op in list_op__in_chckp_seg:
-            uniq_opid = id(op)
-            if isinstance(op, conv2d.TiledConv2d):
-                # update old one
-                pi = old_f_info[uniq_opid].copy()
-                cur_output_shape = (input_slice[1]-input_slice[0]+1, input_slice[3]-input_slice[2]+1) # r-l, b-t
-                pi.cur_output_shape = cur_output_shape
-                old_input_slice = pi.input_slice
-                # adjust_input_slice_diff = []     
-                # for i in range(0, len(old_input_slice)):
-                #     adjust_input_slice_diff.append(abs(old_input_slice[i]-input_slice[i]))
-                pi.input_slice = input_slice
-                pi.real_index = real_index
-                # pi.adjust_input_slice_diff = adjust_input_slice_diff
-
-                fwd_info_dict[uniq_opid] = pi  # insert into info_dict
-
-                #prepare for next
-                ph = op.padding[0]
-                pw = op.padding[1]
-                padding_info, input_slice, internal_expand, real_index = conv2d_fwd_padding_info(real_index, none_tiled_output_shape, [ph, pw], op.stride[0], op.kernel_size[0], pi)
-                print("input_slice, real_index", input_slice, real_index)
-                
-            elif isinstance(op, maxpool2d.cMaxPool2d): # here it is the place to init input_slice and real_index after max_pool conv2d
-                pi = b_info[uniq_opid]
-                input_slice = pi.input_slice
-
-                print("recalc_left_to_right ", pi)
-                none_tiled_output_shape = shape_dict[uniq_opid].output_shape
-                # produce real_index for next op
-                real_index = pi.real_index
-                input_slice = pi.input_slice    # maxpooling no padding here.
-                next_id = -99
-            else:
-                None   
-    return fwd_info_dict
-
-def conv2d_fwd_padding_info(tile_indx: List, none_tiled_input_shape, pads: List, stride, RS, old_f_pi):
-    iH = none_tiled_input_shape[2]
-    iW = none_tiled_input_shape[3]
-    print("@@@@@@@@@@@@@@@@", iH, iW)
-    oH = math.floor((iH+2*pads[0]-(RS-1)-1)/stride+1)
-    oW = math.floor((iW+2*pads[1]-(RS-1)-1)/stride+1)
-
-    tile_top = tile_indx[2]
-    tile_bottom = tile_indx[3]
-    tile_left = tile_indx[0]
-    tile_right = tile_indx[1]
-    #here we only consider stride = 1
-    pad_top = max(0-(tile_top-pads[0]), 0)
-    pad_bottom = max((tile_bottom+pads[0])-(oH-1), 0)
-    pad_left = max(0-(tile_left-pads[1]), 0)
-    pad_right = max((tile_right+pads[1])-(oW-1), 0)
-    # padding 0 element
-    padding_info = [pad_left, pad_right, pad_top, pad_bottom]
-    internal_expand = [0, 0, 0, 0] # we do not need to do additional internal expansion, since the data is larger.
-    # input slice for next
-    input_top = max(0, (tile_top-pads[0]))
-    input_bottom = min(oH-1, (tile_bottom+pads[0]))
-    input_left = max(0, (tile_left-pads[1]))
-    input_right = min(oW-1, (tile_right+pads[1]))
-    #input_tile view, the 4 point(l,r,t,b) in input tenser. Value is include [l, r], [t, b]
-    input_slice = [input_left, input_right, input_top, input_bottom]
-    real_index = input_slice
-    # but final input slice is need to make write result correct
-    return padding_info, input_slice, internal_expand, real_index
-
 # Assume conv2d input output are same shape
 def conv2d_revr_padding_info(tile_indx: List, none_tiled_output_shape, pads: List, stride, RS):
     #print("--", tile_indx, none_tiled_output_shape, pads, stride, RS)
@@ -213,17 +89,6 @@ class Pad_info:
         return rep
 
 
-def adjust_fwd_info(list_op__in_chckp_seg, op_indx, old_f_info, b_info, shape_dict):
-    before_issue_maxpool = list_op__in_chckp_seg[0:op_indx+1] # include the maxpool
-    after_issue_maxpool = list_op__in_chckp_seg[op_indx:]
-    
-    new_fwd_info_dict_1st_half = recalc_right_to_left(before_issue_maxpool, shape_dict, old_f_info, b_info)
-    new_fwd_info_dict_2nd_half = recalc_left_to_right(after_issue_maxpool, shape_dict, old_f_info, b_info)   
-
-    print("###", new_fwd_info_dict_1st_half)
-    print("###", new_fwd_info_dict_2nd_half)
-
-    return new_fwd_info_dict_1st_half
 
 
 def shape_compatible(fwd_out_shape, bwd_out_shape):
@@ -264,8 +129,6 @@ def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, n
         f_info = compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg.copy(), shape_dict, b_info, nTh, nTw)
     else:
         f_info = compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg.copy(), shape_dict, b_info, nTh, nTw)
-
-
 
     #print("op_list_in_seg", list_op__in_chckp_seg)
     # print("------------------------------")
@@ -442,12 +305,14 @@ def get_input_tile(info:Dict, input, first_op_in_seg):
 
 def resize_grad_in(info, grad_input):
     print("padding info ::", info.padding_info)
+    print("grad_input old", grad_input.size())
     if info.padding_info != [0] * len(info.padding_info):
         grad_input = grad_input[:, :, info.padding_info[2]:grad_input.size()[2]-info.padding_info[3], \
                     info.padding_info[0]:grad_input.size()[3]-info.padding_info[1]]
         # TODO: if not in the first ...
-        # pd = torch.nn.ConstantPad2d(info.padding_info, 0)
-        # grad_input = pd(grad_input)
+        pd = torch.nn.ConstantPad2d(info.padding_info, 0)
+        grad_input = pd(grad_input)
+    print("grad_input new", grad_input.size())
     return grad_input
 
 def resize_grad_in_1(info, grad_input):
@@ -459,8 +324,7 @@ def resize_grad_in_1(info, grad_input):
     return grad_input
 
 def reshape_for_final(need_info, f_info, grad_input):
-    print("reshape_for_final", grad_input)
-
+    #print("reshape_for_final", grad_input)
     #remove padding part
     grad_input = resize_grad_in_1(f_info, grad_input)
     # print("f_info ::", f_info, need_info)
@@ -479,12 +343,14 @@ def reshape_for_final(need_info, f_info, grad_input):
     return grad_input
 
 
-def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride):
+def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride, nontiled_grad_out, nontiled_activation):
     # debug (, nontiled_grad_out, nontiled_activation)
     # to get disjoint part of grad_output
     # for stride 1 and same shape in/out-put
     # cal disjoint g_index
     # cal input index based on f_info and pure-calc
+
+    
     Th = f_info.non_disjoint_tile_size[0]
     Tw = f_info.non_disjoint_tile_size[1]
     tile_top = f_info.coord[0]*Th
@@ -499,31 +365,42 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     for i in range(len(actual_index)):
         crop.append(abs( current_stage_g_index[i] - actual_index[i]))
     
-    # print("crop", crop, current_stage_g_index, actual_index)
-    # print("##", crop[2],grad_output.size()[2]-crop[3], crop[0],grad_output.size()[3]-crop[1])
+    current_padd = next_f_info.padding_info
+    if len(current_padd) > 0 and current_padd != [0] * len(current_padd):
+        grad_output = grad_output[:, :, current_padd[2]:grad_output.size()[2]-current_padd[3], \
+                    current_padd[0]:grad_output.size()[3]-current_padd[1]]
+        input_tensor = input_tensor[:, :, current_padd[2]:input_tensor.size()[2]-current_padd[3], \
+                    current_padd[0]:input_tensor.size()[3]-current_padd[1]]
+
+    print("grad_out size", grad_output.size())
+    print("crop", crop, current_stage_g_index, actual_index)
+    print("##", crop[2],grad_output.size()[2]-crop[3], crop[0],grad_output.size()[3]-crop[1])
+
 
     grad_output = grad_output[:,:,crop[2]:grad_output.size()[2]-crop[3], crop[0]:grad_output.size()[3]-crop[1]]
     input_tensor = input_tensor[:,:,crop[2]:input_tensor.size()[2]-crop[3], crop[0]:input_tensor.size()[3]-crop[1]]
 
-    # # for debug
-    # nontiled_grad_out = nontiled_grad_out[:,:, tile_top: tile_bottom+1, tile_left: tile_right+1]
-    # iH = nontiled_activation.size()[2]
-    # iW = nontiled_activation.size()[3]
-    # input_top = tile_top
-    # input_bottom = min(iH-1, (tile_top+Th*stride[0]-1+weight_size[2]-1))
-    # input_left = tile_left
-    # input_right = min(iW-1, (tile_left+Tw*stride[1]-1+weight_size[3]-1))
-    # nontiled_activation = nontiled_activation[:,:, input_top: input_bottom+1, input_left: input_right+1]    
-    # print("A", tile_top, tile_bottom+1, tile_left, tile_right+1)
-    # print("B", input_top, input_bottom+1, input_left, input_right+1)
+    # for debug
+    nontiled_grad_out = nontiled_grad_out[:,:, tile_top: tile_bottom+1, tile_left: tile_right+1]
+    iH = nontiled_activation.size()[2]
+    iW = nontiled_activation.size()[3]
+    input_top = tile_top
+    input_bottom = min(iH-1, (tile_top+Th*stride[0]-1+weight_size[2]-1))
+    input_left = tile_left
+    input_right = min(iW-1, (tile_left+Tw*stride[1]-1+weight_size[3]-1))
+    nontiled_activation = nontiled_activation[:,:, input_top: input_bottom+1, input_left: input_right+1]    
+    print("A", tile_top, tile_bottom+1, tile_left, tile_right+1)
+    print("B", input_top, input_bottom+1, input_left, input_right+1)
 
     
-    # print("saved input", input_tensor.size(), input_tensor)
-    # print("nontiled_activation", nontiled_activation.size(), nontiled_activation)
+    print("csaved input", input_tensor.size())
+    print("cgrad_output", grad_output.size())
+    print("real nontiled_activation", nontiled_activation.size())
+    print("real nontiled_grad_out", nontiled_grad_out.size())
     # nontiled_activation[0][0][0][0] = -99
 
-    # correctness_check.check_equal(grad_output, nontiled_grad_out, False)
-    # correctness_check.check_equal(input_tensor, nontiled_activation, False)
+    correctness_check.check_equal(grad_output, nontiled_grad_out, False)
+    correctness_check.check_equal(input_tensor, nontiled_activation, False)
     
     return grad_output, input_tensor
 
