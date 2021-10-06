@@ -22,8 +22,6 @@ def print_activa(self, input, output):
     print('input size : ', input[0].size())
     #print('input : ', input[0])
     print('output size : ', output[0].size())
-
-
     li_act.append(input[0])
 
     
@@ -32,11 +30,16 @@ Kh = 3
 Kw = 3
 Ph = 1
 Pw = 1
-chanel = 1
-batch = 1
+chanel = 3
+batch = 2
+
+H = 320
+W = 320
+oH = 10
+oW = 10
 
 class Net_ref(nn.Module):
-    def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13):
+    def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
         super().__init__()
         self.conv2d_1 = nn.Conv2d(in_channels=chanel, 
                                   out_channels=chanel, 
@@ -130,6 +133,13 @@ class Net_ref(nn.Module):
 
         self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
 
+        self.flat = nn.Flatten()
+        in_feature = chanel*oH*oW
+        self.fc1 = nn.Linear(in_feature, 1024, bias=False)
+        self.fc2 = nn.Linear(1024, 1024, bias=False)
+
+
+
         self.conv2d_1.weight = Parameter(w1)
         self.conv2d_2.weight = Parameter(w2)
         self.conv2d_3.weight = Parameter(w3)
@@ -143,6 +153,8 @@ class Net_ref(nn.Module):
         self.conv2d_11.weight = Parameter(w11)
         self.conv2d_12.weight = Parameter(w12)
         self.conv2d_13.weight = Parameter(w13)
+        self.fc1.weight = Parameter(fcw1)
+        self.fc2.weight = Parameter(fcw2)
        
         self.conv2d_1.register_forward_hook(print_activa)
         self.conv2d_3.register_forward_hook(print_activa)
@@ -205,6 +217,10 @@ class Net_ref(nn.Module):
         out = self.conv2d_12(out)
         out = self.conv2d_13(out)
         out = self.maxpool5(out)
+
+        out = self.flat(out)
+        out = self.fc1(out)
+        out = self.fc2(out)
       
         return out
 
@@ -309,6 +325,10 @@ class Net(nn.Module):
 
         self.mxp5 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
+        in_feature = chanel*oH*oW
+        self.flat = nn.Flatten()
+        self.fc1 = nn.Linear(in_feature, 1024, bias=False)
+        self.fc2 = nn.Linear(1024, 1024, bias=False)
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
@@ -323,6 +343,7 @@ class Net(nn.Module):
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
         #print("!!!!!!!", model_device)
+        print("!!!!!!!", oH, oW)
         stream_structure = self.block1
 
     # prepare grad info for correctness check(only for linear )
@@ -365,7 +386,12 @@ class Net(nn.Module):
                 output_index = fake_pi.input_slice
                 print(tile_shape, tile_size, output_index)
                 out = self.tcopy(out_temp, out, output_index, tile_size)
+                
                 #del info
+        
+        out = self.flat(out)
+        out = self.fc1(out)
+        out = self.fc2(out)
         return out
 
 def main():
@@ -393,8 +419,11 @@ def main():
     w11 = model.conv2d_11.weight.data
     w12 = model.conv2d_12.weight.data
     w13 = model.conv2d_13.weight.data
+
+    fcw1 = model.fc1.weight.data
+    fcw2 = model.fc2.weight.data
     
-    model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13).to(device)
+    model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2).to(device)
     input_ref = input.data.clone() 
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
