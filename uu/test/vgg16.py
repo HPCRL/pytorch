@@ -33,10 +33,10 @@ Pw = 1
 chanel = 3
 batch = 2
 
-H = 320
-W = 320
-oH = 10
-oW = 10
+H = 1024
+W = 1024
+oH = 32
+oW = 32
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
@@ -400,10 +400,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 320
-    W = 320
-    nTh = 4
-    nTw = 4
+    H = 1024
+    W = 1024
+    nTh = 16
+    nTw = 16
     input = torch.rand(batch,chanel,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data

@@ -106,7 +106,8 @@ class TiledConv2dFunction(torch.autograd.Function):
                         #print("ouput grad ++ input", input_tensor)
                         print("weight shape", weight_size)
                         print("grad_output shape", grad_output.size())
-                        new_grad_out = padding_calc.get_input_tile(b_info, grad_output, 0)
+                        first_op_in_seg = ctx.uniq_id
+                        new_grad_out = padding_calc.get_input_tile(ctx.info[1], grad_output, first_op_in_seg)
                         # since I remove padding from get_input_tile, so manually do it here.
                         grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_out, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                         grad_input = padding_calc.resize_grad_in(f_info, grad_input)
@@ -121,7 +122,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                         print("final", grad_input.size())
                         # reshape to tile size before end of the segment
                         grad_input = padding_calc.reshape_for_final(ctx.info[1][-11], f_info, grad_input)
-                    elif l_depth == 0:  
+                    elif l_depth == 0 and not local_first:  
                         # the last conv in local continous conv segment
                         print("local last ++ input shape", input_size)
                         #print("local last ++ input", input_tensor)
@@ -159,7 +160,12 @@ class TiledConv2dFunction(torch.autograd.Function):
                     #debug 
                     nontiled_grad_out = ctx.info[0][-1*ctx.uniq_id][1]
                     nontiled_activation = ctx.info[0][-1*ctx.uniq_id][0]
-                    next_f_info = ctx.info[0][f_info.next_id] # TODO how to get next info....
+
+                    if f_info.next_id == -99:
+                        # TODO, looks some issue here.
+                        next_f_info = ctx.info[0][-11]
+                    else:
+                        next_f_info = ctx.info[0][f_info.next_id] # TODO how to get next info....
  
                     new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
                                                         f_info, next_f_info, weight_size,\
@@ -176,7 +182,7 @@ class TiledConv2dFunction(torch.autograd.Function):
         else:
             print("using cpu bkw")
 
-        #print("##############grad_in in conv2d", grad_input) 
+        print("##############return grad_in in conv2d", grad_input.size()) 
         return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
     

@@ -12,9 +12,9 @@ grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
     print('grad_output size : ', grad_output[0].size())
-    print('ref grad_output  :\n ', grad_output[0])
+    #print('ref grad_output  :\n ', grad_output[0])
     print('grad_input size : ', grad_input[0].size())
-    print('ref grad_input  : \n', grad_input[0])
+    #print('ref grad_input  : \n', grad_input[0])
     li.append( grad_output[0])
 
 def print_activa(self, input, output):
@@ -22,8 +22,6 @@ def print_activa(self, input, output):
     print('input size : ', input[0].size())
     print('input : ', input[0])
     print('output size : ', output[0].size())
-
-
     li_act.append(input[0])
 
     
@@ -35,7 +33,7 @@ Pw = 1
 chanel = 1
 
 class Net_ref(nn.Module):
-    def __init__(self, w1, w2, w3, w4):
+    def __init__(self, w1, w2):
         super().__init__()
         self.conv2d_1 = nn.Conv2d(in_channels=chanel, 
                                   out_channels=chanel, 
@@ -51,49 +49,28 @@ class Net_ref(nn.Module):
                                   )
         
                                 
-        self.maxpool1 = nn.MaxPool2d((2,2), (2,2))
-        self.conv2d_3 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
-        self.conv2d_4 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
+        #self.maxpool1 = nn.MaxPool2d((2,2), (2,2))
+        
 
-        self.maxpool2 = nn.MaxPool2d((2,2), (2,2))
         self.conv2d_1.weight = Parameter(w1)
         self.conv2d_2.weight = Parameter(w2)
-        self.conv2d_3.weight = Parameter(w3)
-        self.conv2d_4.weight = Parameter(w4)
-       
+      
         self.conv2d_1.register_forward_hook(print_activa)
         self.conv2d_2.register_forward_hook(print_activa)
-        self.maxpool1.register_forward_hook(print_activa)
-        self.maxpool2.register_forward_hook(print_activa)
+        #self.maxpool1.register_forward_hook(print_activa)
         
         self.conv2d_1.register_full_backward_hook(print_grad)
         self.conv2d_2.register_full_backward_hook(print_grad)
-        self.maxpool1.register_full_backward_hook(print_grad)
-        self.maxpool2.register_full_backward_hook(print_grad)
+        #self.maxpool1.register_full_backward_hook(print_grad)
+       
 
     def forward(self, x):
         out = self.conv2d_1(x)
         #print("ref 1st out\n", out)
         out = self.conv2d_2(out)
 
-        out = self.maxpool1(out)
-        #print("ref mxp1 out\n", out)
-        # out = self.conv2d_3(out)
-
-        # out = self.conv2d_4(out)
-        # #print("ref 2nd out\n", out)
-        # out = self.maxpool2(out)
-        #print("ref mxp2 out\n", out)
+        #out = self.maxpool1(out)
+        
       
         return out
 
@@ -116,26 +93,12 @@ class Net(nn.Module):
                                         bias = False,
                                         padding=(Ph,Pw),
                                         ) 
-        self.mxp1 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
+        #self.mxp1 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_3 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
-                                        kernel_size=(Kh,Kw),
-                                        bias = False,
-                                        padding=(Ph,Pw),
-                                        )
-        self.conv2d_4 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
-                                        kernel_size=(Kh,Kw),
-                                        bias = False,
-                                        padding=(Ph,Pw),
-                                        )
-
-        self.mxp2 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
-
+       
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.mxp1]) #, self.conv2d_3, self.conv2d_4,self.mxp2
+        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2]) #, self.conv2d_3, self.conv2d_4,self.mxp2
         
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
@@ -144,19 +107,19 @@ class Net(nn.Module):
         #print("!!!!!!!", model_device)
         stream_structure = self.block1
 
-    # # prepare grad info for correctness check(only for linear )
-    #     li_act_p = []
-    #     for elm in li_act:
-    #         print(elm.size())
-    #         pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
-    #         li_act_p.append(pd(elm))
-    #     i = len(li)
-    #     ii = 0
-    #     for op in self.block1._modules.values():
-    #         grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
-    #         i -= 1
-    #         ii+= 1
-    # # prepare grad info for correctness check(only for linear )
+    # prepare grad info for correctness check(only for linear )
+        li_act_p = []
+        for elm in li_act:
+            print(elm.size())
+            pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
+            li_act_p.append(pd(elm))
+        i = len(li)
+        ii = 0
+        for op in self.block1._modules.values():
+            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
+            i -= 1
+            ii+= 1
+    # prepare grad info for correctness check(only for linear )
 
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
@@ -168,29 +131,17 @@ class Net(nn.Module):
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
-    # # add grad_payload as negate keys
-    #             info[0].update(grad_dict_bk)
-    #   # add grad_payload as negate keys
+                print("finfo", info[0])
+    # add grad_payload as negate keys
+                info[0].update(grad_dict_bk)
+      # add grad_payload as negate keys
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
-                print("finfo", info[0])
+                
                 out_temp = self.block1(input_tile, info)
 
-                # out_temp = self.conv2d_1(input_tile, info)
-                # print("1 out_temp", out_temp[0].size())
-
-                # out_temp = self.conv2d_2(out_temp)
-                # print("2 out_temp", out_temp[0].size())
-
-                # out_temp = self.mxp1(out_temp)
-                # print("max 1", out_temp[0].size())
-
-                
-                # out_temp = self.mxp2(out_temp)
-                # print("max 2", out_temp[0].size())
-
-                
+               
                 # use customized copy
                 fake_pi = info[0][-11]
                 tile_shape = fake_pi.cur_output_shape
@@ -215,10 +166,9 @@ def main():
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
     w2 = model.conv2d_2.weight.data
-    w3 = model.conv2d_3.weight.data
-    w4 = model.conv2d_4.weight.data
     
-    model_ref =  Net_ref(w1, w2, w3, w4).to(device)
+    
+    model_ref =  Net_ref(w1, w2).to(device)
     input_ref = input.data.clone() 
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True

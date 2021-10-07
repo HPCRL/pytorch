@@ -399,8 +399,8 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     print("real nontiled_grad_out", nontiled_grad_out.size())
     # nontiled_activation[0][0][0][0] = -99
 
-    correctness_check.check_equal(grad_output, nontiled_grad_out, False)
-    correctness_check.check_equal(input_tensor, nontiled_activation, False)
+    # correctness_check.check_equal(grad_output, nontiled_grad_out, False)
+    # correctness_check.check_equal(input_tensor, nontiled_activation, False)
     
     return grad_output, input_tensor
 
