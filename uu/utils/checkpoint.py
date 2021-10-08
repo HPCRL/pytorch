@@ -65,7 +65,8 @@ class cCheckpoint(torch.autograd.Function):
         
         # how about multiple inputs 
         # lets restrict last one is info
-        args[0].requires_grad=True      #??
+        # args[0].requires_grad=True      #??
+        print("input size",args[0].size() )
         ctx.save_for_backward(args[0])
         ctx.info = args[-1]
         is_ccheckpoint = True
@@ -126,10 +127,26 @@ class cCheckpoint(torch.autograd.Function):
                 " this checkpoint() is not necessary")
 
         torch.autograd.backward(outputs_with_grad, args_with_grad)
-        grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else None
-                      for inp in detached_inputs)
-        # print("HREREERE", detached_inputs)              
-        # print("HREREERE", grads)
+
+        # eh.. how to pass this info to here
+        # grads = tuple(inp.grad if isinstance(inp, torch.Tensor) else None
+        #               for inp in detached_inputs)
+
+        g_list = []
+        for inp in detached_inputs:
+            if isinstance(inp, torch.Tensor):
+                t = inp.grad[:,:,0:80, 0:80]
+                print("TTTTTTTTTTTT",  t[0,0,0,0:10])
+                g_list.append(t)
+            else:
+                g_list.append(None)
+
+        grads = tuple(g_list)  
+
+
+
+        print("HREREERE", grads[0].size())
+        
         res = (None, None) + grads
         return  res
 

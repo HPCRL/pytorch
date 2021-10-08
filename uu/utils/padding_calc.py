@@ -337,7 +337,7 @@ def reshape_for_final(need_info, f_info, grad_input):
     for i in range(len(need_info_index)):
         crop.append(abs( b_info_index[i] - need_info_index[i]))
     # print("crop", crop)
-    # print("##", crop[2], grad_input.size()[2]-crop[3], crop[0], grad_input.size()[3]-crop[1] )
+    print("reshape_for_final ##", crop[2], grad_input.size()[2]-crop[3], crop[0], grad_input.size()[3]-crop[1] )
     grad_input = grad_input[:,:,crop[2]:grad_input.size()[2]-crop[3], crop[0]:grad_input.size()[3]-crop[1]]
     print("after crop g_in", grad_input.size())
     return grad_input

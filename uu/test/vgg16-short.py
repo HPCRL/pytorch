@@ -5,6 +5,10 @@ from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
+from uu.utils import memory 
+from uu.utils import checkpoint
+
+
 
 li = []
 li_act = []
@@ -298,9 +302,11 @@ class Net(nn.Module):
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
                 print("***input tile", input_tile.size())
-                out_temp = self.block1(input_tile, info)
+                out_temp = checkpoint.checkpoint(self.block1, input_tile, info)
 
-               
+                #out_temp = self.block1(input_tile, info)
+
+
                 # use customized copy
                 fake_pi = info[0][-11]
                 tile_shape = fake_pi.cur_output_shape
@@ -317,10 +323,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 160
-    W = 160
-    nTh = 16
-    nTw = 16
+    H = 320
+    W = 320
+    nTh = 4
+    nTw = 4
     input = torch.rand(batch,chanel,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
@@ -334,28 +340,61 @@ def main():
     w9 = model.conv2d_9.weight.data
     w10 = model.conv2d_10.weight.data
    
-    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    memUsage = memory.MeasureMemory(device)
+    print("==== init ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
+
+
+
     model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10).to(device)
     input_ref = input.data.clone() 
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
     out_ref = model_ref(input_ref)
+
+   
+    print("==== ref_fwd done ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
+
     print("done ref")
     out_ref.sum().backward()
     print("done ref bkw")
 
+    print("==== ref_bwd done ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
+
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+
+    print("==== our init ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
     out = model(input, H, W, nTh, nTw )
 
+
+    print("==== our_fwd done ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
+
    
-
-    
-
     #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
+
+    print("==== our_bwd done ...")
+    print(memUsage.snapshot())
+    print(memUsage.currentValue())      #now should be around 3.8MB
+    print(memUsage.availableValue())
 
     print("~~ check forward correctness ~~")
     # print("out shape", out)

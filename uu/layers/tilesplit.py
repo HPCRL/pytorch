@@ -43,9 +43,8 @@ class TiledSplitFunction(torch.autograd.Function):
         big_grad_in = None
         # print(tile_coord)
         # print(ctx.num_tile)
-        # print(coord[2], coord[3]+1, coord[0], coord[1]+1)
-        #print("TiledSplitFunction bwd", grad_output)
-        # print(TiledSplitFunction.big_grad_in)
+        
+        
         if True or tile_coord == ctx.num_tile:
             # last one create the space
             if ctx.input_is_cuda:
@@ -62,13 +61,13 @@ class TiledSplitFunction(torch.autograd.Function):
                 W = ctx.big_infput_shape[3]
                 big_grad_in = torch.zeros(N, C, H, W) 
         
-        
+        print("TiledSplitFunction.big_grad_in", big_grad_in.size())
+        print("TiledSplitFunction bwd", grad_output.size())
+        print(coord[2], coord[3]+1, coord[0], coord[1]+1)
         
         big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output
         # if tile_coord == [0, 0]:
         #     print("TiledSplitFunction.big_grad_in", big_grad_in)
-        
-        
         return big_grad_in, None, None, None, None
        
 class TiledSplit(torch.nn.Module):

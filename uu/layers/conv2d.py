@@ -182,7 +182,7 @@ class TiledConv2dFunction(torch.autograd.Function):
         else:
             print("using cpu bkw")
 
-        print("##############return grad_in in conv2d", grad_input.size()) 
+        print("##############return grad_in in conv2d", grad_input[0,0,0,0:10]) 
         return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
     
