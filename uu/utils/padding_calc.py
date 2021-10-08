@@ -1,7 +1,7 @@
 import torch
 from typing import Dict, List
 from torch.autograd.variable import Variable
-from uu.layers import maxpool2d, conv2d
+from uu.layers import maxpool2d, conv2d, tilesplit
 import math
 
 from uu.utils import correctness_check
@@ -115,6 +115,8 @@ def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, n
     list_op__in_chckp_seg = []
     #print("stream_structure", stream_structure)
     for op in stream_structure._modules.values():
+        if isinstance(op, tilesplit.TiledSplit):
+            continue
         list_op__in_chckp_seg.append(op)
         #print("hash", id(op))
 
@@ -299,6 +301,7 @@ def get_input_tile(info:Dict, input, first_op_in_seg):
 
     input_tile.requires_grad = input.requires_grad
     assert input_tile is not None
+    del input
     return input_tile
     #return Variable(input_tile, requires_grad = True)
 
@@ -320,7 +323,7 @@ def resize_grad_in_1(info, grad_input):
     if info.padding_info != [0] * len(info.padding_info):
         grad_input = grad_input[:, :, info.padding_info[2]:grad_input.size()[2]-info.padding_info[3], \
                     info.padding_info[0]:grad_input.size()[3]-info.padding_info[1]]
-       
+    
     return grad_input
 
 def reshape_for_final(need_info, f_info, grad_input):
@@ -343,7 +346,7 @@ def reshape_for_final(need_info, f_info, grad_input):
     return grad_input
 
 
-def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride, nontiled_grad_out, nontiled_activation):
+def debug_reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride, nontiled_grad_out, nontiled_activation):
     # debug (, nontiled_grad_out, nontiled_activation)
     # to get disjoint part of grad_output
     # for stride 1 and same shape in/out-put
@@ -405,6 +408,45 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
     return grad_output, input_tensor
 
 
+def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f_info, next_f_info, weight_size, orig_padding, stride):
+    # to get disjoint part of grad_output
+    # for stride 1 and same shape in/out-put
+    # cal disjoint g_index
+    # cal input index based on f_info and pure-calc
+
+    
+    Th = f_info.non_disjoint_tile_size[0]
+    Tw = f_info.non_disjoint_tile_size[1]
+    tile_top = f_info.coord[0]*Th
+    tile_bottom = tile_top+Th-1
+    tile_left = f_info.coord[1]*Tw
+    tile_right = tile_left+Tw-1
+    actual_index = [tile_left, tile_right, tile_top, tile_bottom]
+    current_stage_g_index = next_f_info.input_slice
+    
+    crop = []
+    # assumption: current_stage_g_index >> actual_index
+    for i in range(len(actual_index)):
+        crop.append(abs( current_stage_g_index[i] - actual_index[i]))
+    
+    current_padd = next_f_info.padding_info
+    if len(current_padd) > 0 and current_padd != [0] * len(current_padd):
+        grad_output = grad_output[:, :, current_padd[2]:grad_output.size()[2]-current_padd[3], \
+                    current_padd[0]:grad_output.size()[3]-current_padd[1]]
+        input_tensor = input_tensor[:, :, current_padd[2]:input_tensor.size()[2]-current_padd[3], \
+                    current_padd[0]:input_tensor.size()[3]-current_padd[1]]
+
+    print("grad_out size", grad_output.size())
+    print("crop", crop, current_stage_g_index, actual_index)
+    print("##", crop[2],grad_output.size()[2]-crop[3], crop[0],grad_output.size()[3]-crop[1])
+
+
+    grad_output = grad_output[:,:,crop[2]:grad_output.size()[2]-crop[3], crop[0]:grad_output.size()[3]-crop[1]]
+    input_tensor = input_tensor[:,:,crop[2]:input_tensor.size()[2]-crop[3], crop[0]:input_tensor.size()[3]-crop[1]]
+    
+    return grad_output, input_tensor
+
+
 
 #TODO can simplify
 def recreate_input_tile_f(info:Dict, input, next_id):
@@ -428,6 +470,7 @@ def recreate_input_tile_f(info:Dict, input, next_id):
     #print(padding_info)
     pd = torch.nn.ConstantPad2d(padding_info, 0)
     input_tile = pd(input_tile)
+    del input
     return input_tile
 
 

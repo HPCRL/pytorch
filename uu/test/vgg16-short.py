@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.cuda import init
 from uu.utils import shape_infer 
 from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
@@ -259,7 +260,7 @@ class Net(nn.Module):
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, self.mxp1, \
+        self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.conv2d_2, self.mxp1, \
                                                 self.conv2d_3,  self.conv2d_4, self.mxp2,  \
                                                 self.conv2d_5, self.conv2d_6, self.conv2d_7, self.mxp3, \
                                                 self.conv2d_8, self.conv2d_9, self.conv2d_10, self.mxp4, \
@@ -273,17 +274,19 @@ class Net(nn.Module):
         stream_structure = self.block1
 
     # prepare grad info for correctness check(only for linear )
-        li_act_p = []
-        for elm in li_act:
-            print(elm.size())
-            pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
-            li_act_p.append(pd(elm))
-        i = len(li)
-        ii = 0
-        for op in self.block1._modules.values():
-            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
-            i -= 1
-            ii+= 1
+        # li_act_p = []
+        # for elm in li_act:
+        #     print(elm.size())
+        #     pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
+        #     li_act_p.append(pd(elm))
+        # i = len(li)
+        # ii = 0
+        # for op in self.block1._modules.values():
+        #     if isinstance(op, tilesplit.TiledSplit):
+        #         continue
+        #     grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
+        #     i -= 1
+        #     ii+= 1
     # prepare grad info for correctness check(only for linear )
 
 
@@ -297,14 +300,15 @@ class Net(nn.Module):
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
     # add grad_payload as negate keys
-                info[0].update(grad_dict_bk)
+                #info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
-                print("***input tile", input_tile.size())
-                out_temp = checkpoint.checkpoint(self.block1, input_tile, info)
+                # input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh, nTw]) # -1 here is to match 0-base
+                # print("***input tile", input_tile.size())
+                
+                out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
 
-                #out_temp = self.block1(input_tile, info)
+                #out_temp = self.block1(x, info, stream_structure[1], model_device, [nTh, nTw])
 
 
                 # use customized copy
@@ -314,7 +318,12 @@ class Net(nn.Module):
                 output_index = fake_pi.input_slice
                 print(tile_shape, tile_size, output_index)
                 out = self.tcopy(out_temp, out, output_index, tile_size)
-                #del info
+                # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                # memUsage = memory.MeasureMemory(device)
+                # print("==== loop ...", coord)
+                # initmem = memUsage.currentValue()
+                # print(memory.MemSize(initmem))      #now should be around 3.8MB
+                del info
         return out
 
 def main():
@@ -323,10 +332,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 320
-    W = 320
-    nTh = 4
-    nTw = 4
+    H = 4096
+    W = 4096
+    nTh = 16
+    nTw = 16
     input = torch.rand(batch,chanel,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
@@ -343,9 +352,9 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     memUsage = memory.MeasureMemory(device)
     print("==== init ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    initmem = memUsage.currentValue()
+    print(memory.MemSize(initmem))      #now should be around 3.8MB
+    print(memUsage.available())
 
 
 
@@ -357,33 +366,36 @@ def main():
 
    
     print("==== ref_fwd done ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    ref_fwd_use = memUsage.currentValue()-initmem
+    print(memory.MemSize(ref_fwd_use) )     #now should be around 3.8MB
+    print(memUsage.available())
+    print(memUsage.maxx())
+
 
     print("done ref")
     out_ref.sum().backward()
     print("done ref bkw")
 
     print("==== ref_bwd done ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    ref_bwd_use = memUsage.currentValue()-initmem
+    print(memory.MemSize(ref_bwd_use))      #now should be around 3.8MB
+    print(memUsage.available())
+    print(memUsage.maxx())
 
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
 
     print("==== our init ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    our_initmem = memUsage.currentValue()
+    print(memory.MemSize(our_initmem))      #now should be around 3.8MB
+    print(memUsage.available())
     out = model(input, H, W, nTh, nTw )
 
-
     print("==== our_fwd done ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    our_fwd_use = memUsage.currentValue()-our_initmem
+    print(memory.MemSize(our_fwd_use) )     #now should be around 3.8MB
+    print(memUsage.available())
+    print(memUsage.maxx())
 
    
     #print(input_ref.grad)
@@ -392,55 +404,57 @@ def main():
     out.sum().backward()
 
     print("==== our_bwd done ...")
-    print(memUsage.snapshot())
-    print(memUsage.currentValue())      #now should be around 3.8MB
-    print(memUsage.availableValue())
+    our_bwd_use = memUsage.currentValue()-our_initmem
+    print(memory.MemSize(our_bwd_use))      #now should be around 3.8MB
+    print(memUsage.available())
+    print(memUsage.maxx())
+
 
     print("~~ check forward correctness ~~")
-    # print("out shape", out)
-    # print("out_ref ", out_ref)
-    # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
-    correctness_check.check_equal(out, out_ref, False)
+    print("out shape", out.size())
+    #print("out_ref ", out_ref)
+    # # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
+    # correctness_check.check_equal(out, out_ref, False)
 
-    print("#### compare grad_in")
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
-
-
-    print("#### compare w1")
-    correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
-
-    print("#### compare w2")
-    correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
-
-    print("#### compare w3")
-    correctness_check.check_equal(model_ref.conv2d_3.weight.grad, model.conv2d_3.weight.grad, False)
-
-    print("#### compare w4")
-    correctness_check.check_equal(model_ref.conv2d_4.weight.grad, model.conv2d_4.weight.grad, False)
-
-    print("#### compare w5")
-    correctness_check.check_equal(model_ref.conv2d_5.weight.grad, model.conv2d_5.weight.grad, False)
-
-    print("#### compare w6")
-    correctness_check.check_equal(model_ref.conv2d_6.weight.grad, model.conv2d_6.weight.grad, False)
-
-    print("#### compare w7")
-    correctness_check.check_equal(model_ref.conv2d_7.weight.grad, model.conv2d_7.weight.grad, False)
+    # print("#### compare grad_in")
+    # # print("input ref grad", input_ref.grad)
+    # # print("input grad", input.grad)
+    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
 
-    print("#### compare w8")
-    correctness_check.check_equal(model_ref.conv2d_8.weight.grad, model.conv2d_8.weight.grad, False)
+    # print("#### compare w1")
+    # correctness_check.check_equal(model_ref.conv2d_1.weight.grad, model.conv2d_1.weight.grad, False)
+
+    # print("#### compare w2")
+    # correctness_check.check_equal(model_ref.conv2d_2.weight.grad, model.conv2d_2.weight.grad, False)
+
+    # print("#### compare w3")
+    # correctness_check.check_equal(model_ref.conv2d_3.weight.grad, model.conv2d_3.weight.grad, False)
+
+    # print("#### compare w4")
+    # correctness_check.check_equal(model_ref.conv2d_4.weight.grad, model.conv2d_4.weight.grad, False)
+
+    # print("#### compare w5")
+    # correctness_check.check_equal(model_ref.conv2d_5.weight.grad, model.conv2d_5.weight.grad, False)
+
+    # print("#### compare w6")
+    # correctness_check.check_equal(model_ref.conv2d_6.weight.grad, model.conv2d_6.weight.grad, False)
+
+    # print("#### compare w7")
+    # correctness_check.check_equal(model_ref.conv2d_7.weight.grad, model.conv2d_7.weight.grad, False)
 
 
-    print("#### compare w9")
-    correctness_check.check_equal(model_ref.conv2d_9.weight.grad, model.conv2d_9.weight.grad, False)
+    # print("#### compare w8")
+    # correctness_check.check_equal(model_ref.conv2d_8.weight.grad, model.conv2d_8.weight.grad, False)
 
 
-    print("#### compare w10")
-    correctness_check.check_equal(model_ref.conv2d_10.weight.grad, model.conv2d_10.weight.grad, False)
+    # print("#### compare w9")
+    # correctness_check.check_equal(model_ref.conv2d_9.weight.grad, model.conv2d_9.weight.grad, False)
+
+
+    # print("#### compare w10")
+    # correctness_check.check_equal(model_ref.conv2d_10.weight.grad, model.conv2d_10.weight.grad, False)
 
    
 

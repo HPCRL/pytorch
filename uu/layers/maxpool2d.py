@@ -8,19 +8,39 @@ import math
 import pdb
 from uu.utils import correctness_check 
 
+
+class MMctx:
+    def __init__(self):
+        self.input = None
+        self.kernel_size = None
+        self.padding = None
+        self.stride = None
+        self.uniq_id = None
+        self.info = None
+        self.arg_max = None
+
+myctx_dict = {}
+
 class cMaxPool2dFunction(torch.autograd.Function):
     # create a static variable
     @staticmethod
     def forward(ctx, *inputs):
         #print("\n^^^^^cMaxPool2dFunction fwd")
         input = inputs[0]
-
         kernel_size = inputs[1]
         stride = inputs[2]
         padding = inputs[3]
-        ctx.info = inputs[4]
+        #ctx.info = inputs[4]
         uniq_id = inputs[5]
         is_ccheckpoint = inputs[6]
+
+        if uniq_id in myctx_dict.keys():
+            print("need to get existing")
+            myctx = myctx_dict[uniq_id]
+            del myctx
+            myctx = MMctx()
+        else:
+            myctx = MMctx()
 
         if not is_ccheckpoint:
             out = F.max_pool2d(input, kernel_size, stride, padding, return_indices=True)
@@ -28,51 +48,86 @@ class cMaxPool2dFunction(torch.autograd.Function):
             out_index = out[1]
 
             # save status for bkward
-            ctx.stride = stride
-            ctx.kernel_size = kernel_size
-            ctx.padding = padding
-
-            ctx.input = input
-            ctx.output = out_value
-            ctx.arg_max = out_index
+            # ctx.stride = stride
+            # ctx.kernel_size = kernel_size
+            # ctx.padding = padding
+            # ctx.info = inputs[4]
+            # ctx.input = input
+            # ctx.output = out_value
+            # ctx.arg_max = out_index
 
             ctx.uniq_id = uniq_id
+            myctx.stride = stride
+            myctx.kernel_size = kernel_size
+            myctx.padding = padding
+            myctx.info = inputs[4]
+            myctx.input = input
+            myctx.arg_max = out_index
+
         else:
             out = F.max_pool2d(input, kernel_size, stride, padding, return_indices=True)
-
             out_value = out[0]
             out_index = out[1]
+        
+        # place this entry
+        myctx_dict[uniq_id] = myctx
+        del input
 
         return out_value
     
     @staticmethod
     def backward(ctx, grad_output):
         print("\n^^^^^cMaxPool2dFunction bwd")
-        print("input size", ctx.input.size())
-        print("grad_out size",grad_output.size())
-        #print("grad_out ",grad_output)
-        print("arg size",ctx.arg_max.size())
+       
 
         # #case1
         # if ctx.input.is_cuda:
         #     grad_in = maxpool_2d_bkw_cuda.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         # else:
         #     grad_in = maxpool_2d_bkw_cpp.backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
-        f_info = ctx.info[0][ctx.uniq_id]
-        b_info = ctx.info[1][ctx.uniq_id]
+        
+        myctx = myctx_dict[ctx.uniq_id]
+
+        print("input size", myctx.input.size())
+        print("grad_out size",grad_output.size())
+        #print("grad_out ",grad_output)
+        print("arg size",myctx.arg_max.size())
+
+
+        f_info = myctx.info[0][ctx.uniq_id]
+        b_info = myctx.info[1][ctx.uniq_id]
         rev_g_depth = f_info.op_idex
         g_depth = b_info.op_idex    # global depth
         if g_depth == 0: 
-            grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+            grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, myctx.input, myctx.kernel_size, myctx.stride, myctx.padding, (1,1), False, myctx.arg_max)
             # reshape to tile size before leaving the segment
 
         elif rev_g_depth == 0:
             # the last stage in regular order
             new_grad_out = grad_output[:, :, b_info.input_slice[2]:b_info.input_slice[3]+1, b_info.input_slice[0]:b_info.input_slice[1]+1]
             print("new_grad_out", new_grad_out.size())
-            grad_in = torch._C._nn.max_pool2d_with_indices_backward(new_grad_out, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+            grad_in = torch._C._nn.max_pool2d_with_indices_backward(new_grad_out, myctx.input, myctx.kernel_size, myctx.stride, myctx.padding, (1,1), False, myctx.arg_max)
         else:
-            grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+            grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, myctx.input, myctx.kernel_size, myctx.stride, myctx.padding, (1,1), False, myctx.arg_max)
+        
+        
+        
+        
+        # f_info = ctx.info[0][ctx.uniq_id]
+        # b_info = ctx.info[1][ctx.uniq_id]
+        # rev_g_depth = f_info.op_idex
+        # g_depth = b_info.op_idex    # global depth
+        # if g_depth == 0: 
+        #     grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        #     # reshape to tile size before leaving the segment
+
+        # elif rev_g_depth == 0:
+        #     # the last stage in regular order
+        #     new_grad_out = grad_output[:, :, b_info.input_slice[2]:b_info.input_slice[3]+1, b_info.input_slice[0]:b_info.input_slice[1]+1]
+        #     print("new_grad_out", new_grad_out.size())
+        #     grad_in = torch._C._nn.max_pool2d_with_indices_backward(new_grad_out, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
+        # else:
+        #     grad_in = torch._C._nn.max_pool2d_with_indices_backward(grad_output, ctx.input, ctx.kernel_size, ctx.stride, ctx.padding, (1,1), False, ctx.arg_max)
         
         
         print("##############grad_in in maxp", grad_in.size()) 

@@ -4,6 +4,7 @@
 #include <torch/csrc/autograd/edge.h>
 #include <torch/csrc/autograd/engine.h>
 #include <torch/csrc/autograd/function.h>
+#include <iostream>
 
 namespace torch {
 namespace autograd {
@@ -70,6 +71,7 @@ variable_list run_backward(
     const variable_list& inputs,
     bool allow_unused,
     bool accumulate_grad) {
+  std::cout<<"[autograd.cpp] run_backward";    
   size_t num_tensors = outputs.size();
   edge_list roots;
   roots.reserve(num_tensors);
@@ -137,6 +139,7 @@ void backward(
   if (!retain_graph) {
     retain_graph = create_graph;
   }
+  std::cout<<"[autograd.cpp] backward()";   
   run_backward(tensors, gradients, retain_graph.value(), create_graph, inputs, /*allow_unused=*/true, /*accumulate_grad=*/true);
 }
 
@@ -151,6 +154,7 @@ variable_list grad(
   if (!retain_graph) {
     retain_graph = create_graph;
   }
+  std::cout<<"[autograd.cpp] grad()";  
   return run_backward(
     outputs, gradients, retain_graph.value(), create_graph, inputs, allow_unused, /*accumulate_grad=*/false);
 }

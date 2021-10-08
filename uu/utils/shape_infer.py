@@ -23,6 +23,8 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
     print("Input {}x{}x{}x{}".format(N, C, H, W))
     for op in seq_ops._modules.values():
         print("L-->R current op", id(op))
+        if isinstance(op, tilesplit.TiledSplit):
+            continue
         if isinstance(op, conv2d.TiledConv2d):
             stride = op.stride
             pad = op.padding

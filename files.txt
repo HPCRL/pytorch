@@ -1,1 +1,1 @@
-/uufs/chpc.utah.edu/common/home/u0940848/software/pkg/miniconda3/envs/pytorch-lab/lib/python3.9/site-packages/uu-0.1-py3.9.egg
+/home/yufan/miniconda3/envs/labpytorch/lib/python3.9/site-packages/uu-0.1-py3.9.egg
