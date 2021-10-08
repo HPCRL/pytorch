@@ -367,9 +367,10 @@ def main():
    
     print("==== ref_fwd done ...")
     ref_fwd_use = memUsage.currentValue()-initmem
-    print(memory.MemSize(ref_fwd_use) )     #now should be around 3.8MB
-    print(memUsage.available())
-    print(memUsage.maxx())
+    # print(memory.MemSize(ref_fwd_use) )     #now should be around 3.8MB
+    # print(memUsage.available())
+    print("max ref", memUsage.maximumValue())
+
 
 
     print("done ref")
@@ -377,10 +378,13 @@ def main():
     print("done ref bkw")
 
     print("==== ref_bwd done ...")
-    ref_bwd_use = memUsage.currentValue()-initmem
-    print(memory.MemSize(ref_bwd_use))      #now should be around 3.8MB
-    print(memUsage.available())
-    print(memUsage.maxx())
+    # ref_bwd_use = memUsage.currentValue()-ref_fwd_use
+    # ref_bwd_use_total = memUsage.currentValue()-initmem
+    # print("ref_bwd_use",memory.MemSize(ref_bwd_use))      
+    # print("ref_bwd_use t", memory.MemSize(ref_bwd_use_total))     
+    # print(memUsage.available())
+    print("max ref", memUsage.maximumValue())
+
 
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
@@ -395,23 +399,25 @@ def main():
     our_fwd_use = memUsage.currentValue()-our_initmem
     print(memory.MemSize(our_fwd_use) )     #now should be around 3.8MB
     print(memUsage.available())
-    print(memUsage.maxx())
+    print("max fwd", memUsage.maximumValue())
 
    
     #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out.sum().backward()
-
+    del out
     print("==== our_bwd done ...")
-    our_bwd_use = memUsage.currentValue()-our_initmem
-    print(memory.MemSize(our_bwd_use))      #now should be around 3.8MB
+    our_bwd_use = memUsage.currentValue()-our_fwd_use
+    our_bwd_use_total = memUsage.currentValue()-our_initmem
+    print("our_bwd_use", memory.MemSize(our_bwd_use))   
+    print("our_bwd_use t", memory.MemSize(our_bwd_use_total))    
     print(memUsage.available())
-    print(memUsage.maxx())
+    print("max our", memUsage.maximumValue())
 
 
-    print("~~ check forward correctness ~~")
-    print("out shape", out.size())
+    # print("~~ check forward correctness ~~")
+    # print("out shape", out.size())
     #print("out_ref ", out_ref)
     # # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     # correctness_check.check_equal(out, out_ref, False)
