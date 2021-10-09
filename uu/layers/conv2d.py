@@ -40,8 +40,6 @@ class TiledConv2dFunction(torch.autograd.Function):
         else:
             myctx = MMctx()
 
-
-
         c_info = info[0][uniq_id]   
         print("current fwd info", c_info.coord)
   

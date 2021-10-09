@@ -125,6 +125,7 @@ class Net(nn.Module):
         self.flat = nn.Flatten()
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
         self.fc2 = nn.Linear(1024, 1024, bias=False)
+        self.fc3 = nn.Linear(1024, 1024, bias=False)
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
@@ -173,23 +174,33 @@ class Net(nn.Module):
         out = self.flat(out)
         out = self.fc1(out)
         out = self.fc2(out)
+        out = self.fc3(out)
         return out
 
 def main():
     torch.set_printoptions(profile="full")
     torch.set_default_dtype(torch.float64)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    memUsage = memory.MeasureMemory(device)
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+
+    print("==== real init ...")
+    our_initmem = memUsage.currentValue()
+    print(memory.MemSize(our_initmem))     
+    print(memUsage.available())
+
     model = Net().to(device)
 
 
     input = torch.rand(batch,chanel,H,W, requires_grad = True)
-    memUsage = memory.MeasureMemory(device)
+   
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
 
     print("==== our init ...")
     our_initmem = memUsage.currentValue()
     print(memory.MemSize(our_initmem))     
     print(memUsage.available())
+
     out = model(input, H, W, nTh, nTw )
 
     print("==== our_fwd done ...")

@@ -121,13 +121,13 @@ class Net_ref(nn.Module):
         in_feature = chanel*oH*oW
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
         self.fc2 = nn.Linear(1024, 1024, bias=False)
-
+        self.fc3 = nn.Linear(1024, 1024, bias=False)
         self.block1 = nn.Sequential(*[self.conv2d_1, self.conv2d_2, self.maxpool1, \
                                                 self.conv2d_3,  self.conv2d_4, self.maxpool2,  \
                                                 self.conv2d_5, self.conv2d_6, self.conv2d_7, self.maxpool3, \
                                                 self.conv2d_8, self.conv2d_9, self.conv2d_10, self.maxpool4, \
                                                 self.conv2d_11, self.conv2d_12, self.conv2d_13, self.maxpool5, \
-                                                self.flat, self.fc1, self.fc2 ]) 
+                                                self.flat, self.fc1, self.fc2, self.fc3 ]) 
 
     def forward(self, x):
         out = self.block1(x)

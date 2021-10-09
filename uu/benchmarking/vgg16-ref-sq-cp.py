@@ -121,20 +121,21 @@ class Net_ref(nn.Module):
         in_feature = chanel*oH*oW
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
         self.fc2 = nn.Linear(1024, 1024, bias=False)
+        self.fc3 = nn.Linear(1024, 1024, bias=False)
 
         self.block1 = nn.Sequential(*[self.conv2d_1, self.conv2d_2, self.maxpool1, \
                                                 self.conv2d_3,  self.conv2d_4, self.maxpool2,  \
                                                 self.conv2d_5, self.conv2d_6, self.conv2d_7, self.maxpool3, \
                                                 self.conv2d_8, self.conv2d_9, self.conv2d_10, self.maxpool4, \
                                                 self.conv2d_11, self.conv2d_12, self.conv2d_13, self.maxpool5, \
-                                                self.flat, self.fc1, self.fc2 ]) 
+                                                self.flat, self.fc1, self.fc2, self.fc3 ]) 
 
 
         
 
     def forward(self, x):
         #out = checkpoint_sequential(self.block1, 4,x)
-        out = checkpoint_sequential(self.block1, 5,x)
+        out = checkpoint_sequential(self.block1, 5, x)
         return out
 
 
@@ -151,8 +152,9 @@ def main():
     memUsage = memory.MeasureMemory(device)
     print("==== init ...")
     initmem = memUsage.currentValue()
-    print(memory.MemSize(initmem))      
+    print(memory.MemSize(initmem), initmem)      
     print(memUsage.available())
+    print(torch.cuda.memory_summary())
 
 
     model_ref =  Net_ref().to(device)
@@ -167,10 +169,14 @@ def main():
     print(memory.MemSize(ref_fwd_use) )    
     print("avail ref sq",memUsage.available())
     print("max ref sq", memUsage.maxx(), memUsage.maximumValue())
+    print(torch.cuda.memory_summary())
 
+    torch.cuda.empty_cache()
 
 
     print("done ref sq")
+    print(torch.cuda.memory_summary())
+
     out_ref.sum().backward()
     print("done ref bkw sq")
 
