@@ -220,6 +220,7 @@ class TiledConv2dFunction(torch.autograd.Function):
  
                    if f_info.next_id == -99:
                        # TODO, looks some issue here.
+                       # the slice info is not correct
                        next_f_info = myctx.info[0][-11]
                    else:
                        next_f_info = myctx.info[0][f_info.next_id] # TODO how to get next info....
