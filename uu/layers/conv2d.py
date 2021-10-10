@@ -215,22 +215,22 @@ class TiledConv2dFunction(torch.autograd.Function):
                if ctx.needs_input_grad[1]:
                    # need to reshape both grad_out and input_tensor
                    #debug
-                   # nontiled_grad_out = myctx.info[0][-1*myctx.uniq_id][1]
-                   # nontiled_activation = myctx.info[0][-1*myctx.uniq_id][0]
+                   nontiled_grad_out = myctx.info[0][-1*myctx.uniq_id][1]
+                   nontiled_activation = myctx.info[0][-1*myctx.uniq_id][0]
  
                    if f_info.next_id == -99:
                        # TODO, looks some issue here.
                        # the slice info is not correct
-                       next_f_info = myctx.info[0][-11]
+                       next_f_info =  myctx.info[0][-11]
                    else:
                        next_f_info = myctx.info[0][f_info.next_id] # TODO how to get next info....
-                   # new_grad_output, new_input_tensor = padding_calc.debug_reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
-                   #                                     f_info, next_f_info, weight_size,\
-                   #                                     padding, stride, nontiled_grad_out, nontiled_activation) #
- 
-                   new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
+                   new_grad_output, new_input_tensor = padding_calc.debug_reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
                                                        f_info, next_f_info, weight_size,\
-                                                       padding, stride)
+                                                       padding, stride, nontiled_grad_out, nontiled_activation) #
+ 
+                #    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
+                #                                        f_info, next_f_info, weight_size,\
+                #                                        padding, stride)
                    grad_weight = torch.cudnn_convolution_backward_weight(weight_size , new_grad_output, new_input_tensor, our_padding, stride, dilation, group, False, False, False)
               
                       

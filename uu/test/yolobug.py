@@ -6,15 +6,23 @@ from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
 
-
+li = []
+li_act = []
+grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
     print('Inside '+ self.__class__.__name__+ ' backward')
-    # print('grad_input : ', len(grad_input))
-    # print('grad_output : ', len(grad_output))
     print('grad_output size : ', grad_output[0].size())
-    print('ref grad_output  :\n ', grad_output[0])
+    #print('ref grad_output  :\n ', grad_output[0])
     print('grad_input size : ', grad_input[0].size())
-    print('ref grad_input  : \n', grad_input[0])
+   # print('ref grad_input  : \n', grad_input[0])
+    li.append( grad_output[0])
+
+def print_activa(self, input, output):
+    print('Inside '+ self.__class__.__name__+ ' forward')
+    print('input size : ', input[0].size())
+    print('output size : ', output[0].size())
+    li_act.append(input[0])
+
 
 
 class Net_ref(nn.Module):
@@ -63,11 +71,18 @@ class Net_ref(nn.Module):
         self.conv2d_5.weight = Parameter(w5)
 
 
-        # self.conv2d_1.register_full_backward_hook(print_grad)
-        # self.conv2d_2.register_full_backward_hook(print_grad)
-        # self.conv2d_3.register_full_backward_hook(print_grad)
-        # self.conv2d_4.register_full_backward_hook(print_grad)
-        # self.maxpool.register_full_backward_hook(print_grad)
+        self.conv2d_1.register_forward_hook(print_activa)
+        self.conv2d_3.register_forward_hook(print_activa)
+        self.conv2d_4.register_forward_hook(print_activa)
+        self.conv2d_2.register_forward_hook(print_activa)
+        self.conv2d_5.register_forward_hook(print_activa)
+        self.maxpool.register_forward_hook(print_activa)
+        self.conv2d_1.register_full_backward_hook(print_grad)
+        self.conv2d_2.register_full_backward_hook(print_grad)
+        self.conv2d_3.register_full_backward_hook(print_grad)
+        self.conv2d_4.register_full_backward_hook(print_grad)
+        self.conv2d_5.register_full_backward_hook(print_grad)
+        self.maxpool.register_full_backward_hook(print_grad)
 
     def forward(self, x):
         out = self.conv2d_1(x)
@@ -137,9 +152,29 @@ class Net(nn.Module):
         #print("!!!!!!!", model_device)
         stream_structure = self.block1
 
+
+    # prepare grad info for correctness check(only for linear )
+        li_act_p = []
+        for elm in li_act:
+            print(elm.size())
+            pd = torch.nn.ConstantPad2d((1,1,1,1), 0)
+            li_act_p.append(pd(elm))
+         
+        i = len(li)
+        ii = 0
+
+        print("i", i, len(li_act))
+        for op in self.block1._modules.values():
+            print(op)
+            grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
+            i -= 1
+            ii+= 1
+    # prepare grad info for correctness check(only for linear )
+
+
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
-        for i in range(0,1): 
-            for j in range(0,1):
+        for i in range(0,nTh): 
+            for j in range(0,nTw):
                 coord = [i,j]
                 print("coord", coord)
                 # TODO: here we have to somehow provide static info and num_conv. 
@@ -147,8 +182,12 @@ class Net(nn.Module):
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
                 print("++++++++++++++++++++++++++++++++++++++++++++++++", info)
+    # add grad_payload as negate keys
+                info[0].update(grad_dict_bk)
+      # add grad_payload as negate keys
+                
                 input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh, nTw]) # -1 here is to match 0-base
-                print("***input tile", input_tile[0])
+                print("***input tile", input_tile[0].size())
                 out_temp = self.block1(input_tile[0], info)
                 
                 
@@ -167,13 +206,12 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 16
-    W = 16
-    nTh = 4
-    nTw = 4
+    H = 4
+    W = 4
+    nTh = 2
+    nTw = 2
     input = torch.rand(1,1,H,W, requires_grad = True)
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    out = model(input, H, W, nTh, nTw )
+
 
     
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
@@ -187,7 +225,14 @@ def main():
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
     out_ref = model_ref(input_ref)
+    out_ref.sum().backward()
     print("done")
+
+
+
+
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    out = model(input, H, W, nTh, nTw )
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
@@ -199,11 +244,11 @@ def main():
     # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     correctness_check.check_equal(out, out_ref, False)
 
-    print("#### compare grad_in")
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
+    # print("#### compare grad_in")
+    # # print("input ref grad", input_ref.grad)
+    # # print("input grad", input.grad)
+    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
 
     print("#### compare w1")

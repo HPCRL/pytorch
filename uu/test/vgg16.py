@@ -374,9 +374,9 @@ class Net(nn.Module):
                 info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
-                print("***input tile", input_tile.size())
-                out_temp = self.block1(input_tile, info)
+                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh, nTw]) # -1 here is to match 0-base
+                #print("***input tile", input_tile.size())
+                out_temp = self.block1(input_tile[0], info)
 
                
                 # use customized copy
@@ -451,11 +451,11 @@ def main():
     # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     correctness_check.check_equal(out, out_ref, False)
 
-    print("#### compare grad_in")
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
+    # print("#### compare grad_in")
+    # # print("input ref grad", input_ref.grad)
+    # # print("input grad", input.grad)
+    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
 
     print("#### compare w1")
