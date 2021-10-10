@@ -5,7 +5,6 @@ class mSequential(nn.Sequential):
         for module in self._modules.values():
             if type(inputs) == tuple or type(inputs) == list:
                 print("in customized Sequential", len(inputs))
-                
                 inputs = module(*inputs)
             else:
                 inputs = module(inputs)

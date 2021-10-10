@@ -5,6 +5,7 @@ from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
+from uu.utils import checkpoint
 
 li = []
 li_act = []
@@ -390,7 +391,7 @@ class Net(nn.Module):
       
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.maxpool1 ,self.conv2d_2, self.maxpool2, \
+        self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.maxpool1 ,self.conv2d_2, self.maxpool2, \
                                                 self.conv2d_3,  self.conv2d_4, self.conv2d_5, self.maxpool3,  \
                                                 self.conv2d_6, self.conv2d_7, self.conv2d_8, self.maxpool4, \
                                                 self.conv2d_9, self.conv2d_10, self.conv2d_11, self.conv2d_12, self.conv2d_13, self.maxpool5, \
@@ -416,6 +417,8 @@ class Net(nn.Module):
 
         print("i", i, len(li_act))
         for op in self.block1._modules.values():
+            if isinstance(op, tilesplit.TiledSplit):
+               continue
             grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
             i -= 1
             ii+= 1
@@ -438,9 +441,10 @@ class Net(nn.Module):
 
                 
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh-1, nTw-1]) # -1 here is to match 0-base
-                print("***input tile", input_tile.size())
-                out_temp = self.block1(input_tile, info)
+                #out_temp = self.block1(x, info, stream_structure[1], model_device, [nTh, nTw])
+
+                out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
+
 
                
                 # use customized copy
@@ -462,10 +466,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 320
-    W = 320
-    nTh = 2
-    nTw = 2
+    H = 512
+    W = 512
+    nTh = 4
+    nTw = 4
     input = torch.rand(batch,chanel,H,W, requires_grad = True)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     w1 = model.conv2d_1.weight.data
@@ -569,6 +573,24 @@ def main():
     print("#### compare w13")
     correctness_check.check_equal(model_ref.conv2d_13.weight.grad, model.conv2d_13.weight.grad, False)
 
+    print("#### compare w14")
+    correctness_check.check_equal(model_ref.conv2d_14.weight.grad, model.conv2d_14.weight.grad, False)
 
+    print("#### compare w15")
+    correctness_check.check_equal(model_ref.conv2d_15.weight.grad, model.conv2d_15.weight.grad, False)
+
+    print("#### compare w16")
+    correctness_check.check_equal(model_ref.conv2d_16.weight.grad, model.conv2d_16.weight.grad, False)
+
+    print("#### compare w17")
+    correctness_check.check_equal(model_ref.conv2d_17.weight.grad, model.conv2d_17.weight.grad, False)
+
+    print("#### compare w18")
+    correctness_check.check_equal(model_ref.conv2d_18.weight.grad, model.conv2d_18.weight.grad, False)
+
+    print("#### compare w19")
+    correctness_check.check_equal(model_ref.conv2d_19.weight.grad, model.conv2d_19.weight.grad, False)
+
+    
 if __name__=="__main__":
     main()

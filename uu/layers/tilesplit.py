@@ -61,13 +61,14 @@ class TiledSplitFunction(torch.autograd.Function):
                 W = ctx.big_infput_shape[3]
                 big_grad_in = torch.zeros(N, C, H, W) 
         
-        # print("TiledSplitFunction.big_grad_in", big_grad_in.size())
+        print("TiledSplitFunction.big_grad_in", big_grad_in.size())
         # print("TiledSplitFunction bwd", grad_output.size())
         # print(coord[2], coord[3]+1, coord[0], coord[1]+1)
        
         big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output[:,:,0:H//ctx.num_tile[0], 0:W//ctx.num_tile[1]]
         # if tile_coord == [0, 0]:
         #     print("TiledSplitFunction.big_grad_in", big_grad_in)
+
         return big_grad_in, None, None, None, None
        
 class TiledSplit(torch.nn.Module):

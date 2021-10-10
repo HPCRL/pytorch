@@ -5,6 +5,7 @@ from uu.utils import padding_calc
 from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
+from uu.utils import checkpoint
 
 li = []
 li_act = []
@@ -142,7 +143,7 @@ class Net(nn.Module):
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.conv2d_1, self.conv2d_2, \
+        self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.conv2d_2, \
                                                 self.mxp,  self.conv2d_3, self.conv2d_4, self.conv2d_5])
         
     def forward(self, x, H, W, nTh, nTw):
@@ -165,6 +166,8 @@ class Net(nn.Module):
 
         print("i", i, len(li_act))
         for op in self.block1._modules.values():
+            if isinstance(op, tilesplit.TiledSplit):
+               continue
             print(op)
             grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
             i -= 1
@@ -186,9 +189,20 @@ class Net(nn.Module):
                 info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
                 
-                input_tile = self.tsplit(x, info, stream_structure[0], model_device, [nTh, nTw]) # -1 here is to match 0-base
-                print("***input tile", input_tile[0].size())
-                out_temp = self.block1(input_tile[0], info)
+                input_tile = self.tsplit(x, info, stream_structure[1], model_device, [nTh, nTw]) # -1 here is to match 0-base
+                #print("***input tile", input_tile[0].size())
+                out_temp = self.conv2d_1(input_tile[0], info)
+                out_temp = self.conv2d_2(out_temp)
+                out_temp = self.mxp(out_temp)
+                out_temp = self.conv2d_3(out_temp)
+                out_temp = self.conv2d_4(out_temp)
+                out_temp = self.conv2d_5(out_temp)
+               
+
+                #out_temp = self.block1(x, info, stream_structure[1], model_device, [nTh, nTw])
+
+                #out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
+
                 
                 
                 # use customized copy
@@ -206,10 +220,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
-    H = 4
-    W = 4
-    nTh = 2
-    nTw = 2
+    H = 1024
+    W = 1024
+    nTh = 16
+    nTw = 16
     input = torch.rand(1,1,H,W, requires_grad = True)
 
 
@@ -245,8 +259,8 @@ def main():
     correctness_check.check_equal(out, out_ref, False)
 
     # print("#### compare grad_in")
-    # # print("input ref grad", input_ref.grad)
-    # # print("input grad", input.grad)
+    # print("input ref grad", input_ref.grad)
+    # print("input grad", input.grad)
     # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
     # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
