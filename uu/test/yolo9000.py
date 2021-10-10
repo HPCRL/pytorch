@@ -444,9 +444,6 @@ class Net(nn.Module):
                 #out_temp = self.block1(x, info, stream_structure[1], model_device, [nTh, nTw])
 
                 out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
-
-
-               
                 # use customized copy
                 fake_pi = info[0][-11]
                 tile_shape = fake_pi.cur_output_shape
