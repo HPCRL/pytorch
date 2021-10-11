@@ -1,8 +1,5 @@
 import torch
 from uu.utils import padding_calc
-import numpy
-
-
 
 class TiledSplitFunction(torch.autograd.Function):
     #big_grad_in = None
@@ -12,6 +9,7 @@ class TiledSplitFunction(torch.autograd.Function):
         # also we assume, the tiling only on H/W for a conv2d
         x = inputs[0] 
         info = inputs[1]
+        print("tsplit tile coor fwd", info[1][-11].coord)
          
         first_op_in_seg = id(inputs[2])
         model_device = inputs[3]
@@ -41,8 +39,8 @@ class TiledSplitFunction(torch.autograd.Function):
         tile_coord = b_info.coord
         coord = b_info.input_slice
         big_grad_in = None
-        # print(tile_coord)
-        print(ctx.num_tile)
+        print("tsplit tile coor bkw", tile_coord)
+        # print(ctx.num_tile)
         
         
         if True or tile_coord == ctx.num_tile:
@@ -61,7 +59,7 @@ class TiledSplitFunction(torch.autograd.Function):
                 W = ctx.big_infput_shape[3]
                 big_grad_in = torch.zeros(N, C, H, W) 
         
-        print("TiledSplitFunction.big_grad_in", big_grad_in.size())
+        #print("TiledSplitFunction.big_grad_in", big_grad_in.size())
         # print("TiledSplitFunction bwd", grad_output.size())
         # print(coord[2], coord[3]+1, coord[0], coord[1]+1)
        

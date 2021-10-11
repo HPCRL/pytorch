@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from uu.utils import shape_infer 
 from uu.utils import padding_calc
-from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
+from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy, relu
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
 from uu.utils import checkpoint
@@ -38,8 +38,8 @@ H = 1024
 W = 1024
 oH = 32
 oW = 32
-nTh = 16
-nTw = 16
+nTh = 4
+nTw = 4
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
@@ -135,7 +135,7 @@ class Net_ref(nn.Module):
                                   )
 
         self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
-
+        self.relu = nn.ReLU()
         self.flat = nn.Flatten()
         in_feature = chanel*oH*oW
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
@@ -197,35 +197,19 @@ class Net_ref(nn.Module):
         self.maxpool4.register_full_backward_hook(print_grad)
         self.maxpool5.register_full_backward_hook(print_grad)
 
+        self.block1 = nn.Sequential(*[self.conv2d_1, self.relu, self.conv2d_2, self.relu,self.maxpool1, \
+                                               self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.maxpool2,  \
+                                               self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.maxpool3, \
+                                               self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.maxpool4, \
+                                               self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.maxpool5, \
+                                                   self.flat, self.fc1, self.fc2 ]) 
+
     def forward(self, x):
-        out = self.conv2d_1(x)
-        out = self.conv2d_2(out)
-        out = self.maxpool1(out)
-        
-        out = self.conv2d_3(out)    
-        out = self.conv2d_4(out)
-        out = self.maxpool2(out)
-
-        out = self.conv2d_5(out)
-        out = self.conv2d_6(out)
-        out = self.conv2d_7(out)
-        out = self.maxpool3(out)
-
-        out = self.conv2d_8(out)
-        out = self.conv2d_9(out)
-        out = self.conv2d_10(out)
-        out = self.maxpool4(out)
-
-        out = self.conv2d_11(out)
-        out = self.conv2d_12(out)
-        out = self.conv2d_13(out)
-        out = self.maxpool5(out)
-
-        out = self.flat(out)
-        out = self.fc1(out)
-        out = self.fc2(out)
-      
+        out = self.block1(x)
+    
         return out
+        
+
 
 
 
@@ -327,7 +311,7 @@ class Net(nn.Module):
                                         )
 
         self.mxp5 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
-
+        self.relu = relu.cReLu()
         in_feature = chanel*oH*oW
         self.flat = nn.Flatten()
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
@@ -335,30 +319,36 @@ class Net(nn.Module):
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
-        self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.conv2d_2, self.mxp1, \
-                                                self.conv2d_3,  self.conv2d_4, self.mxp2,  \
-                                                self.conv2d_5, self.conv2d_6, self.conv2d_7, self.mxp3, \
-                                                self.conv2d_8, self.conv2d_9, self.conv2d_10, self.mxp4, \
-                                                self.conv2d_11, self.conv2d_12, self.conv2d_13, self.mxp5,   ]) #
+        self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.relu, self.conv2d_2, self.relu,self.mxp1, \
+                                                self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.mxp2,  \
+                                                self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.mxp3, \
+                                                self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.mxp4, \
+                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.mxp5,   ]) #
         
+        # self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.conv2d_2, self.mxp1, \
+        #                                         self.conv2d_3,  self.conv2d_4,  self.mxp2,  \
+        #                                         self.conv2d_5,  self.conv2d_6, self.conv2d_7,  self.mxp3, \
+        #                                         self.conv2d_8,  self.conv2d_9, self.conv2d_10,  self.mxp4, \
+        #                                         self.conv2d_11,  self.conv2d_12,  self.conv2d_13,  self.mxp5,   ]) #
+        
+
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
-        #print("!!!!!!!", model_device)
-        print("!!!!!!!", oH, oW)
+        print("!!!!!!!", len(shape_dict))
+        # print("!!!!!!!", oH, oW)
         stream_structure = self.block1
 
     # prepare grad info for correctness check(only for linear )
         li_act_p = []
         for elm in li_act:
-            print(elm.size())
             pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
             li_act_p.append(pd(elm))
         i = len(li)
         ii = 0
         for op in self.block1._modules.values():
-            if isinstance(op, tilesplit.TiledSplit):
+            if isinstance(op, tilesplit.TiledSplit) or isinstance(op, relu.cReLu):
                continue
             grad_dict_bk[id(op)*-1] = (li_act_p[ii], li[i-1])
             i -= 1
@@ -370,26 +360,25 @@ class Net(nn.Module):
         for i in range(0,nTh): 
             for j in range(0,nTw):
                 coord = [i,j]
-                print("coord", coord)
+                
                 # TODO: here we have to somehow provide static info and num_conv. 
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
     # add grad_payload as negate keys
-                info[0].update(grad_dict_bk)
+                #info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
                 
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("coord", coord)
                 out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
-
-
-               
+                
                 # use customized copy
                 fake_pi = info[0][-11]
                 tile_shape = fake_pi.cur_output_shape
                 tile_size = [tile_shape[0], tile_shape[1]]
                 output_index = fake_pi.input_slice
-                print(tile_shape, tile_size, output_index)
+                #print("FF", tile_shape, tile_size, output_index)
                 out = self.tcopy(out_temp, out, output_index, tile_size)
                 
                 #del info

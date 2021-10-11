@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from uu.utils import shape_infer 
 from uu.utils import padding_calc
-from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
+from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy, relu
 from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
 from uu.utils import checkpoint
@@ -11,17 +11,17 @@ li = []
 li_act = []
 grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
-    print('Inside '+ self.__class__.__name__+ ' backward')
-    print('grad_output size : ', grad_output[0].size())
-    #print('ref grad_output  :\n ', grad_output[0])
-    print('grad_input size : ', grad_input[0].size())
+    # print('Inside '+ self.__class__.__name__+ ' backward')
+    # print('grad_output size : ', grad_output[0].size())
+    # #print('ref grad_output  :\n ', grad_output[0])
+    # print('grad_input size : ', grad_input[0].size())
    # print('ref grad_input  : \n', grad_input[0])
     li.append( grad_output[0])
 
 def print_activa(self, input, output):
-    print('Inside '+ self.__class__.__name__+ ' forward')
-    print('input size : ', input[0].size())
-    print('output size : ', output[0].size())
+    # print('Inside '+ self.__class__.__name__+ ' forward')
+    # print('input size : ', input[0].size())
+    # print('output size : ', output[0].size())
     li_act.append(input[0])
 
     
@@ -388,7 +388,6 @@ class Net(nn.Module):
                                     bias = False,
                                     padding=(0,0)
                                     )                 #23
-      
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
         self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.maxpool1 ,self.conv2d_2, self.maxpool2, \
@@ -402,20 +401,19 @@ class Net(nn.Module):
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
         #print("!!!!!!!", model_device)
-        print("!!!!!!!", oH, oW)
+        #print("!!!!!!!", oH, oW)
         stream_structure = self.block1
 
     # prepare grad info for correctness check(only for linear )
         li_act_p = []
         for elm in li_act:
-            print(elm.size())
             pd = torch.nn.ConstantPad2d((Ph,Ph,Ph,Ph), 0)
             li_act_p.append(pd(elm))
          
         i = len(li)
         ii = 0
 
-        print("i", i, len(li_act))
+        #print("i", i, len(li_act))
         for op in self.block1._modules.values():
             if isinstance(op, tilesplit.TiledSplit):
                continue
@@ -429,17 +427,16 @@ class Net(nn.Module):
         for i in range(0,nTh): 
             for j in range(0,nTw):
                 coord = [i,j]
-                print("coord", coord)
-                # TODO: here we have to somehow provide static info and num_conv. 
                 input_shape = (N,C,H,W)
                 output_shape = (N,C,oH,oW)
                 info = padding_calc.compute_info_beta([i,j], input_shape, output_shape, nTh, nTw, stream_structure, shape_dict)
-                print("info for", coord, info)
+                #print("info for", coord, info)
     # add grad_payload as negate keys
                 info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
 
                 print("++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("coord", coord)
                 #out_temp = self.block1(x, info, stream_structure[1], model_device, [nTh, nTw])
                 out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
                
@@ -449,7 +446,7 @@ class Net(nn.Module):
                 tile_size = [tile_shape[0], tile_shape[1]]
                 output_index = fake_pi.input_slice
 
-                print(tile_shape, tile_size, output_index)
+                # print(tile_shape, tile_size, output_index)
                 out = self.tcopy(out_temp, out, output_index, tile_size)
                 
                 #del info
@@ -585,6 +582,7 @@ def main():
     correctness_check.check_equal(model_ref.conv2d_18.weight.grad, model.conv2d_18.weight.grad, False)
 
     print("#### compare w19")
+    
     correctness_check.check_equal(model_ref.conv2d_19.weight.grad, model.conv2d_19.weight.grad, False)
 
     

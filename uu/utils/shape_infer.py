@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from uu.utils import correctness_check 
 from uu.utils import padding_calc
-from uu.layers import maxpool2d, conv2d, sequential, tilesplit, tilecopy
+from uu.layers import maxpool2d, conv2d, sequential, tilesplit, relu
 from torch.nn.parameter import Parameter
 import math
 
@@ -23,7 +23,7 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
     print("Input {}x{}x{}x{}".format(N, C, H, W))
     for op in seq_ops._modules.values():
         print("L-->R current op", id(op))
-        if isinstance(op, tilesplit.TiledSplit):
+        if isinstance(op, tilesplit.TiledSplit) or isinstance(op, relu.cReLu):
             continue
         if isinstance(op, conv2d.TiledConv2d):
             stride = op.stride
@@ -54,6 +54,7 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
             output_shape = input_shape
             in_out_shape_info = in_out_shape(input_shape, output_shape)
             shape_dict[id(op)] = in_out_shape_info
+            print("here?? {}x{}x{}x{}".format(N, C, H, W))
 
     # give a hash-map to represnet input shape and out shape of a op
     return N, C, H, W, shape_dict

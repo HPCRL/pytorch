@@ -644,7 +644,7 @@ static variable_list call_function(
   auto inputs =
       call_pre_hooks(fn, InputBuffer::variables(std::move(inputBuffer)));
       
-  std::cout << "[torch/csrc/autograd/engine.cpp] call_function " << fn.name() <<"\n";
+  // std::cout << "[torch/csrc/autograd/engine.cpp] call_function " << fn.name() <<"\n";
   if (!graph_task->keep_graph_) {
     fn.will_release_variables();
   }
