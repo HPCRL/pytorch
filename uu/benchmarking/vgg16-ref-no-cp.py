@@ -8,7 +8,7 @@ from torch.nn.parameter import Parameter
 from uu.utils import correctness_check 
 from uu.utils import memory 
 from uu.utils import checkpoint
-
+import time
 
 Kh = 3
 Kw = 3
@@ -16,8 +16,8 @@ Ph = 1
 Pw = 1
 chanel = 3
 batch = 1
-H = 10240
-W = 10240
+H = 4096
+W = 4096
 oH = H//32
 oW = W//32
 
@@ -116,17 +116,17 @@ class Net_ref(nn.Module):
                                   )
 
         self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
-
+        self.relu = nn.ReLU()
         self.flat = nn.Flatten()
         in_feature = chanel*oH*oW
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
         self.fc2 = nn.Linear(1024, 1024, bias=False)
         self.fc3 = nn.Linear(1024, 1024, bias=False)
-        self.block1 = nn.Sequential(*[self.conv2d_1, self.conv2d_2, self.maxpool1, \
-                                                self.conv2d_3,  self.conv2d_4, self.maxpool2,  \
-                                                self.conv2d_5, self.conv2d_6, self.conv2d_7, self.maxpool3, \
-                                                self.conv2d_8, self.conv2d_9, self.conv2d_10, self.maxpool4, \
-                                                self.conv2d_11, self.conv2d_12, self.conv2d_13, self.maxpool5, \
+        self.block1 = nn.Sequential(*[self.conv2d_1, self.relu, self.conv2d_2, self.relu,self.maxpool1, \
+                                                self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.maxpool2,  \
+                                                self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.maxpool3, \
+                                                self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.maxpool4, \
+                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.maxpool5, \
                                                 self.flat, self.fc1, self.fc2, self.fc3 ]) 
 
     def forward(self, x):
@@ -154,9 +154,13 @@ def main():
 
     model_ref =  Net_ref().to(device)
     input_ref = input.data.clone() 
+
+    start_time = time.time()    
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
     out_ref = model_ref(input_ref)
+    ref_fwd_done = time.time()
+    ref_elapsed_fwd = ref_fwd_done - start_time
 
    
     print("==== ref_fwd done ...")
@@ -166,11 +170,12 @@ def main():
     print("max ref", memUsage.maxx(), memUsage.maximumValue())
 
 
-
-    print("done ref")
     out_ref.sum().backward()
+    ref_elapsed_bwk = time.time()-ref_fwd_done
+    ref_elapsed_total = time.time() - start_time
     print("done ref bkw")
-
+    print("\n&& {}, {}, {}\n".format(ref_elapsed_fwd, ref_elapsed_bwk, ref_elapsed_total) )
+    
     print("==== ref_bwd done ...")
     ref_bwd_use = memUsage.currentValue()-ref_fwd_use
     ref_bwd_use_total = memUsage.currentValue()-initmem
@@ -178,7 +183,7 @@ def main():
     print("ref_bwd_use t", memory.MemSize(ref_bwd_use_total))     
     print("avail ref", memUsage.available())
     print("max ref", memUsage.maxx(),  memUsage.maximumValue())
-
+    print("input graad", input_ref.grad[0,0,0,17])
 
 
 

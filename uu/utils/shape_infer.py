@@ -20,9 +20,9 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
     H = inputH
     W = inputW
     shape_dict = {}
-    print("Input {}x{}x{}x{}".format(N, C, H, W))
+    #print("Input {}x{}x{}x{}".format(N, C, H, W))
     for op in seq_ops._modules.values():
-        print("L-->R current op", id(op))
+        #print("L-->R current op", id(op))
         if isinstance(op, tilesplit.TiledSplit) or isinstance(op, relu.cReLu):
             continue
         if isinstance(op, conv2d.TiledConv2d):
@@ -37,7 +37,7 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
             in_out_shape_info = in_out_shape(input_shape, output_shape)
             shape_dict[id(op)] = in_out_shape_info
 
-            print("after conv2d {}x{}x{}x{}".format(N, C, H, W))
+            #print("after conv2d {}x{}x{}x{}".format(N, C, H, W))
         elif isinstance(op, maxpool2d.cMaxPool2d):
             stride = op.stride
             pad = op.padding
@@ -48,13 +48,13 @@ def shape_infer_sequence(seq_ops, inputH, inputW, N, C):
             output_shape = (N, C, H, W)
             in_out_shape_info = in_out_shape(input_shape, output_shape)
             shape_dict[id(op)] = in_out_shape_info
-            print("after maxpool2d {}x{}x{}x{}".format(N, C, H, W))
+            #print("after maxpool2d {}x{}x{}x{}".format(N, C, H, W))
         else:
             input_shape = (N, C, H, W)
             output_shape = input_shape
             in_out_shape_info = in_out_shape(input_shape, output_shape)
             shape_dict[id(op)] = in_out_shape_info
-            print("here?? {}x{}x{}x{}".format(N, C, H, W))
+            #print("here?? {}x{}x{}x{}".format(N, C, H, W))
 
     # give a hash-map to represnet input shape and out shape of a op
     return N, C, H, W, shape_dict

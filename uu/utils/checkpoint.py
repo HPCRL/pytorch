@@ -49,7 +49,7 @@ def detach_variable(inputs: Tuple[Any, ...]) -> Tuple[torch.Tensor, ...]:
 class cCheckpoint(torch.autograd.Function):
     @staticmethod
     def forward(ctx, run_function, preserve_rng_state, *args):
-        print("in customized checkpoint forward", len(args))
+        #print("in customized checkpoint forward", len(args))
         #print("args", args)
         check_backward_validity(args)
         ctx.run_function = run_function
@@ -83,7 +83,7 @@ class cCheckpoint(torch.autograd.Function):
         # 1) get the tile from cpu
         # 2) fwd per tile
         # 3) bwd 
-        print("\n############# Enter checkpointing bkward ####")
+        #print("\n############# Enter checkpointing bkward ####")
         if not torch.autograd._is_checkpoint_valid():
             raise RuntimeError("Checkpointing is not compatible with .grad(), please use .backward() if possible")
         inputs = ctx.saved_tensors

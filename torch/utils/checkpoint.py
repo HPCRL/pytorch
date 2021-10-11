@@ -94,7 +94,7 @@ class CheckpointFunction(torch.autograd.Function):
             detached_inputs = detach_variable(inputs)
             
             with torch.enable_grad(), torch.cuda.amp.autocast(ctx.had_autocast_in_fwd):
-                print("ctx.run_function bkw", ctx.run_function)
+                #print("ctx.run_function bkw", ctx.run_function)
                 outputs = ctx.run_function(*detached_inputs)
 
         if isinstance(outputs, torch.Tensor):

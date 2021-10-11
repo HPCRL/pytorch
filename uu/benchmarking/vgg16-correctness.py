@@ -336,7 +336,7 @@ class Net(nn.Module):
         #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
-        print("!!!!!!!", len(shape_dict))
+        # print("!!!!!!!", len(shape_dict))
         # print("!!!!!!!", oH, oW)
         stream_structure = self.block1
 
@@ -369,8 +369,8 @@ class Net(nn.Module):
                 #info[0].update(grad_dict_bk)
       # add grad_payload as negate keys
                 
-                print("++++++++++++++++++++++++++++++++++++++++++++++++")
-                print("coord", coord)
+                # print("++++++++++++++++++++++++++++++++++++++++++++++++")
+                # print("coord", coord)
                 out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
                 
                 # use customized copy
@@ -387,6 +387,9 @@ class Net(nn.Module):
         out = self.fc1(out)
         out = self.fc2(out)
         return out
+
+
+import time
 
 def main():
     torch.set_printoptions(profile="full")
@@ -415,27 +418,30 @@ def main():
     fcw2 = model.fc2.weight.data
     
     model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2).to(device)
+    
+    start_time = time.time()
     input_ref = input.data.clone() 
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
     out_ref = model_ref(input_ref)
-    print("done ref")
+    ref_elapsed_fwd = time.time() - start_time
+
     out_ref.sum().backward()
-    print("done ref bkw")
-
-
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    out = model(input, H, W, nTh, nTw )
-
-   
-
     
-
-    #print(input_ref.grad)
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    ref_elapsed_total = time.time() - start_time
+    print("done ref")
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n", ref_elapsed_fwd, ref_elapsed_total)
+    
+    
+    start_time = time.time()
+    out = model(input, H, W, nTh, nTw )
+    our_elapsed_fwd = time.time() - start_time
+   
     out.sum().backward()
+    our_elapsed_total = time.time() - start_time
 
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n", our_elapsed_fwd, our_elapsed_total)
+    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("~~ check forward correctness ~~")
     # print("out shape", out)
     # print("out_ref ", out_ref)
