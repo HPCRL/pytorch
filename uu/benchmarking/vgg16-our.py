@@ -16,39 +16,39 @@ Ph = 1
 Pw = 1
 chanel = 3
 batch = 1
-H = 4096
-W = 4096
+H = 1024
+W = 1024
 oH = H//32
 oW = W//32
-nTh = 1
-nTw = 1
+nTh = 32
+nTw = 32
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv2d_1 = conv2d.TiledConv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_1 = conv2d.TiledConv2d(in_channels=3, 
+                                  out_channels=64, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw),
                                   )  
 
-        self.conv2d_2 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_2 = conv2d.TiledConv2d(in_channels=64, 
+                                        out_channels=64, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         ) 
         self.mxp1 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_3 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_3 = conv2d.TiledConv2d(in_channels=64, 
+                                        out_channels=128, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_4 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_4 = conv2d.TiledConv2d(in_channels=128, 
+                                        out_channels=128, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -56,41 +56,41 @@ class Net(nn.Module):
 
         self.mxp2 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_5 = conv2d.TiledConv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_5 = conv2d.TiledConv2d(in_channels=128, 
+                                  out_channels=256, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw),
                                   )  
 
-        self.conv2d_6 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_6 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=256, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         ) 
-        self.conv2d_7 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_7 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=256, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
         self.mxp3 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_8 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_8 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_9 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_9 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_10 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_10 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -100,20 +100,20 @@ class Net(nn.Module):
 
 
 
-        self.conv2d_11 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_11 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_12 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_12 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_13 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_13 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -121,11 +121,11 @@ class Net(nn.Module):
 
         self.mxp5 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
         self.relu = relu.cReLu()        
-        in_feature = chanel*oH*oW
+        in_feature = 512*oH*oW
         self.flat = nn.Flatten()
-        self.fc1 = nn.Linear(in_feature, 1024, bias=False)
-        self.fc2 = nn.Linear(1024, 1024, bias=False)
-        self.fc3 = nn.Linear(1024, 1024, bias=False)
+        self.fc1 = nn.Linear(in_feature, 4096, bias=False)
+        self.fc2 = nn.Linear(4096, 4096, bias=False)
+        self.fc3 = nn.Linear(4096, 1000, bias=False)
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
@@ -146,7 +146,7 @@ class Net(nn.Module):
         #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
-        #print("!!!!!!!", model_device)
+        print("!!!!!!!", N, C, oH, oW)
         stream_structure = self.block1
 
         out = torch.zeros(N, C, oH, oW, requires_grad=True).cuda()
@@ -185,7 +185,7 @@ class Net(nn.Module):
 
 def main():
     torch.set_printoptions(profile="full")
-    torch.set_default_dtype(torch.float64)
+    torch.set_default_dtype(torch.float32)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     memUsage = memory.MeasureMemory(device)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
@@ -210,6 +210,7 @@ def main():
 
     start_time = time.time()
     out = model(input, H, W, nTh, nTw )
+    torch.cuda.synchronize()
     our_elapsed_fwd_done = time.time()
     our_elapsed_fwd = our_elapsed_fwd_done - start_time
     print("==== our_fwd done ...")
@@ -222,6 +223,7 @@ def main():
     #print(input_ref.grad)
 
     out.sum().backward()
+    torch.cuda.synchronize()
     our_elapsed_bwk = time.time() - our_elapsed_fwd_done
     our_elapsed_total = time.time() - start_time
 

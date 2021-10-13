@@ -1,0 +1,22 @@
+==332263== NVPROF is profiling process 332263, command: python uu/benchmarking/vgg16-ref-no-cp.py
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+==== init ...
+0.0B
+10.7GiB
+==== ref_fwd done ...
+801.2MiB
+avail ref 8.7GiB
+max ref 801.2MiB 840143872
+done ref bkw
+
+&& 1.283724308013916, 0.12673401832580566, 1.4104604721069336
+
+==== ref_bwd done ...
+ref_bwd_use -385.2MiB
+ref_bwd_use t 416.0MiB
+avail ref 9.1GiB
+max ref 913.6MiB 957962240
+input graad tensor(-5.8763e-10, device='cuda:0')
+==332263== Generated result file: /home/yufan/labpytorch/profile.332263

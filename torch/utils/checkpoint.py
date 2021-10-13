@@ -235,6 +235,7 @@ def checkpoint_sequential(functions, segments, input, **kwargs):
         functions = list(functions.children())
 
     segment_size = len(functions) // segments
+    #print("segment_size :", len(functions), segments, segment_size)
     # the last chunk has to be non-volatile
     end = -1
     for start in range(0, segment_size * (segments - 1), segment_size):

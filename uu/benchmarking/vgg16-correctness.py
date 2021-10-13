@@ -34,12 +34,12 @@ Pw = 1
 chanel = 3
 batch = 2
 
-H = 1024
-W = 1024
-oH = 32
-oW = 32
-nTh = 4
-nTw = 4
+H = 2048
+W = 2048
+oH = H//32
+oW = W//32
+nTh = 2
+nTw = 2
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
