@@ -11,18 +11,18 @@ li = []
 li_act = []
 grad_dict_bk = {}
 def print_grad(self, grad_input, grad_output):
-    print('Inside '+ self.__class__.__name__+ ' backward')
-    print('grad_output size : ', grad_output[0].size())
-    #print('ref grad_output  :\n ', grad_output[0])
-    print('grad_input size : ', grad_input[0].size())
-   # print('ref grad_input  : \n', grad_input[0])
+#     print('Inside '+ self.__class__.__name__+ ' backward')
+#     print('grad_output size : ', grad_output[0].size())
+#     #print('ref grad_output  :\n ', grad_output[0])
+#     print('grad_input size : ', grad_input[0].size())
+#    # print('ref grad_input  : \n', grad_input[0])
     li.append( grad_output[0])
 
 def print_activa(self, input, output):
-    print('Inside '+ self.__class__.__name__+ ' forward')
-    print('input size : ', input[0].size())
-    #print('input : ', input[0])
-    print('output size : ', output[0].size())
+    # print('Inside '+ self.__class__.__name__+ ' forward')
+    # print('input size : ', input[0].size())
+    # #print('input : ', input[0])
+    # print('output size : ', output[0].size())
     li_act.append(input[0])
 
     
@@ -34,8 +34,8 @@ Pw = 1
 chanel = 3
 batch = 2
 
-H = 2048
-W = 2048
+H = 512
+W = 512
 oH = H//32
 oW = W//32
 nTh = 2
@@ -44,14 +44,14 @@ nTw = 2
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
         super().__init__()
-        self.conv2d_1 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_1 = nn.Conv2d(in_channels=3, 
+                                  out_channels=64, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_2 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_2 = nn.Conv2d(in_channels=64, 
+                                  out_channels=64, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -59,33 +59,33 @@ class Net_ref(nn.Module):
         
                                 
         self.maxpool1 = nn.MaxPool2d((2,2), (2,2))
-        self.conv2d_3 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_3 = nn.Conv2d(in_channels=64, 
+                                  out_channels=128, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_4 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_4 = nn.Conv2d(in_channels=128, 
+                                  out_channels=128, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
         self.maxpool2 = nn.MaxPool2d((2,2), (2,2))                          
-        self.conv2d_5 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_5 = nn.Conv2d(in_channels=128, 
+                                  out_channels=256, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_6 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_6 = nn.Conv2d(in_channels=256, 
+                                  out_channels=256, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_7 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_7 = nn.Conv2d(in_channels=256, 
+                                  out_channels=256, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -94,20 +94,20 @@ class Net_ref(nn.Module):
                                 
         self.maxpool3 = nn.MaxPool2d((2,2), (2,2))
 
-        self.conv2d_8 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_8 = nn.Conv2d(in_channels=256, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_9 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_9 = nn.Conv2d(in_channels=512, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_10 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_10 = nn.Conv2d(in_channels=512, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -115,20 +115,20 @@ class Net_ref(nn.Module):
 
         self.maxpool4 = nn.MaxPool2d((2,2), (2,2))
 
-        self.conv2d_11 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_11 = nn.Conv2d(in_channels=512, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_12 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_12 = nn.Conv2d(in_channels=512, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
                                   )
-        self.conv2d_13 = nn.Conv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_13 = nn.Conv2d(in_channels=512, 
+                                  out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
@@ -136,10 +136,19 @@ class Net_ref(nn.Module):
 
         self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
         self.relu = nn.ReLU()
+        
+        
+        self.avgp = nn.AvgPool2d(oH, stride=1)
         self.flat = nn.Flatten()
-        in_feature = chanel*oH*oW
+        in_feature = 512
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
-        self.fc2 = nn.Linear(1024, 1024, bias=False)
+        self.sft = nn.Softmax(dim=-1)
+        
+        
+        # self.flat = nn.Flatten()
+        # in_feature = chanel*oH*oW
+        # self.fc1 = nn.Linear(in_feature, 1024, bias=False)
+        # self.fc2 = nn.Linear(1024, 1024, bias=False)
 
 
 
@@ -157,7 +166,7 @@ class Net_ref(nn.Module):
         self.conv2d_12.weight = Parameter(w12)
         self.conv2d_13.weight = Parameter(w13)
         self.fc1.weight = Parameter(fcw1)
-        self.fc2.weight = Parameter(fcw2)
+        #self.fc2.weight = Parameter(fcw2)
        
         self.conv2d_1.register_forward_hook(print_activa)
         self.conv2d_3.register_forward_hook(print_activa)
@@ -202,10 +211,20 @@ class Net_ref(nn.Module):
                                                self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.maxpool3, \
                                                self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.maxpool4, \
                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.maxpool5, \
-                                                   self.flat, self.fc1, self.fc2 ]) 
+                                             ]) 
 
     def forward(self, x):
         out = self.block1(x)
+        out = self.avgp(out)
+
+        print("out.shape", out.size())
+        out = self.flat(out)
+        print("out.shape", out.size())
+        out = self.fc1(out)
+        print("out.shape", out.size())
+        out = self.sft(out)
+        print("out.shape", out.size())
+
     
         return out
         
@@ -217,29 +236,29 @@ class Net_ref(nn.Module):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv2d_1 = conv2d.TiledConv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_1 = conv2d.TiledConv2d(in_channels=3, 
+                                  out_channels=64, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw),
                                   )  
 
-        self.conv2d_2 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_2 = conv2d.TiledConv2d(in_channels=64, 
+                                        out_channels=64, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         ) 
         self.mxp1 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_3 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_3 = conv2d.TiledConv2d(in_channels=64, 
+                                        out_channels=128, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_4 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_4 = conv2d.TiledConv2d(in_channels=128, 
+                                        out_channels=128, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -247,41 +266,41 @@ class Net(nn.Module):
 
         self.mxp2 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_5 = conv2d.TiledConv2d(in_channels=chanel, 
-                                  out_channels=chanel, 
+        self.conv2d_5 = conv2d.TiledConv2d(in_channels=128, 
+                                  out_channels=256, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw),
                                   )  
 
-        self.conv2d_6 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_6 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=256, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         ) 
-        self.conv2d_7 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_7 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=256, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
         self.mxp3 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-        self.conv2d_8 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_8 = conv2d.TiledConv2d(in_channels=256, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_9 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_9 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_10 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_10 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
@@ -289,33 +308,41 @@ class Net(nn.Module):
 
         self.mxp4 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-
-
-        self.conv2d_11 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_11 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_12 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_12 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
-        self.conv2d_13 = conv2d.TiledConv2d(in_channels=chanel, 
-                                        out_channels=chanel, 
+        self.conv2d_13 = conv2d.TiledConv2d(in_channels=512, 
+                                        out_channels=512, 
                                         kernel_size=(Kh,Kw),
                                         bias = False,
                                         padding=(Ph,Pw),
                                         )
 
         self.mxp5 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
+
         self.relu = relu.cReLu()
-        in_feature = chanel*oH*oW
+        # in_feature = chanel*oH*oW
+        # self.flat = nn.Flatten()
+        # self.fc1 = nn.Linear(in_feature, 1024, bias=False)
+        # self.fc2 = nn.Linear(1024, 1024, bias=False)
+        
+
+
+        self.avgp = nn.AvgPool2d(oH, stride=1)
         self.flat = nn.Flatten()
+        in_feature = 512
         self.fc1 = nn.Linear(in_feature, 1024, bias=False)
-        self.fc2 = nn.Linear(1024, 1024, bias=False)
+        self.sft = nn.Softmax(dim=-1)
+        
 
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
@@ -323,7 +350,7 @@ class Net(nn.Module):
                                                 self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.mxp2,  \
                                                 self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.mxp3, \
                                                 self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.mxp4, \
-                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.mxp5,   ]) #
+                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.mxp5   ]) #
         
         # self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.conv2d_2, self.mxp1, \
         #                                         self.conv2d_3,  self.conv2d_4,  self.mxp2,  \
@@ -383,9 +410,11 @@ class Net(nn.Module):
                 
                 #del info
         
+        out = self.avgp(out)
         out = self.flat(out)
         out = self.fc1(out)
-        out = self.fc2(out)
+        out = self.sft(out)
+
         return out
 
 
@@ -415,7 +444,8 @@ def main():
     w13 = model.conv2d_13.weight.data
 
     fcw1 = model.fc1.weight.data
-    fcw2 = model.fc2.weight.data
+    # fcw2 = model.fc2.weight.data
+    fcw2= None
     
     model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2).to(device)
     
