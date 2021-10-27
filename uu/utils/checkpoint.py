@@ -74,6 +74,7 @@ class cCheckpoint(torch.autograd.Function):
         args = list(args)
         args.append(is_ccheckpoint)
         args = tuple(args)
+        
         with torch.no_grad():
             outputs = run_function(*args)
         return outputs

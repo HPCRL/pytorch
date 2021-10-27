@@ -46,7 +46,6 @@ class cMaxPool2dFunction(torch.autograd.Function):
             out = F.max_pool2d(input, kernel_size, stride, padding, return_indices=True)
             out_value = out[0]
             out_index = out[1]
-
             # save status for bkward for non-checkpoint
             # ctx.stride = stride
             # ctx.kernel_size = kernel_size
@@ -63,16 +62,18 @@ class cMaxPool2dFunction(torch.autograd.Function):
             myctx.info = inputs[4]
             myctx.input = input
             myctx.arg_max = out_index
-
+            del out
         else:
             out = F.max_pool2d(input, kernel_size, stride, padding, return_indices=True)
             out_value = out[0]
-            out_index = out[1]
+            del out
+            #out_index = out[1]
         
         # place this entry
         myctx_dict[uniq_id] = myctx
         del input
-
+        
+        torch.cuda.empty_cache()
         return out_value
     
     @staticmethod
@@ -110,6 +111,7 @@ class cMaxPool2dFunction(torch.autograd.Function):
     
         #print("##############grad_in in maxp", grad_in.size()) 
         #print("grad in", grad_in)
+        torch.cuda.empty_cache()
         return grad_in, None, None, None, None, None, None
         
         
@@ -166,10 +168,9 @@ class cMaxPool2d(_MaxPoolNd):
         else:
             print("missing info in cMaxPool2d")
             assert False
-        cmaxplool = cMaxPool2dFunction.apply
-       
-        uniq_id = id(self)
 
+        cmaxplool = cMaxPool2dFunction.apply
+        uniq_id = id(self)
         pi = info[0][uniq_id]
         
         if pi.op_idex == 0: # last stage in the segment or in the global network

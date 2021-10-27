@@ -16,12 +16,12 @@ Ph = 1
 Pw = 1
 chanel = 3
 batch = 1
-H = 1024
-W = 1024
+H = 512
+W = 512
 oH = H//32
 oW = W//32
-nTh = 32
-nTw = 32
+nTh = 4
+nTw = 4
 
 class Net(nn.Module):
     def __init__(self):
@@ -98,8 +98,6 @@ class Net(nn.Module):
 
         self.mxp4 = maxpool2d.cMaxPool2d((2, 2), (2, 2))
 
-
-
         self.conv2d_11 = conv2d.TiledConv2d(in_channels=512, 
                                         out_channels=512, 
                                         kernel_size=(Kh,Kw),
@@ -123,7 +121,7 @@ class Net(nn.Module):
         self.relu = relu.cReLu()        
         in_feature = 512*oH*oW
         self.flat = nn.Flatten()
-        self.fc1 = nn.Linear(in_feature, 4096, bias=False)
+        self.fc1 = nn.Linear(in_feature, 4096, bias=False)  # 2G word even for 1kx1k  | 200G word or 10Kx10K. No GPU works
         self.fc2 = nn.Linear(4096, 4096, bias=False)
         self.fc3 = nn.Linear(4096, 1000, bias=False)
 
@@ -162,7 +160,6 @@ class Net(nn.Module):
                 #print("++++++++++++++++++++++++++++++++++++++++++++++++")
                 out_temp = checkpoint.checkpoint(self.block1, x, info, stream_structure[1], model_device, [nTh, nTw])
 
-
                 # use customized copy
                 fake_pi = info[0][-11]
                 tile_shape = fake_pi.cur_output_shape
@@ -170,11 +167,7 @@ class Net(nn.Module):
                 output_index = fake_pi.input_slice
                 #print(tile_shape, tile_size, output_index)
                 out = self.tcopy(out_temp, out, output_index, tile_size)
-                # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                # memUsage = memory.MeasureMemory(device)
-                # print("==== loop ...", coord)
-                # initmem = memUsage.currentValue()
-                # print(memory.MemSize(initmem))      #now should be around 3.8MB
+                del out_temp
                 del info
 
         out = self.flat(out)

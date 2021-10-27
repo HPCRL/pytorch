@@ -74,9 +74,18 @@ class TiledSplit(torch.nn.Module):
         super(TiledSplit, self).__init__()
 
     def forward(self, *inputs):
-        #print("tsplit here")
+        if len(inputs) == 5:
+            is_ccheckpoint = False
+        elif len(inputs) == 6:
+            is_ccheckpoint = inputs[-1]
+        else:
+            print("missing info in split")
+            assert False
+
+
+
         tsplit = TiledSplitFunction.apply
         r = tsplit(*inputs)
         info = inputs[1]
-        return r, info
+        return r, info, is_ccheckpoint
  

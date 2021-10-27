@@ -487,28 +487,29 @@ def reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, f
 
 #TODO can simplify
 def recreate_input_tile_f(info:Dict, input, next_id):
-    pi = info[0][next_id]
-    padding_info = pi.padding_info
-    #shifting tile to extract
-    input_shape = input.size()
-    top = 0 + padding_info[2]
-    bottom = input_shape[2]-padding_info[3]
-    left = 0 + padding_info[0]
-    right = input_shape[3]-padding_info[1]
-    # print("\n===\n")
-    # print(input_shape)
-    # print(padding_info)
-    # print(slice_info)
-    # print("top, bottom, left, right " , top, bottom, left, right)
-    # print("\n===\n")
-    
-    input_tile = input[:, :, top:bottom, left:right]       #NCHW, included index
-    #print("== inputtile for next", input_tile)
-    #print(padding_info)
-    pd = torch.nn.ConstantPad2d(padding_info, 0)
-    input_tile = pd(input_tile)
-    del input
-    return input_tile
+    with torch.no_grad():
+        pi = info[0][next_id]
+        padding_info = pi.padding_info
+        #shifting tile to extract
+        input_shape = input.size()
+        top = 0 + padding_info[2]
+        bottom = input_shape[2]-padding_info[3]
+        left = 0 + padding_info[0]
+        right = input_shape[3]-padding_info[1]
+        # print("\n===\n")
+        # print(input_shape)
+        # print(padding_info)
+        # print(slice_info)
+        # print("top, bottom, left, right " , top, bottom, left, right)
+        # print("\n===\n")
+        
+        input_tile = input[:, :, top:bottom, left:right]       #NCHW, included index
+        #print("== inputtile for next", input_tile)
+        #print(padding_info)
+        pd = torch.nn.ConstantPad2d(padding_info, 0)
+        input_tile = pd(input_tile)
+        del input
+        return input_tile
 
 
 

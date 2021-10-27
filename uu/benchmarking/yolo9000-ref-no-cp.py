@@ -16,8 +16,8 @@ Ph = 1
 Pw = 1
 chanel = 3
 batch = 1
-H = 512
-W = 512
+H = 3072
+W = 3072
 oH = H//32
 oW = W//32
 
@@ -26,108 +26,138 @@ class Net_ref(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv2d_1 = nn.Conv2d(in_channels=3, 
+                                  out_channels=32, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)
+                                  )                 #0
+        self.maxpool1 = nn.MaxPool2d((2,2), (2,2))  #1
+
+        self.conv2d_2 = nn.Conv2d(in_channels=32, 
                                   out_channels=64, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
-        self.conv2d_2 = nn.Conv2d(in_channels=64, 
-                                  out_channels=64, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
-        
+                                  )                 #2
+        self.maxpool2 = nn.MaxPool2d((2,2), (2,2))  #3
                                 
-        self.maxpool1 = nn.MaxPool2d((2,2), (2,2))
+        
         self.conv2d_3 = nn.Conv2d(in_channels=64, 
                                   out_channels=128, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
+                                  )                 #4
         self.conv2d_4 = nn.Conv2d(in_channels=128, 
+                                  out_channels=64, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #5
+        self.conv2d_5 = nn.Conv2d(in_channels=64, 
                                   out_channels=128, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
-        self.maxpool2 = nn.MaxPool2d((2,2), (2,2))                          
-        self.conv2d_5 = nn.Conv2d(in_channels=128, 
-                                  out_channels=256, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
-        self.conv2d_6 = nn.Conv2d(in_channels=256, 
-                                  out_channels=256, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
-        self.conv2d_7 = nn.Conv2d(in_channels=256, 
-                                  out_channels=256, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
+                                  )                 #6
+        self.maxpool3 = nn.MaxPool2d((2,2), (2,2))  #7
+
         
-                                
-        self.maxpool3 = nn.MaxPool2d((2,2), (2,2))
+        self.conv2d_6 = nn.Conv2d(in_channels=128, 
+                                  out_channels=256, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)
+                                  )                 #8
+        self.conv2d_7 = nn.Conv2d(in_channels=256, 
+                                  out_channels=128, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #9
+        self.conv2d_8 = nn.Conv2d(in_channels=128, 
+                                  out_channels=256, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)   
+                                  )                 #10
+        self.maxpool4 = nn.MaxPool2d((2,2), (2,2))  #11
 
-        self.conv2d_8 = nn.Conv2d(in_channels=256, 
+        
+        self.conv2d_9 = nn.Conv2d(in_channels=256, 
                                   out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
-        self.conv2d_9 = nn.Conv2d(in_channels=512, 
-                                  out_channels=512, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
+                                  )                 #12
         self.conv2d_10 = nn.Conv2d(in_channels=512, 
+                                  out_channels=256, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #13
+        self.conv2d_11 = nn.Conv2d(in_channels=256, 
                                   out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
-
-        self.maxpool4 = nn.MaxPool2d((2,2), (2,2))
-
-        self.conv2d_11 = nn.Conv2d(in_channels=512, 
-                                  out_channels=512, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
+                                  )                 #14
         self.conv2d_12 = nn.Conv2d(in_channels=512, 
+                                  out_channels=256, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #15
+        self.conv2d_13 = nn.Conv2d(in_channels=256, 
                                   out_channels=512, 
                                   kernel_size=(Kh,Kw),
                                   bias = False,
                                   padding=(Ph,Pw)
-                                  )
-        self.conv2d_13 = nn.Conv2d(in_channels=512, 
-                                  out_channels=512, 
-                                  kernel_size=(Kh,Kw),
-                                  bias = False,
-                                  padding=(Ph,Pw)
-                                  )
+                                  )                 #16
+        self.maxpool5 = nn.MaxPool2d((2,2), (2,2))  #17
 
-        self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
-        self.relu = nn.ReLU()
-        self.flat = nn.Flatten()
-        in_feature = 512*oH*oW
-        self.fc1 = nn.Linear(in_feature, 4096, bias=False)
-        self.fc2 = nn.Linear(4096, 4096, bias=False)
-        self.fc3 = nn.Linear(4096, 1000, bias=False)
-        self.block1 = nn.Sequential(*[self.conv2d_1, self.relu, self.conv2d_2, self.relu,self.maxpool1, \
-                                                self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.maxpool2,  \
-                                                self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.maxpool3, \
-                                                self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.maxpool4, \
-                                                self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.maxpool5, \
-                                                self.flat, self.fc1, self.fc2, self.fc3 ]) 
+
+        self.conv2d_14 = nn.Conv2d(in_channels=512, 
+                                  out_channels=1024, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)
+                                  )                 #18
+        self.conv2d_15 = nn.Conv2d(in_channels=1024, 
+                                  out_channels=512, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #19
+        self.conv2d_16 = nn.Conv2d(in_channels=512, 
+                                  out_channels=1024, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)
+                                  )                 #20
+        self.conv2d_17 = nn.Conv2d(in_channels=1024, 
+                                  out_channels=512, 
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )                 #21
+        self.conv2d_18 = nn.Conv2d(in_channels=512, 
+                                  out_channels=1024, 
+                                  kernel_size=(Kh,Kw),
+                                  bias = False,
+                                  padding=(Ph,Pw)
+                                  )                 #22
+        self.conv2d_19 = nn.Conv2d(in_channels=1024, 
+                                  out_channels=2048, #28269,        ##fake one number
+                                  kernel_size=(1,1),
+                                  bias = False,
+                                  padding=(0,0)
+                                  )    
+        self.block1 = nn.Sequential(*[self.conv2d_1, self.maxpool1 ,self.conv2d_2, self.maxpool2, \
+                                                self.conv2d_3,  self.conv2d_4, self.conv2d_5, self.maxpool3,  \
+                                                self.conv2d_6, self.conv2d_7, self.conv2d_8, self.maxpool4, \
+                                                self.conv2d_9, self.conv2d_10, self.conv2d_11, self.conv2d_12, self.conv2d_13, self.maxpool5, \
+                                                self.conv2d_14, self.conv2d_15, self.conv2d_16, self.conv2d_17, self.conv2d_18, self.conv2d_19 ]) 
 
     def forward(self, x):
         out = self.block1(x)
@@ -177,6 +207,7 @@ def main():
 
 
     out_ref.sum().backward()
+    print("out_ref", out_ref.size())
     torch.cuda.synchronize()
     ref_elapsed_bwk = time.time()-ref_fwd_done
     ref_elapsed_total = time.time() - start_time

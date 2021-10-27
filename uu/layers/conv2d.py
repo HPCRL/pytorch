@@ -10,6 +10,9 @@ from torch.nn import functional as F
 from uu.utils import padding_calc
 from torch.nn.parameter import Parameter
 
+from uu.utils import memory 
+
+
 class MMctx:
     def __init__(self):
         self.input = None
@@ -32,6 +35,10 @@ class TiledConv2dFunction(torch.autograd.Function):
                         padding, dilation, groups, info, uniq_id, is_ccheckpoint):
         # print("== tiled conv2d forward")
         # print("myctx_dict.keys()", myctx_dict.keys())
+        model_device = torch.device("cuda" if input.is_cuda else "cpu")
+        memUsage = memory.MeasureMemory(model_device)
+
+        
         if uniq_id in myctx_dict.keys():
             #print("need to get existing")
             myctx = myctx_dict[uniq_id]
@@ -46,16 +53,36 @@ class TiledConv2dFunction(torch.autograd.Function):
   
         s_depth = c_info.local_idex  # depth in current segment
         
-        if c_info.local_first: # if it is the first conv in a segment then padding
-            padding_info = c_info.padding_info
-            pd = torch.nn.ConstantPad2d(padding_info, 0)
-            input = pd(input)
+        print("\n==== ++ before conv2d padding ...")
+        initmem = memUsage.currentValue()
+        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
+
+        with torch.no_grad():
+            if c_info.local_first: # if it is the first conv in a segment then padding
+                padding_info = c_info.padding_info
+                pd = torch.nn.ConstantPad2d(padding_info, 0)
+                print("==== 1 conv2d padding ...")
+                initmem = memUsage.currentValue()
+                print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())    
+
+                input = pd(input)
+                # torch.cuda.empty_cache()
+                print("==== 2 conv2d padding ...")
+                initmem = memUsage.currentValue()
+                print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())      
+            else:
+                input = input
+       
+        torch.cuda.empty_cache()
+        print("==== [issue!! ]after padding ...")
+        initmem = memUsage.currentValue()
+        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())   
 
         #print("af input shape", input.size())
                  
         if s_depth == 0: 
             # depth is 0 if it is the last conv or the last one in segment
-            if not is_ccheckpoint:    
+            if not is_ccheckpoint:   
                 # #for non-checkpoint version
                 # ctx.input = input
                 # ctx.weight = weight
@@ -65,7 +92,6 @@ class TiledConv2dFunction(torch.autograd.Function):
                 # ctx.uniq_id = uniq_id
                 # ctx.info = info  
                 ctx.uniq_id = uniq_id
-
                 myctx.input = input
                 myctx.weight = weight
                 myctx.padding = padding
@@ -75,8 +101,6 @@ class TiledConv2dFunction(torch.autograd.Function):
                 myctx.info = info 
                 myctx.coord = c_info.coord 
                 
-
-
                 #force no auto padding in our customized functions.
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
@@ -87,6 +111,8 @@ class TiledConv2dFunction(torch.autograd.Function):
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
             #print("shape input_tile_for_next\n", out.size())
+            #remove input buffer
+            del input
         else:
             if not is_ccheckpoint:  
                 # #for non-checkpoint version          
@@ -108,8 +134,6 @@ class TiledConv2dFunction(torch.autograd.Function):
                 myctx.info = info 
                 myctx.coord = c_info.coord 
                 
-
-
                 #force no auto padding in our customized functions.
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
@@ -120,18 +144,30 @@ class TiledConv2dFunction(torch.autograd.Function):
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
          
+            #remove input buffer
+            del input
+            #torch.cuda.empty_cache()
+            print("==== after conv2d compute...")
+            initmem = memUsage.currentValue()
+            print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
+            
             #print("net_ out\n", out)
             # TODO : how to get the direct children after this??
             next_id = c_info.next_id
-            input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
-            #print("input_tile_for_next\n", input_tile_for_next)
-            out = input_tile_for_next
-            #print("shape input_tile_for_next\n", input_tile_for_next.size())
-        
-        
+            #input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
+            out = padding_calc.recreate_input_tile_f(info, out, next_id)
+
+            print("==== after recreate_input_tile_f ...")
+            initmem = memUsage.currentValue()
+            print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
+           
+
         # place this entryS
         myctx_dict[uniq_id] = myctx
-        del input
+        print("==== return from conv2d ...")
+        initmem = memUsage.currentValue()
+        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())  
+
         return out
 
     @staticmethod
@@ -168,9 +204,9 @@ class TiledConv2dFunction(torch.autograd.Function):
                     #    print("weight shape", weight_size)
                     #    print("grad_output shape", grad_output.size())
                        first_op_in_seg = myctx.uniq_id
-                       new_grad_out = padding_calc.get_input_tile(myctx.info[1], grad_output, first_op_in_seg)
+                       new_grad_output = padding_calc.get_input_tile(myctx.info[1], grad_output, first_op_in_seg)
                        # since I remove padding from get_input_tile, so manually do it here.
-                       grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_out, weight_tensor, our_padding, stride, dilation, group, False, False, False)
+                       grad_input = torch.cudnn_convolution_backward_input(input_size, new_grad_output, weight_tensor, our_padding, stride, dilation, group, False, False, False)
                        grad_input = padding_calc.resize_grad_in(f_info, grad_input)
                        #print("grad_input", grad_input.size())
                    elif g_depth == 0:
@@ -231,6 +267,7 @@ class TiledConv2dFunction(torch.autograd.Function):
                 #                                        f_info, next_f_info, weight_size,\
                 #                                        padding, stride, nontiled_grad_out, nontiled_activation) #
  
+                   #get new grad_output, input_tensor; have to reuse variable since python mem-management
                    new_grad_output, new_input_tensor = padding_calc.reshape_grad_out_input_tensor_for_weight_update(grad_output, input_tensor, \
                                                        f_info, next_f_info, weight_size,\
                                                        padding, stride)
@@ -244,7 +281,6 @@ class TiledConv2dFunction(torch.autograd.Function):
                print("using naive cuda bkw")
         else:
             print("using cpu bkw")
-    
         # print("##############return grad_in in conv2d", grad_input[0,0,0,0:10])
         return grad_input, grad_weight, grad_bias, None, None, None, None, None, None, None, None
 
@@ -410,7 +446,6 @@ class TiledConv2d(_ConvNd):
             print("missing info in cConv2d")
             assert False
         
-        
         tconv2d = TiledConv2dFunction.apply
         uniq_id = id(self)
         pi = info[0][uniq_id]
@@ -418,12 +453,14 @@ class TiledConv2d(_ConvNd):
         if pi.op_idex == 0: # last stage in the segment or in the global network
             out = tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint) 
-            #print("conv FF", out.size())
+            # if self.is_ccheckpoint:
+            #     del input
             return out
         else:
             out = tconv2d(input, self.weight, self.bias, self.stride,
                        self.padding, self.dilation, self.groups, info, uniq_id, self.is_ccheckpoint) 
-            #print("* conv FF", out.size())
+            # if self.is_ccheckpoint:
+            #     del input
             return out, info, self.is_ccheckpoint
 
 
