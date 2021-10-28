@@ -157,7 +157,7 @@ class Net_ref(nn.Module):
 
     def forward(self, x):
         out = self.block(x)
-        print("##", H)
+        #print("##", H)
         return out
 
 def main():

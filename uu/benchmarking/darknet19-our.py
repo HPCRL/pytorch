@@ -156,7 +156,7 @@ class Net(nn.Module):
              
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
-        print("##", H)
+        #print("##", H)
         model_device = next(self.parameters()).device
         N, C, oH, oW, shape_dict = shape_infer.shape_infer_sequence(self.block1, H, W, batch, chanel)
         stream_structure = self.block1
