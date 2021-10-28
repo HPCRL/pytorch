@@ -35,10 +35,6 @@ class TiledConv2dFunction(torch.autograd.Function):
                         padding, dilation, groups, info, uniq_id, is_ccheckpoint):
         # print("== tiled conv2d forward")
         # print("myctx_dict.keys()", myctx_dict.keys())
-        model_device = torch.device("cuda" if input.is_cuda else "cpu")
-        memUsage = memory.MeasureMemory(model_device)
-
-        
         if uniq_id in myctx_dict.keys():
             #print("need to get existing")
             myctx = myctx_dict[uniq_id]
@@ -53,31 +49,15 @@ class TiledConv2dFunction(torch.autograd.Function):
   
         s_depth = c_info.local_idex  # depth in current segment
         
-        print("\n==== ++ before conv2d padding ...")
-        initmem = memUsage.currentValue()
-        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
-
         with torch.no_grad():
             if c_info.local_first: # if it is the first conv in a segment then padding
                 padding_info = c_info.padding_info
                 pd = torch.nn.ConstantPad2d(padding_info, 0)
-                print("==== 1 conv2d padding ...")
-                initmem = memUsage.currentValue()
-                print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())    
-
                 input = pd(input)
-                # torch.cuda.empty_cache()
-                print("==== 2 conv2d padding ...")
-                initmem = memUsage.currentValue()
-                print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())      
             else:
                 input = input
        
-        torch.cuda.empty_cache()
-        print("==== [issue!! ]after padding ...")
-        initmem = memUsage.currentValue()
-        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())   
-
+        
         #print("af input shape", input.size())
                  
         if s_depth == 0: 
@@ -147,9 +127,6 @@ class TiledConv2dFunction(torch.autograd.Function):
             #remove input buffer
             del input
             #torch.cuda.empty_cache()
-            print("==== after conv2d compute...")
-            initmem = memUsage.currentValue()
-            print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
             
             #print("net_ out\n", out)
             # TODO : how to get the direct children after this??
@@ -157,16 +134,9 @@ class TiledConv2dFunction(torch.autograd.Function):
             #input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
             out = padding_calc.recreate_input_tile_f(info, out, next_id)
 
-            print("==== after recreate_input_tile_f ...")
-            initmem = memUsage.currentValue()
-            print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())     
-           
 
         # place this entryS
         myctx_dict[uniq_id] = myctx
-        print("==== return from conv2d ...")
-        initmem = memUsage.currentValue()
-        print(initmem, memory.MemSize(initmem),  memUsage.maximumValue(), memUsage.maxx())  
 
         return out
 

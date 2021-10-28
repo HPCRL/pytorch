@@ -33,10 +33,10 @@ Pw = 1
 chanel = 3
 batch = 1
 
-H = 512
-W = 512
-nTh = 4
-nTw = 4
+H = 1024
+W = 1024
+nTh = 1
+nTw = 1
 oH = H // 32
 oW = W // 32
 
@@ -175,6 +175,7 @@ class Net_ref(nn.Module):
 
         self.avgp = nn.AvgPool2d(oH, stride=1)
         self.sft = nn.Softmax(dim=-1)
+        self.flat = nn.Flatten()
         
 
         self.conv2d_1.weight = Parameter(w1)
@@ -260,6 +261,7 @@ class Net_ref(nn.Module):
         out = self.block(x)
         print("out.shape", out.size())
         out = self.avgp(out)
+        out = self.flat(out)
         print("out.shape", out.size())
         out = self.sft(out)
         print("out.shape", out.size())
@@ -402,6 +404,7 @@ class Net(nn.Module):
         
         self.avgp = nn.AvgPool2d(oH, stride=1)
         self.sft = nn.Softmax(dim=-1)
+        self.flat = nn.Flatten()
         self.tsplit = tilesplit.TiledSplit()
         self.tcopy = tilecopy.TiledCopy()
         self.block1 = sequential.mSequential(*[self.tsplit, self.conv2d_1, self.maxpool1 ,self.conv2d_2, self.maxpool2, \
@@ -465,13 +468,14 @@ class Net(nn.Module):
                 
                 #del info
         out = self.avgp(out)
+        out = self.flat(out)
         out = self.sft(out)
         
         return out
 
 def main():
     torch.set_printoptions(profile="full")
-    torch.set_default_dtype(torch.float64)
+    torch.set_default_dtype(torch.float32)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
@@ -498,17 +502,23 @@ def main():
     w18 = model.conv2d_18.weight.data
     w19 = model.conv2d_19.weight.data
     
+    # add loss function here
+    criterion =  nn.MSELoss()
+    labels = torch.rand(batch, 1000).cuda()
     
 
-  
-    
     model_ref =  Net_ref(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15, w16, w17, w18, w19).to(device)
     input_ref = input.data.clone() 
     input_ref = input_ref.cuda()
     input_ref.requires_grad = True
+    
     out_ref = model_ref(input_ref)
     print("done ref")
-    out_ref.sum().backward()
+    print(out_ref.size())
+    loss = criterion(out_ref, labels)
+    loss.backward()
+
+    #out_ref.sum().backward()
     print("done ref bkw")
 
 
@@ -522,7 +532,10 @@ def main():
     #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    out.sum().backward()
+    loss = criterion(out, labels)
+    loss.backward()
+
+    # out.sum().backward()
 
     print("~~ check forward correctness ~~")
     # print("out shape", out)
@@ -531,8 +544,8 @@ def main():
     correctness_check.check_equal(out, out_ref, False)
 
     print("#### compare grad_in")
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
+    print("input ref grad", input_ref.grad[0,0,0,0])
+    print("input grad", input.grad[0,0,0,0])
     #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
     correctness_check.check_equal(input.grad, input_ref.grad, False)
 

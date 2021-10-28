@@ -11,16 +11,6 @@ from uu.utils import checkpoint
 from torch.utils.checkpoint import checkpoint, checkpoint_sequential
 import time
 
-Kh = 3
-Kw = 3
-Ph = 1
-Pw = 1
-chanel = 3
-batch = 1
-H = 2048
-W = 2048
-oH = H//32
-oW = W//32
 
 class Net_ref(nn.Module):
     def __init__(self):
@@ -117,25 +107,29 @@ class Net_ref(nn.Module):
 
         self.maxpool5 = nn.MaxPool2d((2,2), (2,2))
         self.relu = nn.ReLU()
-        self.flat = nn.Flatten()
-        in_feature = 512*oH*oW
-        self.fc1 = nn.Linear(in_feature, 4096, bias=False)
-        self.fc2 = nn.Linear(4096, 4096, bias=False)
-        self.fc3 = nn.Linear(4096, 1000, bias=False)
 
-        self.block1 = nn.Sequential(*[self.conv2d_1, self.relu, self.conv2d_2, self.relu,self.maxpool1, \
+        self.avgp = nn.AvgPool2d(oH, stride=1)
+        self.flat = nn.Flatten()
+        in_feature = 512
+        self.fc1 = nn.Linear(in_feature, 1024, bias=False)
+        self.sft = nn.Softmax(dim=-1)
+
+
+
+        self.block1 = nn.Sequential(*[self.conv2d_1, self.relu, self.conv2d_2, self.relu, self.maxpool1, \
                                                 self.conv2d_3, self.relu, self.conv2d_4, self.relu, self.maxpool2,  \
                                                 self.conv2d_5, self.relu, self.conv2d_6, self.relu, self.conv2d_7, self.relu, self.maxpool3, \
                                                 self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.maxpool4, \
                                                 self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.maxpool5, \
-                                                self.flat, self.fc1, self.fc2, self.fc3 ]) 
+                                                self.avgp, self.flat, self.fc1, self.sft ]) 
 
 
         
 
     def forward(self, x):
         #out = checkpoint_sequential(self.block1, 4,x)
-        out = checkpoint_sequential(self.block1, 6, x)
+        # total 22 stages
+        out = checkpoint_sequential(self.block1, 5, x)
         return out
 
 
@@ -144,56 +138,83 @@ class Net_ref(nn.Module):
 def main():
     torch.set_printoptions(profile="full")
     torch.set_default_dtype(torch.float32)
+
+    # add loss function here
+    criterion =  nn.MSELoss()
     
-    input = torch.rand(batch,chanel,H,W, requires_grad = True)
-    print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
+    
+    #print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    memUsage = memory.MeasureMemory(device)
-    print("==== init ...")
-    initmem = memUsage.currentValue()
-    print(memory.MemSize(initmem), initmem)      
-    print(memUsage.available())
+    # memUsage = memory.MeasureMemory(device)
+    # print("==== init ...")
+    # initmem = memUsage.currentValue()
+    # print(memory.MemSize(initmem), initmem)      
+    # print(memUsage.available())
 
 
     model_ref =  Net_ref().to(device)
-    input_ref = input.data.clone() 
-
-    start_time = time.time()    
-    input_ref = input_ref.cuda()
-    input_ref.requires_grad = True
     
-    out_ref = model_ref(input_ref)
-    torch.cuda.synchronize()
-    ref_fwd_done = time.time()
-    ref_elapsed_fwd = ref_fwd_done - start_time
-   
-    print("==== ref_fwd done ...")
-    ref_fwd_use = memUsage.currentValue()-initmem
-    print(memory.MemSize(ref_fwd_use) )    
-    print("avail ref sq",memUsage.available())
-    print("max ref sq", memUsage.maxx(), memUsage.maximumValue())
+    ref_elapsed_fwd = 0
+    ref_elapsed_bwk = 0
+    start_time = time.time()    
+    for i in range(0,1):
+        input_ref = torch.rand(batch,chanel,H,W)
+        labels = torch.rand(batch, 1024).cuda()
+        
+        local_start = time.time() 
+        input_ref = input_ref.cuda()
+        input_ref.requires_grad = True
+        out_ref = model_ref(input_ref)
+        torch.cuda.synchronize()
+        ref_fwd_done = time.time()
+        ref_elapsed_fwd += (ref_fwd_done - local_start)
 
 
-    out_ref.sum().backward()
-    torch.cuda.synchronize()
-    ref_elapsed_bwk = time.time()-ref_fwd_done
+    # print("==== ref_fwd done ...")
+    # ref_fwd_use = memUsage.currentValue()-initmem
+    # print(memory.MemSize(ref_fwd_use) )    
+    # print("avail ref",memUsage.available())
+    # print("max ref", memUsage.maxx(), memUsage.maximumValue())
+
+        loss = criterion(out_ref, labels)
+        loss.backward()
+        torch.cuda.synchronize()
+        ref_elapsed_bwk += (time.time()-ref_fwd_done)
+        
+    
+    torch.cuda.synchronize()    
     ref_elapsed_total = time.time() - start_time
-    print("done seq ref bkw")
+    #print("done ref bkw")
     print("\n&& {}, {}, {}\n".format(ref_elapsed_fwd, ref_elapsed_bwk, ref_elapsed_total) )
     
 
-    print("==== ref_bwd done ...")
-    ref_bwd_use = memUsage.currentValue()-ref_fwd_use
-    ref_bwd_use_total = memUsage.currentValue()-initmem
-    print("ref_bwd_use sq",memory.MemSize(ref_bwd_use))      
-    print("ref_bwd_use t sq ", memory.MemSize(ref_bwd_use_total))     
-    print("avail ref sq", memUsage.available())
-    print("max ref sq", memUsage.maxx(),  memUsage.maximumValue())
-    print("input graad", input_ref.grad[0,0,0,17])
+    # print("==== ref_bwd done ...")
+    # ref_bwd_use = memUsage.currentValue()-ref_fwd_use
+    # ref_bwd_use_total = memUsage.currentValue()-initmem
+    # print("ref_bwd_use sq",memory.MemSize(ref_bwd_use))      
+    # print("ref_bwd_use t sq ", memory.MemSize(ref_bwd_use_total))     
+    # print("avail ref sq", memUsage.available())
+    # print("max ref sq", memUsage.maxx(),  memUsage.maximumValue())
+    #print("input graad", input_ref.grad[0,0,0,17])
+    
 
 
-
+import sys
 
 if __name__=="__main__":
+    Kh = 3
+    Kw = 3
+    Ph = 1
+    Pw = 1
+    chanel = 3
+    batch = 1
+
+
+    H = int(sys.argv[1])
+    W = H
+    oH = H//32
+    oW = W//32
+
+
     main()
