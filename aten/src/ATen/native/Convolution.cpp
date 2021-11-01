@@ -13,6 +13,7 @@
 #include <nnpack.h>
 #endif
 
+#include <iostream>
 
 constexpr int MIOPEN_DIM_MAX = 5;
 
@@ -707,6 +708,7 @@ at::Tensor _convolution(
         output.add_(reshape_bias(input.dim(), bias));
       }
     } else {
+      //std::cout << "[aten/src/ATen/native/Convolution.cpp] at::cudnn_convolution\n";
       output = at::cudnn_convolution(
           input.contiguous(cudnn_memory_format), weight,
           params.padding, params.stride, params.dilation, params.groups, params.benchmark, params.deterministic, params.allow_tf32);

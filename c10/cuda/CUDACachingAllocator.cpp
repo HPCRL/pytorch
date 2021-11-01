@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
 
 namespace c10 {
 
@@ -663,6 +664,7 @@ class DeviceCachingAllocator {
       return false;
     } else {
       p.err = cudaMalloc(&ptr, size);
+      //std::cout << "[CUDACachingAllocator.cpp] cudaMalloc block\n";
       if (p.err != cudaSuccess) {
         if (p.err == cudaErrorMemoryAllocation) {
           // If this is the first attempt (!isRetry), we can forgive and clear CUDA's
@@ -705,11 +707,14 @@ class DeviceCachingAllocator {
   void free_blocks(BlockPool& blocks)
   {
     // Frees all non-split blocks
+
+    //std::cout << "[CUDACachingAllocator.cpp] cudaFree block\n";
     auto it = blocks.begin();
     while (it != blocks.end()) {
       Block* block = *it;
       if (!block->prev && !block->next) {
         C10_CUDA_CHECK(cudaFree((void*)block->ptr));
+        //std::cout << "[CUDACachingAllocator.cpp] cudaFree block\n";
         total_allocated_memory -= block->size;
 
         StatTypes stat_types;

@@ -60,7 +60,7 @@ class Pad_info:
         op_idex, local_idex, next_id, local_first, non_disjoint_tile_size):
         self.coord = coord
         # self.ordering_info = ordering_info # [seg_id, position(0 base), depth(0 base)]
-        self.cur_output_shape = cur_output_shape # current op produce [problem, tile] size; use it to remodify fwd
+        self.cur_output_shape = cur_output_shape 
         self.padding_info = padding_info
         self.input_slice = input_slice
         self.internal_expand = internal_expand

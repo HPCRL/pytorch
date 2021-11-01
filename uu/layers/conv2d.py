@@ -11,7 +11,7 @@ from uu.utils import padding_calc
 from torch.nn.parameter import Parameter
 
 from uu.utils import memory 
-
+import time
 
 class MMctx:
     def __init__(self):
@@ -23,6 +23,7 @@ class MMctx:
         self.uniq_id = None
         self.info = None
         self.coord = None
+        self.input_real_size = None
     def __repr__(self) -> str:
         rep = "[[ " + str(self.uniq_id) +"[" +' PI( <' + "".join([str(x)+"," for x in self.coord]) + '>,\n'
         return rep
@@ -33,13 +34,13 @@ class TiledConv2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight, bias, stride,
                         padding, dilation, groups, info, uniq_id, is_ccheckpoint):
-        # print("== tiled conv2d forward")
+        
         # print("myctx_dict.keys()", myctx_dict.keys())
         if uniq_id in myctx_dict.keys():
             #print("need to get existing")
             myctx = myctx_dict[uniq_id]
-            del myctx
-            myctx = MMctx()
+            # del myctx
+            # myctx = MMctx()
         else:
             myctx = MMctx()
 
@@ -51,15 +52,13 @@ class TiledConv2dFunction(torch.autograd.Function):
         
         with torch.no_grad():
             if c_info.local_first: # if it is the first conv in a segment then padding
+                # print("== tiled conv2d forward / first padding", c_info.coord)
                 padding_info = c_info.padding_info
                 pd = torch.nn.ConstantPad2d(padding_info, 0)
                 input = pd(input)
             else:
                 input = input
-       
         
-        #print("af input shape", input.size())
-                 
         if s_depth == 0: 
             # depth is 0 if it is the last conv or the last one in segment
             if not is_ccheckpoint:   
@@ -85,14 +84,19 @@ class TiledConv2dFunction(torch.autograd.Function):
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+                # print("== tiled conv2d forward / last layer conv compute")
             else:
                 #force no auto padding in our customized functions.
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+                
+
+                
+                # print("== tiled conv2d forward / last layer conv compute nonchp")
             #print("shape input_tile_for_next\n", out.size())
             #remove input buffer
-            del input
+            #del input
         else:
             if not is_ccheckpoint:  
                 # #for non-checkpoint version          
@@ -118,14 +122,16 @@ class TiledConv2dFunction(torch.autograd.Function):
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+                # print("== tiled conv2d forward / reg layer conv compute")
             else:
                 #force no auto padding in our customized functions.
                 padding = (0,0)
                 out = F.conv2d(input, weight, bias, stride,
                         padding, dilation, groups)
+                # print("== tiled conv2d forward / reg layer conv compute nonchp")
          
             #remove input buffer
-            del input
+            #del input
             #torch.cuda.empty_cache()
             
             #print("net_ out\n", out)
@@ -133,15 +139,17 @@ class TiledConv2dFunction(torch.autograd.Function):
             next_id = c_info.next_id
             #input_tile_for_next = padding_calc.recreate_input_tile_f(info, out, next_id)
             out = padding_calc.recreate_input_tile_f(info, out, next_id)
+            # print("== tiled conv2d forward / reg layer conv creat next")
+            
 
 
         # place this entryS
         myctx_dict[uniq_id] = myctx
-
         return out
 
     @staticmethod
     def backward(ctx, grad_output):
+        # print("--------------------------------------------------")
         myctx = myctx_dict[ctx.uniq_id]
         f_info = myctx.info[0][myctx.uniq_id]
         b_info = myctx.info[1][myctx.uniq_id]
@@ -220,6 +228,9 @@ class TiledConv2dFunction(torch.autograd.Function):
                        # print("grad_input", grad_input.size())
                else:
                    grad_input = None
+                
+
+            #    print("== tiled conv2d backward / compute grad_input done", b_info.coord)
  
                if ctx.needs_input_grad[1]:
                    # need to reshape both grad_out and input_tensor
@@ -247,6 +258,10 @@ class TiledConv2dFunction(torch.autograd.Function):
                else:
                    grad_weight = None
                    grad_bias = None
+
+
+            #    print("== tiled conv2d backward / compute grad_weight done") 
+               
            else:
                print("using naive cuda bkw")
         else:

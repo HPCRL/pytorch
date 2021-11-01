@@ -135,7 +135,7 @@ class Net(nn.Module):
                                                 self.conv2d_8, self.relu, self.conv2d_9, self.relu, self.conv2d_10, self.relu, self.mxp4, \
                                                 self.conv2d_11, self.relu, self.conv2d_12, self.relu, self.conv2d_13, self.relu, self.mxp5,   ]) #
         
-        
+    # static  out_temp =None
     def forward(self, x, H, W, nTh, nTw):
         #nTh, nTw -- num of tiles in H,W
         model_device = next(self.parameters()).device

@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <unordered_map>
 
+#include <iostream>
+
 // Note [behavior of cudnnFind and cudnnGet]
 // You'll notice that by default, in the ConvolutionDescriptor, we do the following:
 //
@@ -721,6 +723,7 @@ void raw_cudnn_convolution_backward_input_out(
     const at::Tensor& weight,
     IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups,
     bool benchmark, bool deterministic, bool allow_tf32) {
+    //std::cout<< "[aten/src/ATen/native/cudnn/Conv_v7.cpp] CudnnConvolutionBackward input\n";
   split_batch_dim_to_32bit_out(grad_input, grad_output, weight, padding, stride, dilation, groups, benchmark, deterministic, allow_tf32, 1024 * 1024 * 128, raw_cudnn_convolution_backward_input_out_32bit);
 }
 
@@ -782,6 +785,7 @@ void raw_cudnn_convolution_backward_weight_out(
   const int64_t no = grad_output.numel();
   // Assume the shape of the tensor is (N, C, D1, D2, ...)
   // if N * C * D1 * D2 * ... <= int_max, then no need to split at all
+  //std::cout<< "[aten/src/ATen/native/cudnn/Conv_v7.cpp] CudnnConvolutionBackward weight\n";
   if (ni <= int_max && no <= int_max) {
     raw_cudnn_convolution_backward_weight_out_32bit(grad_weight, grad_output, input, padding, stride, dilation, groups, benchmark, deterministic, allow_tf32);
     return;

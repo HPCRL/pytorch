@@ -37,8 +37,8 @@ class cMaxPool2dFunction(torch.autograd.Function):
         if uniq_id in myctx_dict.keys():
             #print("need to get existing")
             myctx = myctx_dict[uniq_id]
-            del myctx
-            myctx = MMctx()
+            # del myctx
+            # myctx = MMctx()
         else:
             myctx = MMctx()
 
@@ -73,7 +73,6 @@ class cMaxPool2dFunction(torch.autograd.Function):
         myctx_dict[uniq_id] = myctx
         del input
         
-        torch.cuda.empty_cache()
         return out_value
     
     @staticmethod
