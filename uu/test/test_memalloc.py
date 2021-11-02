@@ -228,7 +228,14 @@ def main():
         out = model(input, H, W, nTh, nTw )
         #time.sleep(5)
         print("######################################################")
+
+        import cProfile, pstats
+        profiler = cProfile.Profile()
+        profiler.enable()
         out.sum().backward()
+        profiler.disable()
+        stats = pstats.Stats(profiler).sort_stats('cumtime')
+        stats.print_stats()
         
    
 

@@ -54,8 +54,13 @@ class TiledConv2dFunction(torch.autograd.Function):
             if c_info.local_first: # if it is the first conv in a segment then padding
                 # print("== tiled conv2d forward / first padding", c_info.coord)
                 padding_info = c_info.padding_info
-                pd = torch.nn.ConstantPad2d(padding_info, 0)
-                input = pd(input)
+                # pd = torch.nn.ConstantPad2d(padding_info, 0)
+                # input = pd(input)
+
+                input_shape = input.size()
+                input = torch.cuda.FloatTensor(torch.Size([input_shape[0], input_shape[1], input_shape[2]+padding_info[2]+padding_info[3], input_shape[3]+padding_info[0]+padding_info[1]]))
+
+
             else:
                 input = input
         

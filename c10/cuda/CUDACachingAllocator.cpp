@@ -710,27 +710,27 @@ class DeviceCachingAllocator {
 
     //std::cout << "[CUDACachingAllocator.cpp] cudaFree block\n";
     auto it = blocks.begin();
-    while (it != blocks.end()) {
-      Block* block = *it;
-      if (!block->prev && !block->next) {
-        C10_CUDA_CHECK(cudaFree((void*)block->ptr));
-        //std::cout << "[CUDACachingAllocator.cpp] cudaFree block\n";
-        total_allocated_memory -= block->size;
+    // while (it != blocks.end()) {
+    //   Block* block = *it;
+    //   if (!block->prev && !block->next) {
+    //     C10_CUDA_CHECK(cudaFree((void*)block->ptr));
+    //     //std::cout << "[CUDACachingAllocator.cpp] cudaFree block\n";
+    //     total_allocated_memory -= block->size;
 
-        StatTypes stat_types;
-        stat_types[static_cast<size_t>(StatType::AGGREGATE)] = true;
-        stat_types[static_cast<size_t>(get_stat_type_for_pool(*(block->pool)))] = true;
-        update_stat_array(stats.segment, -1, stat_types);
-        update_stat_array(stats.reserved_bytes, -block->size, stat_types);
+    //     StatTypes stat_types;
+    //     stat_types[static_cast<size_t>(StatType::AGGREGATE)] = true;
+    //     stat_types[static_cast<size_t>(get_stat_type_for_pool(*(block->pool)))] = true;
+    //     update_stat_array(stats.segment, -1, stat_types);
+    //     update_stat_array(stats.reserved_bytes, -block->size, stat_types);
 
-        auto cur = it;
-        ++it;
-        blocks.erase(cur);
-        delete block;
-      } else {
-        ++it;
-      }
-    }
+    //     auto cur = it;
+    //     ++it;
+    //     blocks.erase(cur);
+    //     delete block;
+    //   } else {
+    //     ++it;
+    //   }
+    // }
   }
 
   cudaEvent_t create_event_internal() {

@@ -19,11 +19,15 @@ class TiledSplitFunction(torch.autograd.Function):
         ctx.big_infput_shape = x.size()
         
         input = padding_calc.get_input_tile(info[0], x, first_op_in_seg)
+        
+    
         is_m_cuda = True if "cuda" in str(model_device) else False
         if ctx.input_is_cuda != is_m_cuda:
             # print("#########", ctx.input_is_cuda)
             # print(model_device)
             if is_m_cuda == True: # model is on GPU 
+                #input = torch.cuda.FloatTensor(input.size())
+                # print("TiledSplitFunction", input.size())
                 input = input.to(model_device)    # explicitly load input tile to device 
             else:
                 device = torch.device("cpu")
@@ -36,36 +40,27 @@ class TiledSplitFunction(torch.autograd.Function):
     def backward(ctx, grad_output):
         # TODO: need to regather all tile-grad-in
         b_info = ctx.info[1][-11]
-        tile_coord = b_info.coord
         coord = b_info.input_slice
         big_grad_in = None
         #print("tsplit tile coor bkw", tile_coord)
         # print(ctx.num_tile)
         
+        if ctx.input_is_cuda:
+            # create a cuda-tensor
+            N = ctx.big_infput_shape[0]
+            C = ctx.big_infput_shape[1]
+            H = ctx.big_infput_shape[2]
+            W = ctx.big_infput_shape[3]
+            big_grad_in = torch.zeros(N, C, H, W).cuda()
+            big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output[:,:,0:H//ctx.num_tile[0], 0:W//ctx.num_tile[1]]
+# if it a very begining input, we do not necessarily to pass it back.
+        # else:
+        #     N = ctx.big_infput_shape[0]
+        #     C = ctx.big_infput_shape[1]
+        #     H = ctx.big_infput_shape[2]
+        #     W = ctx.big_infput_shape[3]
+        #     big_grad_in = torch.zeros(N, C, H, W) 
         
-        if True or tile_coord == ctx.num_tile:
-            # last one create the space
-            if ctx.input_is_cuda:
-                # create a cuda-tensor
-                N = ctx.big_infput_shape[0]
-                C = ctx.big_infput_shape[1]
-                H = ctx.big_infput_shape[2]
-                W = ctx.big_infput_shape[3]
-                big_grad_in = torch.zeros(N, C, H, W).cuda()
-            else:
-                N = ctx.big_infput_shape[0]
-                C = ctx.big_infput_shape[1]
-                H = ctx.big_infput_shape[2]
-                W = ctx.big_infput_shape[3]
-                big_grad_in = torch.zeros(N, C, H, W) 
-        
-        #print("TiledSplitFunction.big_grad_in", big_grad_in.size())
-        # print("TiledSplitFunction bwd", grad_output.size())
-        # print(coord[2], coord[3]+1, coord[0], coord[1]+1)
-       
-        big_grad_in[:,:, coord[2]:coord[3]+1, coord[0]:coord[1]+1] = grad_output[:,:,0:H//ctx.num_tile[0], 0:W//ctx.num_tile[1]]
-        # if tile_coord == [0, 0]:
-        #     print("TiledSplitFunction.big_grad_in", big_grad_in)
 
         return big_grad_in, None, None, None, None
        

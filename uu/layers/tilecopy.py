@@ -2,16 +2,16 @@ import torch
 
 
 class TiledCopyFunction(torch.autograd.Function):
-    # create a static variable
+    # create a static variable, caching it
     GRAD_OUT = None
+
     @staticmethod
     def forward(ctx, *inputs):
         #print("\n^^^^^TiledCopyFunction fwd")
         out_temp = inputs[0]
         out = inputs[1]
         coord = inputs[2]
-        tile_size = inputs[3]
-       
+        
         #ctx.input_num = len(inputs)
         # print ("**input[0]", input[0])
         # print ("coord", coord)
@@ -26,6 +26,8 @@ class TiledCopyFunction(torch.autograd.Function):
         #print("\n^^^^^TiledCopyFunction")
         if TiledCopyFunction.GRAD_OUT is None:
             TiledCopyFunction.GRAD_OUT = grad_output
+            #print("\n^^^^^TiledCopyFunction assign final grad_out", TiledCopyFunction.GRAD_OUT.is_cuda, grad_output.is_cuda)
+
 
         # based on num of input to generate return tuple
         res = list()
@@ -34,8 +36,6 @@ class TiledCopyFunction(torch.autograd.Function):
         res.append(None)
         res.append(None)
         res = tuple(res)
-
-
         # print(TiledCopyFunction.GRAD_OUT)
         return res
 
