@@ -144,8 +144,6 @@ def compute_info_beta(output_tile_coord: List, input_shape, output_shape, nTh, n
     return info
 
 
-
-
 def compute_fwd_info_beta(output_tile_coord, list_op__in_chckp_seg, shape_dict, b_info, nTh, nTw) -> Dict:
     # stream_structure is list of ops
     # compute fwd is from the last stage
@@ -311,19 +309,19 @@ def resize_grad_in(info, grad_input):
         left = 0 + info.padding_info[0]
         right = grad_input.size()[3]-info.padding_info[1]
 
-        #grad_input = grad_input[:, :, top:bottom, left:right]
+        grad_input = grad_input[:, :, top:bottom, left:right]
         # TODO: if not in the first ...
         grad_input_shape = grad_input.size()
-        grad_input = torch.cuda.FloatTensor(torch.Size([grad_input_shape[0], grad_input_shape[1], bottom-top+info.padding_info[2]+info.padding_info[3], right-left+info.padding_info[0]+info.padding_info[1]]))
+        #grad_input_new = torch.cuda.FloatTensor(torch.Size([grad_input_shape[0], grad_input_shape[1], bottom-top+info.padding_info[2]+info.padding_info[3], right-left+info.padding_info[0]+info.padding_info[1]]))
         
-        
+        #assert grad_input_new.size() == grad_input_shape
         #old padding
-        # pd = torch.nn.ConstantPad2d(info.padding_info, 0)
-        # grad_input = pd(grad_input)
-
-
-    #print("grad_input new", grad_input.size())
-    return grad_input
+        pd = torch.nn.ConstantPad2d(info.padding_info, 0)
+        grad_input = pd(grad_input)
+        #print("grad_input new", grad_input.size())
+        return grad_input
+    else:
+        return grad_input
 
 def resize_grad_in_1(info, grad_input):
     #print("padding info ::", info.padding_info)
@@ -339,7 +337,6 @@ def reshape_for_final(need_info, f_info, grad_input):
     # print("f_info ::", f_info, need_info)
     need_info_index = need_info.input_slice
     b_info_index = f_info.input_slice
-    
     
     crop = []
     # assumption: b_info >> need_info
@@ -499,37 +496,63 @@ def recreate_input_tile_f(info:Dict, input, next_id):
     with torch.no_grad():
         pi = info[0][next_id]
         padding_info = pi.padding_info
-        #shifting tile to extract
-        input_shape = input.size()
-        top = 0 + padding_info[2]
-        bottom = input_shape[2]-padding_info[3]
-        left = 0 + padding_info[0]
-        right = input_shape[3]-padding_info[1]
-        # print("\n===\n")
-        # print(input_shape)
-        # print(padding_info)
-        # print(slice_info)
-        # print("top, bottom, left, right " , top, bottom, left, right)
-        # print("\n===\n")
-        
-        input_tile = input[:, :, top:bottom, left:right]       #NCHW, included index
-        #print("== inputtile for next", input_tile)
-        #print(padding_info)
+        if padding_info != [0] * len(padding_info):
+            #shifting tile to extract
+            input_shape = input.size()
+            top = 0 + padding_info[2]
+            bottom = input_shape[2]-padding_info[3]
+            left = 0 + padding_info[0]
+            right = input_shape[3]-padding_info[1]
 
-        # padding is an issue to cause the  grad_input
-        # pd = torch.nn.ConstantPad2d(padding_info, 0)
-        # input_tile = pd(input_tile)
-        # return input_tile
+            # top_bound = 0
+            # bottom_bound = input_shape[2]
+            # left_bound = 0
+            # right_bound = input_shape[3]
+            # print("\n===\n")
+            # print(input_shape)
+            # print(padding_info)
+            # print(slice_info)
+            # print("top, bottom, left, right " , top, bottom, left, right)
+            # print("\n===\n")
+            
+            input_tile = input[:, :, top:bottom, left:right]       #NCHW, included index
+            #print("== inputtile for next", input_tile)
+            #print(padding_info)
 
-
-        input_tile_new = torch.cuda.FloatTensor(torch.Size([input_shape[0], input_shape[1], bottom-top+padding_info[2]+padding_info[3], right-left+padding_info[0]+padding_info[1]]))
-        
-        
-        # print(input_shape[0], input_shape[1], bottom-top+padding_info[2]+padding_info[3], right-left+padding_info[0]+padding_info[1])
-        # print(input_tile_new.size(), input_tile.size())
-        # assert input_tile_new.size() == input_tile.size()
-
-        return input_tile_new
+            pd = torch.nn.ConstantPad2d(padding_info, 0)
+            input_tile = pd(input_tile)
+            # return input_tile
 
 
+            
 
+            #input_tile = torch.cuda.FloatTensor(torch.Size([input_shape[0], input_shape[1], bottom-top+padding_info[2]+padding_info[3], right-left+padding_info[0]+padding_info[1]]))
+            #input_tile_new[:, :, top:bottom, left:right]  = input[:, :, top:bottom, left:right] 
+            
+            # print(input_shape[0], input_shape[1], bottom-top+padding_info[2]+padding_info[3], right-left+padding_info[0]+padding_info[1])
+            # print(input_tile_new.size(), input_tile.size())
+            #assert input_tile_new.size() == input.size()
+
+            return input_tile
+        else:
+            return input
+
+
+
+# def recreate_input_tile_f(info:Dict, input, next_id):
+#     pi = info[0][next_id]
+#     padding_info = pi.padding_info
+#     if padding_info != [0] * len(padding_info):
+#         input_shape = input.size()
+#         top_bound = 0
+#         bottom_bound = input_shape[2]
+#         left_bound = 0
+#         right_bound = input_shape[3]
+
+#         top = 0 + padding_info[2]
+#         bottom = input_shape[2]-padding_info[3]
+#         left = 0 + padding_info[0]
+#         right = input_shape[3]-padding_info[1] 
+
+#     else:
+#         return input

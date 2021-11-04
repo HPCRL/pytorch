@@ -38,8 +38,8 @@ H = 512
 W = 512
 oH = H//32
 oW = W//32
-nTh = 2
-nTw = 2
+nTh = 1
+nTw = 1
 
 class Net_ref(nn.Module):
     def __init__(self, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, fcw1, fcw2):
@@ -422,7 +422,7 @@ import time
 
 def main():
     torch.set_printoptions(profile="full")
-    torch.set_default_dtype(torch.float64)
+    torch.set_default_dtype(torch.float32)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
@@ -478,11 +478,11 @@ def main():
     # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     correctness_check.check_equal(out, out_ref, False)
 
-    print("#### compare grad_in")
-    # print("input ref grad", input_ref.grad)
-    # print("input grad", input.grad)
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
+    # print("#### compare grad_in")
+    # # print("input ref grad", input_ref.grad)
+    # # print("input grad", input.grad)
+    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
 
     print("#### compare w1")

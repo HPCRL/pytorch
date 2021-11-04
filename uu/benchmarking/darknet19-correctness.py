@@ -33,10 +33,10 @@ Pw = 1
 chanel = 3
 batch = 1
 
-H = 1024
-W = 1024
-nTh = 1
-nTw = 1
+H = 512
+W = 512
+nTh = 4
+nTw = 4
 oH = H // 32
 oW = W // 32
 
@@ -475,7 +475,7 @@ class Net(nn.Module):
 
 def main():
     torch.set_printoptions(profile="full")
-    torch.set_default_dtype(torch.float32)
+    torch.set_default_dtype(torch.float64)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Net().to(device)
 
@@ -515,27 +515,31 @@ def main():
     out_ref = model_ref(input_ref)
     print("done ref")
     print(out_ref.size())
-    loss = criterion(out_ref, labels)
-    loss.backward()
-
+    loss1 = criterion(out_ref, labels)
+    print("loss1", loss1)
+    loss1.backward()
     #out_ref.sum().backward()
+
+  
     print("done ref bkw")
 
 
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     out = model(input, H, W, nTh, nTw )
 
-   
+    
 
     
 
     #print(input_ref.grad)
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
     print("\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n")
-    loss = criterion(out, labels)
-    loss.backward()
+    loss2 = criterion(out, labels)
+    print("loss2", loss2)
+    loss2.backward()
 
-    # out.sum().backward()
+    #assert loss1 == loss2
+    #out.sum().backward()
 
     print("~~ check forward correctness ~~")
     # print("out shape", out)
@@ -543,11 +547,11 @@ def main():
     # # not_same_num = correctness_check.point_wise_compare_4d(1,1,oH, oW, out, out_ref)
     correctness_check.check_equal(out, out_ref, False)
 
-    print("#### compare grad_in")
-    print("input ref grad", input_ref.grad[0,0,0,0])
-    print("input grad", input.grad[0,0,0,0])
-    #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
-    correctness_check.check_equal(input.grad, input_ref.grad, False)
+    # print("#### compare grad_in")
+    # print("input ref grad", input_ref.grad[0,0,0,0])
+    # print("input grad", input.grad[0,0,0,0])
+    # #not_same_num = correctness_check.point_wise_compare_4d(1,1,H, W, input.grad, input_ref.grad.to('cpu'))
+    # correctness_check.check_equal(input.grad, input_ref.grad, False)
 
 
     print("#### compare w1")
