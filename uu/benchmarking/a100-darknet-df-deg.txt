@@ -1,228 +1,301 @@
 ========= 512 
 ==========df 
-N_seg 1
-
-&& 1.3013360500335693, 0.5575268268585205, 1.8625352382659912
-
 N_seg 2
 
-&& 1.2998642921447754, 0.5560939311981201, 1.8596656322479248
+&& 1.3050122261047363, 0.599635124206543, 1.9083266258239746
 
 N_seg 3
 
-&& 1.2994935512542725, 0.540602445602417, 1.8437707424163818
+&& 1.315051555633545, 0.5973753929138184, 1.9160974025726318
 
 N_seg 4
 
-&& 1.3006937503814697, 0.5684616565704346, 1.8728461265563965
+&& 1.2888662815093994, 0.48379063606262207, 1.776304006576538
 
 N_seg 5
 
-&& 1.3013343811035156, 0.5565547943115234, 1.8615360260009766
+&& 1.2892050743103027, 0.5734686851501465, 1.8664424419403076
 
 N_seg 6
 
-&& 1.2905831336975098, 0.5377559661865234, 1.832028865814209
+&& 1.3071208000183105, 0.5557234287261963, 1.8665485382080078
+
+N_seg 7
+
+&& 1.3004226684570312, 0.5461032390594482, 1.8502168655395508
+
+N_seg 8
+
+&& 1.3064231872558594, 0.5493221282958984, 1.8594682216644287
+
+N_seg 9
+
+&& 1.2892491817474365, 0.5538206100463867, 1.8467717170715332
+
+N_seg 10
+
+&& 1.2959740161895752, 0.5400559902191162, 1.8397164344787598
 
 ========= 1024 
-N_seg 1
-
-&& 1.3033289909362793, 0.6056842803955078, 1.9233505725860596
-
 N_seg 2
 
-&& 1.3112149238586426, 0.5672016143798828, 1.892866849899292
+&& 1.297760009765625, 0.5421311855316162, 1.854301929473877
 
 N_seg 3
 
-&& 1.3147332668304443, 0.5487596988677979, 1.8778266906738281
+&& 1.3044092655181885, 0.5635051727294922, 1.8822174072265625
 
 N_seg 4
 
-&& 1.3175106048583984, 0.5673186779022217, 1.8992891311645508
+&& 1.3203444480895996, 0.547776460647583, 1.8824617862701416
 
 N_seg 5
 
-&& 1.290757417678833, 0.5597493648529053, 1.8648056983947754
+&& 1.3181023597717285, 0.5445389747619629, 1.8769807815551758
 
 N_seg 6
 
-&& 1.3025078773498535, 0.5614948272705078, 1.878319263458252
+&& 1.3137073516845703, 0.5581672191619873, 1.8890721797943115
+
+N_seg 7
+
+&& 1.3061516284942627, 0.5365254878997803, 1.8569962978363037
+
+N_seg 8
+
+&& 1.306694746017456, 0.5515944957733154, 1.8726346492767334
+
+N_seg 9
+
+&& 1.3167293071746826, 0.5780766010284424, 1.9091382026672363
+
+N_seg 10
+
+&& 1.293485164642334, 0.5594155788421631, 1.8672010898590088
 
 ========= 2048 
-N_seg 1
-
-&& 1.3254201412200928, 0.5878615379333496, 1.9877889156341553
-
 N_seg 2
 
-&& 1.3374321460723877, 0.5343482494354248, 1.9464199542999268
+&& 1.3350074291229248, 0.5728905200958252, 1.9823851585388184
 
 N_seg 3
 
-&& 1.3210620880126953, 0.5945451259613037, 1.9900214672088623
+&& 1.3388986587524414, 0.5229334831237793, 1.9364368915557861
 
 N_seg 4
 
-&& 1.3227636814117432, 0.5846853256225586, 1.9821157455444336
+&& 1.3216636180877686, 0.5857028961181641, 1.981734275817871
 
 N_seg 5
 
-&& 1.3200345039367676, 0.6025969982147217, 2.0088014602661133
+&& 1.3173739910125732, 0.5820894241333008, 1.9738948345184326
 
 N_seg 6
 
-&& 1.3366308212280273, 0.5915818214416504, 2.0028066635131836
+&& 1.3194539546966553, 0.59621262550354, 1.9903757572174072
+
+N_seg 7
+
+&& 1.327397346496582, 0.5788528919219971, 1.9806797504425049
+
+N_seg 8
+
+&& 1.333984613418579, 0.5943105220794678, 2.0029640197753906
+
+N_seg 9
+
+&& 1.3263952732086182, 0.6120724678039551, 2.013031244277954
+
+N_seg 10
+
+&& 1.324643611907959, 0.5994429588317871, 1.9985547065734863
 
 ========= 3072 
-N_seg 1
-
-&& 1.364466905593872, 0.630255937576294, 2.162224531173706
-
 N_seg 2
 
-&& 1.3791861534118652, 0.6612777709960938, 2.208000898361206
+&& 1.3630151748657227, 0.6411228179931641, 2.1715810298919678
 
 N_seg 3
 
-&& 1.3696632385253906, 0.6529808044433594, 2.190685272216797
+&& 1.3548004627227783, 0.581768274307251, 2.103754997253418
 
 N_seg 4
 
-&& 1.3793926239013672, 0.6662030220031738, 2.213352680206299
+&& 1.3656361103057861, 0.6369493007659912, 2.1703882217407227
 
 N_seg 5
 
-&& 1.3545668125152588, 0.6578168869018555, 2.1795287132263184
+&& 1.3644838333129883, 0.6509130001068115, 2.182699680328369
 
 N_seg 6
 
-&& 1.361220121383667, 0.6642110347747803, 2.1929965019226074
+&& 1.3551435470581055, 0.633307695388794, 2.1555166244506836
+
+N_seg 7
+
+&& 1.3683257102966309, 0.6542472839355469, 2.1905980110168457
+
+N_seg 8
+
+&& 1.3582637310028076, 0.646625280380249, 2.172396421432495
+
+N_seg 9
+
+&& 1.3729619979858398, 0.651301383972168, 2.191739320755005
+
+N_seg 10
+
+&& 1.3576021194458008, 0.6367425918579102, 2.1652348041534424
 
 ========= 4096 
-N_seg 1
-
-&& 1.420111894607544, 0.6845157146453857, 2.402432441711426
-
 N_seg 2
 
-&& 1.4294064044952393, 0.7348623275756836, 2.4614644050598145
+&& 1.432574987411499, 0.7306344509124756, 2.46222186088562
 
 N_seg 3
 
-&& 1.415376901626587, 0.735482931137085, 2.449258804321289
+&& 1.418776273727417, 0.735001802444458, 2.451606035232544
 
 N_seg 4
 
-&& 1.4249389171600342, 0.7322146892547607, 2.4555881023406982
+&& 1.43015456199646, 0.7067103385925293, 2.4346630573272705
 
 N_seg 5
 
-&& 1.4270992279052734, 0.7301220893859863, 2.454404592514038
+&& 1.436981439590454, 0.7214179039001465, 2.456727981567383
 
 N_seg 6
 
-&& 1.427009105682373, 0.7237682342529297, 2.4483351707458496
+&& 1.4223220348358154, 0.7283468246459961, 2.4496989250183105
+
+N_seg 7
+
+&& 1.423351764678955, 0.7419083118438721, 2.462888717651367
+
+N_seg 8
+
+&& 1.4174578189849854, 0.7328622341156006, 2.4473133087158203
+
+N_seg 9
+
+&& 1.4251160621643066, 0.7331357002258301, 2.4557247161865234
+
+N_seg 10
+
+&& 1.4349746704101562, 0.7426252365112305, 2.476105213165283
 
 ========= 5120 
-N_seg 1
-
-&& 1.4797446727752686, 0.7519280910491943, 2.6956019401550293
-
 N_seg 2
 
-&& 1.484767198562622, 0.7481131553649902, 2.7023346424102783
+&& 1.4899442195892334, 0.8142225742340088, 2.7701709270477295
 
 N_seg 3
 
-&& 1.4975523948669434, 0.7571594715118408, 2.7204198837280273
+&& 1.4755818843841553, 0.7674009799957275, 2.707426071166992
 
 N_seg 4
 
-&& 1.5047516822814941, 0.7045118808746338, 2.6794703006744385
+&& 1.5012414455413818, 0.7737505435943604, 2.7400641441345215
 
 N_seg 5
 
-&& 1.499150276184082, 0.783935546875, 2.749300241470337
+&& 1.5322849750518799, 0.7498676776885986, 2.747210741043091
 
 N_seg 6
 
-&& 1.497884750366211, 0.7749083042144775, 2.7373032569885254
+&& 1.5076220035552979, 0.7672383785247803, 2.7436792850494385
+
+N_seg 7
+
+&& 1.489736557006836, 0.7902746200561523, 2.7448201179504395
+
+N_seg 8
+
+&& 1.4890820980072021, 0.7583203315734863, 2.713426113128662
+
+N_seg 9
+
+&& 1.4865810871124268, 0.7783434391021729, 2.729764699935913
+
+N_seg 10
+
+&& 1.4850974082946777, 0.7591774463653564, 2.710362672805786
 
 ========= 6144 
-N_seg 1
-
-&& 1.5698351860046387, 4.344494342803955, 6.583873987197876
-
 N_seg 2
 
-&& 1.5757472515106201, 4.019362926483154, 6.26359748840332
+&& 1.5679728984832764, 4.0314857959747314, 6.273042678833008
 
 N_seg 3
 
-&& 1.5496652126312256, 4.0692298412323, 6.2865190505981445
+&& 1.5640485286712646, 4.031228542327881, 6.2684924602508545
 
 N_seg 4
 
-&& 1.5718677043914795, 4.041551351547241, 6.286172389984131
+&& 1.5681407451629639, 4.0261311531066895, 6.267746925354004
 
 N_seg 5
 
-&& 1.5703985691070557, 4.039412498474121, 6.28502345085144
+&& 1.5592780113220215, 4.034472227096558, 6.263834476470947
 
 N_seg 6
 
-&& 1.5493190288543701, 4.037784576416016, 6.259131669998169
+&& 1.5636789798736572, 4.049309730529785, 6.283405780792236
+
+N_seg 7
+
+&& 1.570042371749878, 4.024506330490112, 6.267657995223999
+
+N_seg 8
+
+&& 1.5542995929718018, 4.082770347595215, 6.305445671081543
+
+N_seg 9
+
+&& 1.584547519683838, 4.057337045669556, 6.31418251991272
+
+N_seg 10
+
+&& 1.5776307582855225, 4.018179893493652, 6.268278360366821
 
 ========= 7168 
-N_seg 1
-
-&& 1.6785480976104736, 5.9990575313568115, 8.593990802764893
-
 N_seg 2
 
-&& 1.6866099834442139, 5.674141883850098, 8.27613878250122
+&& 1.6468884944915771, 5.663896560668945, 8.224291563034058
 
 N_seg 3
 
-&& 1.6544017791748047, 5.706431865692139, 8.276671409606934
+&& 1.6489684581756592, 5.7035088539123535, 8.261077642440796
 
 N_seg 4
 
-&& 1.6703367233276367, 5.684142827987671, 8.271851062774658
+&& 1.6544013023376465, 5.683961868286133, 8.25517225265503
 
 N_seg 5
 
-&& 1.649355173110962, 5.72139573097229, 8.284489393234253
+&& 1.6747844219207764, 5.784735679626465, 8.375673770904541
 
 N_seg 6
 
-&& 1.6750860214233398, 5.2874932289123535, 7.877960681915283
+&& 1.6423523426055908, 5.283374071121216, 7.841188430786133
+
+N_seg 7
+
+&& 1.6496148109436035, 5.270488500595093, 7.835217475891113
+
+N_seg 8
+
+&& 1.6824891567230225, 5.278365612030029, 7.876235008239746
+
+N_seg 9
+
+&& 1.6320338249206543, 5.270468235015869, 7.816407680511475
+
+N_seg 10
+
+&& 1.6421024799346924, 5.287926912307739, 7.846625566482544
 
 ========= 8192 
-N_seg 1
-Traceback (most recent call last):
-  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
-    main()
-  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 191, in main
-    out_ref = model_ref(input_ref)
-  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 162, in forward
-    out = checkpoint_sequential(self.block, N_seg, x)
-  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
-    return run_function(end + 1, len(functions) - 1, functions)(input)
-  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
-    input = functions[j](input)
-  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/yufan/labpytorch/torch/nn/modules/pooling.py", line 162, in forward
-    return F.max_pool2d(input, self.kernel_size, self.stride,
-  File "/home/yufan/labpytorch/torch/_jit_internal.py", line 365, in fn
-    return if_false(*args, **kwargs)
-  File "/home/yufan/labpytorch/torch/nn/functional.py", line 659, in _max_pool2d
-    return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
-RuntimeError: CUDA out of memory. Tried to allocate 256.00 MiB (GPU 0; 39.59 GiB total capacity; 37.58 GiB already allocated; 198.19 MiB free; 37.60 GiB reserved in total by PyTorch)
 N_seg 2
 Traceback (most recent call last):
   File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
@@ -305,7 +378,7 @@ Traceback (most recent call last):
 RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 32.66 GiB already allocated; 2.18 GiB free; 35.35 GiB reserved in total by PyTorch)
 N_seg 6
 
-&& 2.449026584625244, 1.4378807544708252, 5.065997838973999
+&& 2.505311965942383, 1.4655611515045166, 5.161299228668213
 
 N_seg 7
 Traceback (most recent call last):
@@ -324,28 +397,58 @@ Traceback (most recent call last):
   File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
     Variable._execution_engine.run_backward(
 RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 29.66 GiB already allocated; 3.94 GiB free; 33.60 GiB reserved in total by PyTorch)
-========= 9216 
-N_seg 1
+N_seg 8
 Traceback (most recent call last):
   File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
     main()
-  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 191, in main
-    out_ref = model_ref(input_ref)
-  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 162, in forward
-    out = checkpoint_sequential(self.block, N_seg, x)
-  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
-    return run_function(end + 1, len(functions) - 1, functions)(input)
-  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
-    input = functions[j](input)
-  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
-    return self._conv_forward(input, self.weight, self.bias)
-  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
-    return F.conv2d(input, weight, bias, self.stride,
-RuntimeError: CUDA out of memory. Tried to allocate 2.53 GiB (GPU 0; 39.59 GiB total capacity; 36.15 GiB already allocated; 372.19 MiB free; 37.43 GiB reserved in total by PyTorch)
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 29.66 GiB already allocated; 3.94 GiB free; 33.60 GiB reserved in total by PyTorch)
+N_seg 9
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 29.66 GiB already allocated; 3.94 GiB free; 33.60 GiB reserved in total by PyTorch)
+N_seg 10
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 23.66 GiB already allocated; 6.18 GiB free; 31.35 GiB reserved in total by PyTorch)
+========= 9216 
 N_seg 2
 Traceback (most recent call last):
   File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
@@ -461,7 +564,7 @@ Traceback (most recent call last):
   File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
     return F.conv2d(input, weight, bias, self.stride,
 RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 28.63 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
-N_seg 7
+N_seg 8
 Traceback (most recent call last):
   File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
     main()
@@ -484,3 +587,43 @@ Traceback (most recent call last):
   File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
     return F.conv2d(input, weight, bias, self.stride,
 RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 32.43 GiB already allocated; 2.63 GiB free; 34.90 GiB reserved in total by PyTorch)
+N_seg 9
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 32.43 GiB already allocated; 2.63 GiB free; 34.90 GiB reserved in total by PyTorch)
+N_seg 10
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 10.12 GiB (GPU 0; 39.59 GiB total capacity; 29.90 GiB already allocated; 426.19 MiB free; 37.12 GiB reserved in total by PyTorch)
