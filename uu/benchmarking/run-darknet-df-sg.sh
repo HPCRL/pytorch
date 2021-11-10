@@ -81,3 +81,14 @@ python darknet19-ref-sq-cp.py 8192 3
 python darknet19-ref-sq-cp.py 8192 4 
 python darknet19-ref-sq-cp.py 8192 5 
 python darknet19-ref-sq-cp.py 8192 6
+python darknet19-ref-sq-cp.py 8192 7
+
+
+echo "========= 9216 "
+python darknet19-ref-sq-cp.py 9216 1 
+python darknet19-ref-sq-cp.py 9216 2 
+python darknet19-ref-sq-cp.py 9216 3 
+python darknet19-ref-sq-cp.py 9216 4 
+python darknet19-ref-sq-cp.py 9216 5 
+python darknet19-ref-sq-cp.py 9216 6
+python darknet19-ref-sq-cp.py 9216 7

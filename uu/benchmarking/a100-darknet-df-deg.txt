@@ -1,0 +1,486 @@
+========= 512 
+==========df 
+N_seg 1
+
+&& 1.3013360500335693, 0.5575268268585205, 1.8625352382659912
+
+N_seg 2
+
+&& 1.2998642921447754, 0.5560939311981201, 1.8596656322479248
+
+N_seg 3
+
+&& 1.2994935512542725, 0.540602445602417, 1.8437707424163818
+
+N_seg 4
+
+&& 1.3006937503814697, 0.5684616565704346, 1.8728461265563965
+
+N_seg 5
+
+&& 1.3013343811035156, 0.5565547943115234, 1.8615360260009766
+
+N_seg 6
+
+&& 1.2905831336975098, 0.5377559661865234, 1.832028865814209
+
+========= 1024 
+N_seg 1
+
+&& 1.3033289909362793, 0.6056842803955078, 1.9233505725860596
+
+N_seg 2
+
+&& 1.3112149238586426, 0.5672016143798828, 1.892866849899292
+
+N_seg 3
+
+&& 1.3147332668304443, 0.5487596988677979, 1.8778266906738281
+
+N_seg 4
+
+&& 1.3175106048583984, 0.5673186779022217, 1.8992891311645508
+
+N_seg 5
+
+&& 1.290757417678833, 0.5597493648529053, 1.8648056983947754
+
+N_seg 6
+
+&& 1.3025078773498535, 0.5614948272705078, 1.878319263458252
+
+========= 2048 
+N_seg 1
+
+&& 1.3254201412200928, 0.5878615379333496, 1.9877889156341553
+
+N_seg 2
+
+&& 1.3374321460723877, 0.5343482494354248, 1.9464199542999268
+
+N_seg 3
+
+&& 1.3210620880126953, 0.5945451259613037, 1.9900214672088623
+
+N_seg 4
+
+&& 1.3227636814117432, 0.5846853256225586, 1.9821157455444336
+
+N_seg 5
+
+&& 1.3200345039367676, 0.6025969982147217, 2.0088014602661133
+
+N_seg 6
+
+&& 1.3366308212280273, 0.5915818214416504, 2.0028066635131836
+
+========= 3072 
+N_seg 1
+
+&& 1.364466905593872, 0.630255937576294, 2.162224531173706
+
+N_seg 2
+
+&& 1.3791861534118652, 0.6612777709960938, 2.208000898361206
+
+N_seg 3
+
+&& 1.3696632385253906, 0.6529808044433594, 2.190685272216797
+
+N_seg 4
+
+&& 1.3793926239013672, 0.6662030220031738, 2.213352680206299
+
+N_seg 5
+
+&& 1.3545668125152588, 0.6578168869018555, 2.1795287132263184
+
+N_seg 6
+
+&& 1.361220121383667, 0.6642110347747803, 2.1929965019226074
+
+========= 4096 
+N_seg 1
+
+&& 1.420111894607544, 0.6845157146453857, 2.402432441711426
+
+N_seg 2
+
+&& 1.4294064044952393, 0.7348623275756836, 2.4614644050598145
+
+N_seg 3
+
+&& 1.415376901626587, 0.735482931137085, 2.449258804321289
+
+N_seg 4
+
+&& 1.4249389171600342, 0.7322146892547607, 2.4555881023406982
+
+N_seg 5
+
+&& 1.4270992279052734, 0.7301220893859863, 2.454404592514038
+
+N_seg 6
+
+&& 1.427009105682373, 0.7237682342529297, 2.4483351707458496
+
+========= 5120 
+N_seg 1
+
+&& 1.4797446727752686, 0.7519280910491943, 2.6956019401550293
+
+N_seg 2
+
+&& 1.484767198562622, 0.7481131553649902, 2.7023346424102783
+
+N_seg 3
+
+&& 1.4975523948669434, 0.7571594715118408, 2.7204198837280273
+
+N_seg 4
+
+&& 1.5047516822814941, 0.7045118808746338, 2.6794703006744385
+
+N_seg 5
+
+&& 1.499150276184082, 0.783935546875, 2.749300241470337
+
+N_seg 6
+
+&& 1.497884750366211, 0.7749083042144775, 2.7373032569885254
+
+========= 6144 
+N_seg 1
+
+&& 1.5698351860046387, 4.344494342803955, 6.583873987197876
+
+N_seg 2
+
+&& 1.5757472515106201, 4.019362926483154, 6.26359748840332
+
+N_seg 3
+
+&& 1.5496652126312256, 4.0692298412323, 6.2865190505981445
+
+N_seg 4
+
+&& 1.5718677043914795, 4.041551351547241, 6.286172389984131
+
+N_seg 5
+
+&& 1.5703985691070557, 4.039412498474121, 6.28502345085144
+
+N_seg 6
+
+&& 1.5493190288543701, 4.037784576416016, 6.259131669998169
+
+========= 7168 
+N_seg 1
+
+&& 1.6785480976104736, 5.9990575313568115, 8.593990802764893
+
+N_seg 2
+
+&& 1.6866099834442139, 5.674141883850098, 8.27613878250122
+
+N_seg 3
+
+&& 1.6544017791748047, 5.706431865692139, 8.276671409606934
+
+N_seg 4
+
+&& 1.6703367233276367, 5.684142827987671, 8.271851062774658
+
+N_seg 5
+
+&& 1.649355173110962, 5.72139573097229, 8.284489393234253
+
+N_seg 6
+
+&& 1.6750860214233398, 5.2874932289123535, 7.877960681915283
+
+========= 8192 
+N_seg 1
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 191, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 162, in forward
+    out = checkpoint_sequential(self.block, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/pooling.py", line 162, in forward
+    return F.max_pool2d(input, self.kernel_size, self.stride,
+  File "/home/yufan/labpytorch/torch/_jit_internal.py", line 365, in fn
+    return if_false(*args, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 659, in _max_pool2d
+    return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+RuntimeError: CUDA out of memory. Tried to allocate 256.00 MiB (GPU 0; 39.59 GiB total capacity; 37.58 GiB already allocated; 198.19 MiB free; 37.60 GiB reserved in total by PyTorch)
+N_seg 2
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 1024.00 MiB (GPU 0; 39.59 GiB total capacity; 35.65 GiB already allocated; 186.19 MiB free; 37.35 GiB reserved in total by PyTorch)
+N_seg 3
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 1024.00 MiB (GPU 0; 39.59 GiB total capacity; 36.15 GiB already allocated; 186.19 MiB free; 37.35 GiB reserved in total by PyTorch)
+N_seg 4
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 30.66 GiB already allocated; 3.19 GiB free; 34.35 GiB reserved in total by PyTorch)
+N_seg 5
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 32.66 GiB already allocated; 2.18 GiB free; 35.35 GiB reserved in total by PyTorch)
+N_seg 6
+
+&& 2.449026584625244, 1.4378807544708252, 5.065997838973999
+
+N_seg 7
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 29.66 GiB already allocated; 3.94 GiB free; 33.60 GiB reserved in total by PyTorch)
+========= 9216 
+N_seg 1
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 191, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 162, in forward
+    out = checkpoint_sequential(self.block, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 2.53 GiB (GPU 0; 39.59 GiB total capacity; 36.15 GiB already allocated; 372.19 MiB free; 37.43 GiB reserved in total by PyTorch)
+N_seg 2
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 27.99 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
+N_seg 3
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 28.63 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
+N_seg 4
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 28.63 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
+N_seg 5
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 29.90 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
+N_seg 6
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 28.63 GiB already allocated; 4.22 GiB free; 33.32 GiB reserved in total by PyTorch)
+N_seg 7
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 233, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/darknet19-ref-sq-cp.py", line 204, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 5.06 GiB (GPU 0; 39.59 GiB total capacity; 32.43 GiB already allocated; 2.63 GiB free; 34.90 GiB reserved in total by PyTorch)
