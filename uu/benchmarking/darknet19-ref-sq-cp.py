@@ -159,7 +159,7 @@ class Net_ref(nn.Module):
 
     def forward(self, x):
         # total 22 stages
-        out = checkpoint_sequential(self.block, 5, x)
+        out = checkpoint_sequential(self.block, N_seg, x)
         return out
 
 def main():
@@ -227,5 +227,7 @@ if __name__=="__main__":
     oH = H//32
     oW = W//32
 
+    N_seg = int(sys.argv[2])
+    print("N_seg", N_seg)
 
     main()
