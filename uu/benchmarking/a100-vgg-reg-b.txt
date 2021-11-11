@@ -1,0 +1,436 @@
+========= 512 
+==========df 
+
+&& 2.6467723846435547
+
+N_seg 2
+
+&&  2.6227762699127197
+
+N_seg 3
+
+&&  2.6427130699157715
+
+N_seg 4
+
+&&  2.5535693168640137
+
+N_seg 5
+
+&&  2.6556763648986816
+
+N_seg 6
+
+&&  2.607556104660034
+
+N_seg 7
+
+&&  2.6432127952575684
+
+N_seg 8
+
+&&  2.6448888778686523
+
+N_seg 9
+
+&&  2.6287825107574463
+
+N_seg 10
+
+&&  2.6288771629333496
+
+========= 1024 
+
+&& 3.019300937652588
+
+N_seg 2
+
+&&  3.019282817840576
+
+N_seg 3
+
+&&  3.0614395141601562
+
+N_seg 4
+
+&&  3.03381085395813
+
+N_seg 5
+
+&&  3.045964241027832
+
+N_seg 6
+
+&&  3.055328845977783
+
+N_seg 7
+
+&&  3.0435433387756348
+
+N_seg 8
+
+&&  3.02925705909729
+
+N_seg 9
+
+&&  3.017812967300415
+
+N_seg 10
+
+&&  3.0641937255859375
+
+========= 2048 
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 174, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 132, in forward
+    out = self.block1(x)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/container.py", line 119, in forward
+    input = module(input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/pooling.py", line 162, in forward
+    return F.max_pool2d(input, self.kernel_size, self.stride,
+  File "/home/yufan/labpytorch/torch/_jit_internal.py", line 365, in fn
+    return if_false(*args, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 659, in _max_pool2d
+    return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 34.43 GiB already allocated; 3.67 GiB free; 34.44 GiB reserved in total by PyTorch)
+N_seg 2
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 34.98 GiB already allocated; 70.19 MiB free; 37.46 GiB reserved in total by PyTorch)
+N_seg 3
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 31.49 GiB already allocated; 2.07 GiB free; 35.46 GiB reserved in total by PyTorch)
+N_seg 4
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 39.59 GiB total capacity; 34.49 GiB already allocated; 1.05 GiB free; 36.48 GiB reserved in total by PyTorch)
+N_seg 5
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 32.49 GiB already allocated; 1.06 GiB free; 36.48 GiB reserved in total by PyTorch)
+N_seg 6
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 98, in backward
+    outputs = ctx.run_function(*detached_inputs)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 24.49 GiB already allocated; 5.07 GiB free; 32.47 GiB reserved in total by PyTorch)
+N_seg 7
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 32.49 GiB already allocated; 4.07 GiB free; 33.46 GiB reserved in total by PyTorch)
+N_seg 8
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 24.49 GiB already allocated; 4.07 GiB free; 33.46 GiB reserved in total by PyTorch)
+N_seg 9
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 24.49 GiB already allocated; 4.07 GiB free; 33.46 GiB reserved in total by PyTorch)
+N_seg 10
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 181, in main
+    loss.backward()
+  File "/home/yufan/labpytorch/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+  File "/home/yufan/labpytorch/torch/autograd/function.py", line 89, in apply
+    return self._forward_cls.backward(self, *args)  # type: ignore
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 114, in backward
+    torch.autograd.backward(outputs_with_grad, args_with_grad)
+  File "/home/yufan/labpytorch/torch/autograd/__init__.py", line 146, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: CUDA out of memory. Tried to allocate 8.00 GiB (GPU 0; 39.59 GiB total capacity; 24.49 GiB already allocated; 4.07 GiB free; 33.46 GiB reserved in total by PyTorch)
+========= 3072 
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 174, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-no-cp.py", line 132, in forward
+    out = self.block1(x)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/container.py", line 119, in forward
+    input = module(input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 18.00 GiB (GPU 0; 39.59 GiB total capacity; 36.90 GiB already allocated; 1.20 GiB free; 36.90 GiB reserved in total by PyTorch)
+N_seg 2
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/linear.py", line 94, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 1754, in linear
+    return torch._C._nn.linear(input, weight, bias)
+RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling `cublasCreate(handle)`
+N_seg 3
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/linear.py", line 94, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 1754, in linear
+    return torch._C._nn.linear(input, weight, bias)
+RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling `cublasCreate(handle)`
+N_seg 4
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/linear.py", line 94, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 1754, in linear
+    return torch._C._nn.linear(input, weight, bias)
+RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling `cublasCreate(handle)`
+N_seg 5
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 245, in checkpoint_sequential
+    return run_function(end + 1, len(functions) - 1, functions)(input)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/linear.py", line 94, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/functional.py", line 1754, in linear
+    return torch._C._nn.linear(input, weight, bias)
+RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling `cublasCreate(handle)`
+N_seg 6
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 243, in checkpoint_sequential
+    input = checkpoint(run_function(start, end, functions), input,
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 179, in checkpoint
+    return CheckpointFunction.apply(function, preserve, *args)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 75, in forward
+    outputs = run_function(*args)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 9.00 GiB (GPU 0; 39.59 GiB total capacity; 27.90 GiB already allocated; 1.20 GiB free; 36.90 GiB reserved in total by PyTorch)
+N_seg 7
+Traceback (most recent call last):
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 223, in <module>
+    main()
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 168, in main
+    out_ref = model_ref(input_ref)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/uu/benchmarking/vgg16-ref-sq-cp.py", line 132, in forward
+    out = checkpoint_sequential(self.block1, N_seg, x)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 243, in checkpoint_sequential
+    input = checkpoint(run_function(start, end, functions), input,
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 179, in checkpoint
+    return CheckpointFunction.apply(function, preserve, *args)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 75, in forward
+    outputs = run_function(*args)
+  File "/home/yufan/labpytorch/torch/utils/checkpoint.py", line 230, in forward
+    input = functions[j](input)
+  File "/home/yufan/labpytorch/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/yufan/labpytorch/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA out of memory. Tried to allocate 9.00 GiB (GPU 0; 39.59 GiB total capacity; 27.90 GiB already allocated; 1.20 GiB free; 36.90 GiB reserved in total by PyTorch)

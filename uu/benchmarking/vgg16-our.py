@@ -226,7 +226,7 @@ def main():
     torch.cuda.synchronize()    
     ref_elapsed_total = time.time() - start_time
     #print("done ref bkw")
-    print("\n&& {}\n".format(ref_elapsed_fwd, ref_elapsed_bwk, ref_elapsed_total) )
+    print("\n&& {}\n".format(ref_elapsed_total) )
     
 
 

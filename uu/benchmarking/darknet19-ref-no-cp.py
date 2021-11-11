@@ -211,7 +211,7 @@ if __name__=="__main__":
     Ph = 1
     Pw = 1
     chanel = 3
-    batch = 1
+    batch = 8
 
     H = int(sys.argv[1])
     W = H
