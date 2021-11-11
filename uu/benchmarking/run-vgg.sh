@@ -63,3 +63,23 @@ python vgg16-our.py 5120 8 $NTIME
 python vgg16-our.py 5120 16 $NTIME
 
 
+echo "========= 6144 "
+
+echo "==========ours "
+python vgg16-our.py 6144 1 $NTIME
+python vgg16-our.py 6144 2 $NTIME
+python vgg16-our.py 6144 4 $NTIME
+python vgg16-our.py 6144 8 $NTIME
+python vgg16-our.py 6144 16 $NTIME
+
+
+echo "========= 7168 "
+
+echo "==========ours "
+python vgg16-our.py 7168 1 $NTIME
+python vgg16-our.py 7168 2 $NTIME
+python vgg16-our.py 7168 4 $NTIME
+python vgg16-our.py 7168 8 $NTIME
+python vgg16-our.py 7168 16 $NTIME
+
+
