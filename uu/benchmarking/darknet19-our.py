@@ -211,20 +211,20 @@ def main():
 
         local_start = time.time() 
         out = model(input, H, W, nTh, nTw )
-        torch.cuda.synchronize()
-        ref_fwd_done = time.time()
-        ref_elapsed_fwd += (ref_fwd_done - local_start)
+        # torch.cuda.synchronize()
+        # ref_fwd_done = time.time()
+        # ref_elapsed_fwd += (ref_fwd_done - local_start)
 
 
         loss = criterion(out, labels)
         loss.backward()
-        torch.cuda.synchronize()
-        ref_elapsed_bwk += (time.time()-ref_fwd_done)
+        # torch.cuda.synchronize()
+        # ref_elapsed_bwk += (time.time()-ref_fwd_done)
     
     torch.cuda.synchronize()    
     ref_elapsed_total = time.time() - start_time
     #print("done ref bkw")
-    print("\n&& {}, {}, {}\n".format(ref_elapsed_fwd, ref_elapsed_bwk, ref_elapsed_total) )
+    print("\n&&  {}\n".format(ref_elapsed_total) )
     
 
   

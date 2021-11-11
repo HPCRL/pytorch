@@ -129,7 +129,7 @@ class Net_ref(nn.Module):
     def forward(self, x):
         #out = checkpoint_sequential(self.block1, 4,x)
         # total 22 stages
-        out = checkpoint_sequential(self.block1, 5, x)
+        out = checkpoint_sequential(self.block1, N_seg, x)
         return out
 
 
@@ -166,9 +166,9 @@ def main():
         input_ref = input_ref.cuda()
         input_ref.requires_grad = True
         out_ref = model_ref(input_ref)
-        torch.cuda.synchronize()
-        ref_fwd_done = time.time()
-        ref_elapsed_fwd += (ref_fwd_done - local_start)
+        # torch.cuda.synchronize()
+        # ref_fwd_done = time.time()
+        # ref_elapsed_fwd += (ref_fwd_done - local_start)
 
 
     # print("==== ref_fwd done ...")
@@ -179,14 +179,14 @@ def main():
 
         loss = criterion(out_ref, labels)
         loss.backward()
-        torch.cuda.synchronize()
-        ref_elapsed_bwk += (time.time()-ref_fwd_done)
+        # torch.cuda.synchronize()
+        # ref_elapsed_bwk += (time.time()-ref_fwd_done)
         
     
     torch.cuda.synchronize()    
     ref_elapsed_total = time.time() - start_time
     #print("done ref bkw")
-    print("\n&& {}, {}, {}\n".format(ref_elapsed_fwd, ref_elapsed_bwk, ref_elapsed_total) )
+    print("\n&&  {}\n".format( ref_elapsed_total) )
     
 
     # print("==== ref_bwd done ...")
@@ -215,6 +215,9 @@ if __name__=="__main__":
     W = H
     oH = H//32
     oW = W//32
+
+    N_seg = int(sys.argv[2])
+    print("N_seg", N_seg)
 
 
     main()
