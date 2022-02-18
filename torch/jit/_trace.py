@@ -955,6 +955,7 @@ def trace_module(
 
             example_inputs = make_tuple(example_inputs)
 
+
             module._c._create_method_from_trace(
                 method_name,
                 func,

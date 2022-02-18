@@ -1,7 +1,9 @@
+# from cv2 import trace
 import torch
 import os
 import re
 from typing import List
+
 
 THEMES = {
     "basic": {
@@ -258,15 +260,21 @@ def get_shape(torch_node) -> List[int]:
 
 def build_graph(model=None, args=None, debug: bool=False):
     # Initialize an empty graph
-    g = Graph()
+    g = Graph()    
     trace_graph, out = torch.jit._get_trace_graph(model, args)
-    trace_graph = torch.onnx._optimize_trace(trace_graph, torch.onnx.OperatorExportTypes.RAW)
+    trace_graph = torch.onnx._optimize_trace(trace_graph, torch.onnx.OperatorExportTypes.ONNX_FALLTHROUGH)
+    # torch.onnx.export(model, args, "tt.onnx", verbose=True)
+    # onnx_model = onnx.load("tt.onnx")
+    # onnx.checker.check_model(onnx_model)
+    # print("onnx_model", onnx_model)
+
 
     fake_root_node = MetaNode(uid="Root51118102", name="Root", op=None, 
                        output_shape=args.size(), input_shape_list=[], output_shape_list=[], params=None)
     g.add_node(fake_root_node)
 
     if debug:
+        print("id graph: ")
         dump_id_graph(trace_graph)
 
     for torch_node in trace_graph.nodes():
@@ -283,10 +291,17 @@ def build_graph(model=None, args=None, debug: bool=False):
         output_shape = get_output_shape(torch_node)
         input_shape = get_input_shape(torch_node)
 
-        if str(op).strip() == "prim::Constant":
-            print ("SKIP")    
+        if str(op).strip() == "prim::Constant" :
+            print ("SKIP")   
+        # if str(op).strip() == "prim::GetAttr" :
+        #     print ("Attrib")   
+        #     print("-- inputs shape", input_shape)
+        #     print("-- outputs shape", output_shape)
+        #     print("-- inputs ", inputs)
+        #     print("-- outputs ", outputs) 
         else:
             print("-- op ", op)
+            print("-- id ", pytorch_id(torch_node))
             print("-- params ", params)
             print("-- inputs shape", input_shape)
             print("-- outputs shape", output_shape)
@@ -303,8 +318,10 @@ def build_graph(model=None, args=None, debug: bool=False):
                 target_inputs = [i.unique() for i in target_torch_node.inputs()]
                 if set(outputs) & set(target_inputs):
                     g.add_edge_by_id(pytorch_id(torch_node), pytorch_id(target_torch_node), shape)
-                if 0 in set(target_inputs):
-                    root = g.get_node_by_id("Root51118102")
-                    #print (root)
-                    g.add_edge_by_id("Root51118102", pytorch_id(target_torch_node), root.output_shape)
+                # if 0 in set(target_inputs):
+                #     root = g.get_node_by_id("Root51118102")
+                #     #print (root)
+                #     g.add_edge_by_id("Root51118102", pytorch_id(target_torch_node), root.output_shape)
+    
+    
     return g
