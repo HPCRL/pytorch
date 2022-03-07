@@ -418,6 +418,18 @@ class Tracer(TracerBase):
             value was returned from the ``Module`` invocation.
         """
         module_qualified_name = self.path_of_module(m)
+
+        """
+            YUFAN: binding name for customized gen code
+        """
+       
+        if "set_cust_name" in str(dir(m)):
+            print("???  ", module_qualified_name, m)
+            m.set_cust_name(module_qualified_name)
+        """
+            End: binding name for customized gen code
+        """
+
         if not self.is_leaf_module(m, module_qualified_name):
             return forward(*args, **kwargs)
         return self.create_proxy('call_module', module_qualified_name, args, kwargs)

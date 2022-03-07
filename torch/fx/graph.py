@@ -635,6 +635,7 @@ class Graph:
                           "GraphModule! Call "
                           "GraphModule.add_submodule to add the "
                           "necessary submodule")
+        
         return self.create_node('call_module', module_name, args, kwargs, type_expr=type_expr)
 
     @compatibility(is_backward_compatible=True)
